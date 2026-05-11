@@ -451,3 +451,156 @@ Los 4 módulos en una frase:
 ---
 
 *Documento generado como consolidación de los planes 01, 08, 13 y 16 de IAldea.*
+
+---
+
+## 📊 Registro de Avances
+
+> Última actualización: **11 de mayo de 2026** — Pop-Up City, Puerto Escondido, Oaxaca
+> Commit: `f64ce8b` → [github.com/MarxMad/IAldea-org-26](https://github.com/MarxMad/IAldea-org-26)
+
+---
+
+### Estado General por Módulo
+
+| Módulo | Nombre | Estado | Avance |
+|---|---|---|---|
+| A | Captura Multimodal Offline | 🟡 En diseño | Plan completo, pendiente código |
+| B | Análisis Predictivo de Impacto | 🟢 Iniciado | Script GIS funcional, capas generadas |
+| C | Traducción a Lenguas Originarias | 🟡 En diseño | Plan completo, pendiente código |
+| D | Configuración No-Code | 🟡 En diseño | Plan completo, pendiente código |
+| GIS | Capas geoespaciales del territorio | ✅ Completado | 5 capas derivadas del MDT INEGI |
+
+---
+
+### ✅ Completado
+
+#### Módulo B / GIS — Procesamiento del MDT INEGI (11 mayo 2026)
+
+Script: [`scripts/generar_capas_mdt.py`](scripts/generar_capas_mdt.py)
+Fuente: MDT INEGI E14D58D1, resolución 1.5m, Valles Centrales de Oaxaca
+
+**5 capas geoespaciales generadas** del territorio piloto:
+
+| Capa | Archivo | Resultado clave |
+|---|---|---|
+| Pendientes | `derivados/pendientes.tif` | Media **19.9°** — terreno muy inclinado |
+| Orientación solar | `derivados/orientacion.tif` | **24.4%** del área apta para paneles solares |
+| Sombreado del relieve | `derivados/sombreado.tif` | Mapa visual 3D del territorio |
+| Riesgo de derrumbe | `derivados/riesgo_derrumbe.tif` | **22.6% en riesgo alto/crítico** = ~963 ha |
+| Humedad / inundación | `derivados/humedad_twi.tif` | **834 ha** con alta acumulación de agua |
+
+**Clasificación de riesgo real del territorio piloto (Tlacolula, Oaxaca):**
+
+| Nivel | Grados | Área | Implicación para la comunidad |
+|---|---|---|---|
+| 1 Bajo | 0–8° | 941.9 ha | Zonas seguras para vivienda y construcción |
+| 2 Moderado | 8–15° | 702.2 ha | Construir con precaución menor |
+| 3 Alto | 15–30° | 1,584.1 ha | Evaluar antes de construir — zona de riesgo |
+| 4 Muy alto | 30–45° | 816.2 ha | Riesgo activo de deslizamiento |
+| 5 Crítico | >45° | 126.9 ha | No apto para ningún uso humano |
+
+**Uso concreto por área:**
+
+```
+🌊 Desastres   → Mapa de riesgo_derrumbe.tif identifica 963 ha en peligro real
+⚡ Energía     → orientacion.tif señala laderas sur-suroeste para paneles solares
+🏗️ Infraestruc → pendientes.tif para elegir trazos de caminos con menor desnivel
+💧 Agua        → humedad_twi.tif delimita cuencas de captación natural
+🛡️ Seguridad   → pendientes.tif para ubicar puntos de vigilancia con visibilidad
+🌾 Producción  → zonas riesgo=1 (941 ha) son las más aptas para cultivo
+```
+
+---
+
+#### Documentación Estratégica (10–11 mayo 2026)
+
+| Documento | Descripción | Líneas |
+|---|---|---|
+| `ideas_desarrollo.md` | 20 ideas de desarrollo organizadas por capa de arquitectura | 36 |
+| `plan_01_ingesta_multimodal.md` | Plan completo: OCR, Whisper.cpp, pipeline offline | ~220 |
+| `plan_08_analisis_impacto.md` | Plan completo: grafo de conocimiento, propagación de impacto | ~250 |
+| `plan_13_traduccion_lenguas.md` | Plan completo: sistema híbrido IA+humano, lenguas de Oaxaca | ~300 |
+| `plan_16_config_nocode.md` | Plan completo: asistente de 7 pasos, generación SOUL.md/YAML | ~350 |
+| `plan_producto_unificado.md` | Este documento — visión integrada para 10 áreas de la comunidad | ~450 |
+| `metadatos/` | Metadatos INEGI del MDT (3 archivos, documentación oficial) | — |
+| `derivados/README.md` | Estadísticas completas del procesamiento MDT | 55 |
+
+---
+
+#### Infraestructura del Repositorio (11 mayo 2026)
+
+```
+IAldea-org-26/
+├── .gitignore                     ← excluye archivos pesados (.tif, PDFs)
+├── ideas_desarrollo.md            ← 20 ideas documentadas
+├── plan_01_ingesta_multimodal.md  ← Plan Módulo A
+├── plan_08_analisis_impacto.md    ← Plan Módulo B
+├── plan_13_traduccion_lenguas.md  ← Plan Módulo C
+├── plan_16_config_nocode.md       ← Plan Módulo D
+├── plan_producto_unificado.md     ← Este documento
+├── metadatos/
+│   ├── e14d58d1_mt.txt            ← Metadatos INEGI (completos)
+│   ├── e14d58d1_mt.xml            ← Metadatos XML
+│   └── metadatos_mdt_1.5m.txt    ← Ficha del producto
+├── scripts/
+│   └── generar_capas_mdt.py      ← Script GIS documentado (231 líneas)
+└── derivados/
+    └── README.md                  ← Estadísticas de las capas generadas
+```
+
+**Repositorio:** [github.com/MarxMad/IAldea-org-26](https://github.com/MarxMad/IAldea-org-26)
+**Fork de:** [github.com/ariutokintumi/IAldea-org](https://github.com/ariutokintumi/IAldea-org)
+
+---
+
+### 🔄 En Progreso
+
+#### Datos de entrada disponibles (no en repo por tamaño)
+
+| Dataset | Tamaño | Ubicación local | Estado |
+|---|---|---|---|
+| MDT INEGI E14D58D1 (BIL) | 72.4 MB | `conjunto_de_datos/` | ✅ Disponible |
+| MDT INEGI E14D58D1 (GeoTIFF) | 45.8 MB | `conjunto_de_datos/` | ✅ Disponible |
+| Anuario Estadístico Oaxaca 2021 (PDF) | ~15 MB | `resumen_Oaxaca.pdf` | ✅ Analizado, pendiente ingestión al Kernel |
+| `pendientes.tif` | 74.8 MB | `derivados/` | ✅ Generado |
+| `orientacion.tif` | 74.9 MB | `derivados/` | ✅ Generado |
+| `sombreado.tif` | 73.8 MB | `derivados/` | ✅ Generado |
+| `riesgo_derrumbe.tif` | 4.6 MB | `derivados/` | ✅ Generado |
+| `humedad_twi.tif` | 75.8 MB | `derivados/` | ✅ Generado |
+
+---
+
+### 🔜 Próximos Pasos (ordenados por prioridad)
+
+```mermaid
+graph TD
+    A["✅ 5 capas GIS<br/>generadas"] --> B["🔜 Visualizador web<br/>mapa interactivo<br/>(Leaflet.js)"]
+    A --> C["🔜 Ingestar Anuario<br/>INEGI al Kernel<br/>(PyMuPDF)"]
+    B --> D["🔜 Módulo A:<br/>Pipeline de<br/>captura offline"]
+    C --> D
+    D --> E["🔜 Módulo B:<br/>Motor de impacto<br/>con datos del grafo"]
+    E --> F["🔜 Módulo C:<br/>Chat bilingüe<br/>Mixteco/Español"]
+    F --> G["🔜 Módulo D:<br/>Configurador<br/>no-code"]
+    G --> H["🎯 Demo integrado<br/>con dataset<br/>ficticio de Tlacolula"]
+
+    style A fill:#4A7C59,color:#fff
+    style H fill:#1E4D5C,color:#fff
+```
+
+| # | Tarea | Módulo | Esfuerzo |
+|---|---|---|---|
+| 1 | Mapa web interactivo con las 5 capas GIS (Leaflet.js) | B/GIS | ~4 h |
+| 2 | Ingestar `resumen_Oaxaca.pdf` al Kernel con PyMuPDF | A | ~2 h |
+| 3 | Pipeline OCR básico (Tesseract) para fotos de actas | A | ~1 día |
+| 4 | Pipeline de transcripción de audio (Whisper.cpp) | A | ~1 día |
+| 5 | Grafo de conocimiento base (NetworkX + SQLite) | B | ~2 días |
+| 6 | Motor de análisis de impacto básico | B | ~2 días |
+| 7 | Chat bilingüe con LLM + detección de idioma | C | ~2 días |
+| 8 | Asistente no-code de configuración (7 pasos) | D | ~2 días |
+| 9 | Dataset ficticio de comunidad "San Juan Tlacolula" | Demo | ~1 día |
+| 10 | Demo integrado para presentación | Todos | ~1 día |
+
+---
+
+*Registro de avances actualizado el 11 de mayo de 2026 — ETH Cinco de Mayo Pop-Up City.*
