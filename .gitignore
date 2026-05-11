@@ -1,0 +1,44 @@
+# ──────────────────────────────────────────────
+# IAldea — .gitignore
+# ──────────────────────────────────────────────
+
+# Datos geoespaciales pesados (no versionar)
+conjunto_de_datos/
+derivados/*.tif
+derivados/*.tfw
+derivados/*.ovr
+derivados/*.aux.xml
+
+# El PDF del anuario (pesado, disponible en INEGI)
+resumen_Oaxaca.pdf
+
+# Scripts temporales de análisis
+oaxaca_scan.py
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
