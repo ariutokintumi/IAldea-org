@@ -1,116 +1,159 @@
 # Día 2 — Gobernanza, roles y accesos (IAldea)
 
-> **Objetivo del día:** dejar definidos la **estructura comunitaria**, los **roles de usuario**, los **permisos**, los **niveles de acceso**, la **separación autoridad / ciudadanía**, y los modos **público / privado / confidencial** — listos para volcar a `policy_config.yaml` y al asistente no-code.  
-> Referencias: [README.md](../../README.md) (privacidad, agentes), [plan_16_config_nocode.md](plan_16_config_nocode.md), [config/policy_config.example.yaml](../../config/policy_config.example.yaml).
+**Objetivo:** alinear **roles**, **niveles de acceso** y **política de privacidad** con el modelo que el equipo ya consensuó en la matriz colaboradores, y fijar **WhatsApp** como medio principal de consulta ciudadana.
+
+**Fuentes canónicas:**
+
+- Matriz **Etapa × Rol** (CSV): [`docs/roles/permission-matrix.csv`](../roles/permission-matrix.csv) (copia estándar del archivo original en `docs/`).
+- Resumen de roles: [`docs/roles/role-model.md`](../roles/role-model.md).
+- Árbol de repo esperado: `CONTEXTO-POPUP-VILLAGE.md` §18 (adecuación al final de este documento, §13).
 
 ---
 
-## 1. Metas del Día 2 (checklist)
+## Metas del taller (Día 2)
 
-| Meta | Entregable concreto |
-|------|---------------------|
-| Estructura comunitaria | Modelo de **órganos** (asamblea, autoridades, comités, ciudadanía, externos) y cómo se mapean a **roles técnicos** en el sistema. |
-| Roles de usuario | Catálogo de **roles considerados** + slugs estables + agrupación (autoridad / comité / ciudadanía / externo / operación). |
-| Permisos | **Matriz permiso × rol** (booleana o niveles) alineada a capacidades del producto. |
-| Niveles de acceso | **Niveles L0–L3** (o similar) sobre datos y acciones; qué rol entra en qué nivel. |
-| Separación autoridad / ciudadanía | Reglas explícitas: **qué ve** cada bando, **qué no ve**, y **qué requiere umbral de agregación**. |
-| Modos público / privado / confidencial | Definición operativa y **valor por defecto**; relación con roles y con el Agente Ciudadano vs Autoridad. |
-| Identidad sin revelar persona | **ID o firma pseudónima** por contribuyente (vinculada a rol y comunidad), trazable para auditoría operativa y **no** reidentificable en agregados. |
+- [ ] Validar **roles oficiales** (7) y **etapas del ciclo** (8) frente al CSV.
+- [ ] Acordar **WhatsApp** como canal ciudadano (alcance, opt-in, límites).
+- [ ] Definir **niveles L0–L3** y mapeo rol → nivel.
+- [ ] Definir **modos de privacidad** por defecto y excepciones.
+- [ ] Alinear **modelo de datos** mínimo (membresía, documentos, `contributor_handle`).
+- [ ] Dejar **matriz de permisos** lista para implementación (síntesis §9).
+- [ ] **Checklist** de salidas del Día 2 (§12).
 
 ---
 
-## 2. Estructura comunitaria (modelo lógico)
+## 2. Canal ciudadano principal: WhatsApp
 
-La comunidad **no es plana**: IAldea refleja **gobierno y participación**, sin sustituir asambleas ni ley local.
+**Decisión:** el **medio de entrada** para consultas ciudadanas, aclaraciones y (cuando aplique) reservas de cita o flujos guiados será **WhatsApp**, por cobertura y costo de adopción en el piloto.
+
+**Qué cubre en MVP conceptual**
+
+- Preguntas con respuesta basada en **fuentes comunitarias** (actas, reglamentos, FAQs) con **citas** cuando exista documento.
+- Derivación a **humanos** (Secretaría / Coordinación) cuando falte fuente o haya riesgo (salud, denuncias, datos personales de terceros).
+- **Opt-in explícito** al tratamiento de mensajes; enlace corto a política de privacidad y al modo de memoria (ver §7).
+
+**Qué no sustituye**
+
+- No reemplaza **asamblea**, **votación formal** ni firma de actas: solo reduce fricción informativa y canaliza demanda.
+- No es el único posible **frontend** futuro: la app web / otros conectores pueden convivir.
+
+**Implementación en repo (roadmap)**
+
+- Conector en `packages/connectors/` (p. ej. WhatsApp Cloud API / proveedor acordado). Hasta que exista código, el flujo se documenta aquí y en `docs/architecture.md`.
+- Identidad técnica: enlazar mensajes a **`contributor_handle`** (§8.1), no exponer teléfono en agregados ni en tableros públicos.
+
+**Relación con modos de privacidad**
+
+- En modo **sin memoria persistente**, el conector no debe escribir contenido identificable en el Kernel más allá de lo estrictamente necesario para la sesión (definir umbral en taller).
+- En modo **comunitario confidencial**, solo roles con agregación autorizada ven métricas derivadas del canal.
+
+---
+
+## 3. Estructura comunitaria (diagrama)
 
 ```mermaid
 flowchart TB
-  ASM["Asamblea / decisión colectiva<br/>(fuera del software)"]
-  AUT["Autoridades electas o reconocidas<br/>presidente, secretario, síndico, regidor…"]
-  COM["Comités temáticos<br/>agua, obras, educación…"]
-  CIU["Ciudadanía<br/>habitantes con voz consultiva"]
-  EXT["Externos<br/>visitante, patrocinador, asesor"]
-  OPS["Operación técnica<br/>admin, operador piloto"]
-
-  ASM -.->|"delibera"| AUT
-  ASM -.-> COM
-  AUT --> COM
-  CIU --> ASM
-  EXT -.->|"solo si política lo permite"| CIU
-  OPS -.->|"configura / ingiere / audita logs"| AUT
+  subgraph Gobernanza
+    S[Secretaría]
+    C[Coordinación]
+    T[Tesorería]
+    V[Validador]
+  end
+  subgraph Operación
+    M[Miembro de Comité]
+  end
+  subgraph Ciudadanía
+    Z[Ciudadanos]
+  end
+  subgraph Apoyo
+    F[Financiador]
+  end
+  S --> C
+  C --> M
+  C --> T
+  C --> V
+  M --> Z
+  T --> Z
+  V --> Z
+  Z --> W[(Canal WhatsApp<br/>+ memoria opcional)]
+  F -. agregados .-> Z
 ```
 
-**Principio:** el software **registra, consulta y resume** según permisos; la **soberanía** sigue en la asamblea y en las normas comunitarias.
+---
+
+## 4. Roles oficiales (modelo colaboradores)
+
+Los **siete roles** de la matriz CSV son la referencia. Slugs propuestos para código y YAML:
+
+| Rol (UI) | `slug` | Rol en el sistema |
+|----------|--------|-------------------|
+| Secretaría | `secretaria` | Memoria formal, actas, registro de etapas. |
+| Coordinación | `coordinacion` | Orquesta flujos entre actores y etapas. |
+| Miembro de Comité | `comite_miembro` | Propone, ejecuta y aporta evidencia operativa. |
+| Tesorería | `tesoreria` | Viabilidad y registro de recursos; **humano** para liberación de fondos. |
+| Validador | `validador` | Verificación, cumplimiento y calidad de evidencia / informes. |
+| Ciudadano | `ciudadano` | Consulta, aportes y memoria según política. |
+| Financiador | `financiador` | Visión agregada y comentarios de financiamiento **sin** condicionar la decisión comunitaria. |
+
+**Nota (modelo anterior / talleres locales):** roles como *presidente*, *regidor*, *secretario municipal* pueden **mapearse** a `coordinacion`, `comite_miembro` o `secretaria` según la comunidad; no son columnas del CSV actual — documentar el mapeo por piloto si aplica.
 
 ---
 
-## 3. Roles a considerar (catálogo → slugs)
+## 5. Etapas del ciclo (objeto de coordinación)
 
-Cada persona tiene **un rol principal** en el sistema (y opcionalmente roles secundarios en una fase posterior). Los slugs van en minúsculas y sin espacios; la etiqueta visible puede ir en español en la UI.
+Resumen alineado al CSV (detalle narrativo en cada celda del archivo).
 
-| Rol (nombre de trabajo) | `slug` sugerido | Grupo |
-|-------------------------|-----------------|--------|
-| Presidente municipal / comunitario | `presidente` | autoridad |
-| Secretario | `secretario` | autoridad |
-| Miembro de comité | `comite_miembro` | comité |
-| Regidor / concejal (donde aplique) | `regidor` | autoridad |
-| Asesor (técnico o comunitario) | `asesor` | externo_proximo |
-| Ciudadano | `ciudadano` | ciudadania |
-| Joven | `joven` | ciudadania |
-| Persona mayor | `adulto_mayor` | ciudadania |
-| Visitante | `visitante` | externo |
-| Administrador del sistema | `admin` | operacion |
-| Operador piloto (cívico / ETH / partner) | `operador_piloto` | operacion |
-| Patrocinador u observador externo | `observador_externo` | externo |
-
-**Notas:**
-
-- **Joven** y **adulto mayor** comparten la mayoría de permisos con **ciudadano** salvo que la comunidad active **políticas diferenciadas** (p. ej. menores: sin retención de memoria en modo público).
-- **Visitante** y **observador_externo** suelen tener **L0/L1** muy acotados (solo lectura de material explícitamente público, sin feedback confidencial).
-- **Asesor** puede leer más que un ciudadano **solo si** el comité lo delega por escrito en política (evitar “asesor omnisciente” por defecto).
+| Etapa | Objeto de coordinación | Papel típico de la IA |
+|-------|------------------------|------------------------|
+| **Entender** | Narrativa y contexto compartido | Sintetiza fuentes con trazabilidad y límites. |
+| **Proponer** | Opciones e impactos | Estructura propuestas y trade-offs para deliberación humana. |
+| **Decidir** | Respuesta institucional | Asiste **solo** con *human-in-the-loop*; Tesorería sobre recursos. |
+| **Ejecutar** | Acciones y programas | Da seguimiento y observabilidad; no sustituye actos humanos. |
+| **Verificar** | Evidencia y cumplimiento | Apoya listas de chequeo; Validador con responsabilidad explícita. |
+| **Informar** | Transparencia y divulgación | Adapta mensajes por audiencia sin identificar personas. |
+| **Recordar** | Memoria institucional | Consulta para ciudadanía y financiadores bajo reglas de agregación. |
+| **Aprender** | Retroalimentación colectiva | Detecta patrones; no prescribe decisiones finales. |
 
 ---
 
-## 4. Niveles de acceso (L0–L3)
+## 6. Niveles de acceso (L0–L3)
 
-Niveles son **abstracción** para implementar checks; no son “rangos morales”, son **control de superficie de ataque**.
-
-| Nivel | Quién típico | Datos / acciones |
-|-------|----------------|------------------|
-| **L0** | Visitante, observador externo | Solo contenido marcado **público** y sin datos personales. Sin ingesta. |
-| **L1** | Ciudadano, joven, adulto mayor | Chat y consulta según **modo de privacidad**; feedback según política; **no** ve agregados crudos de otros si la política lo restringe. |
-| **L2** | Presidente, secretario, regidor, comité | Ver agregados (si `aggregate_visibility` lo permite), comparar escenarios, exportar informes, **no** modificar `policy` salvo que también sean admin. |
-| **L3** | `admin`, `operador_piloto` (delegado) | Ingesta, cambio de configuración, gestión de roles, lectura de **logs de auditoría** según lo que la comunidad delegue al piloto. |
-
-**Separación autoridad / ciudadanía (reglas cortas):**
-
-- **Autoridad y comité (L2):** pueden ver **agregados** que cumplan umbral (`aggregation_threshold`) y políticas de visibilidad; **nunca** listas de “quién preguntó qué” en modo confidencial.
-- **Ciudadanía (L1):** ve **sus propias** interacciones y respuestas citadas; agregados solo si la política dice `all` o equivalente explícito.
-- **Externos (L0–L1 acotado):** sin acceso a minutas internas salvo **fuente pública** explícita.
+| Nivel | Quién (orientativo) | Puede ver / hacer |
+|-------|---------------------|-------------------|
+| **L0** | Invitado externo, patrocinador sin membresía | Solo material explícitamente público o reportes agregados acordados. |
+| **L1** | `ciudadano`, `financiador` | Documentos permitidos al rol; agregados según política; **no** listas identificables de aportes ajenos. |
+| **L2** | `secretaria`, `coordinacion`, `comite_miembro`, `tesoreria`, `validador` | Operación completa de gobernanza y comités según matriz; agregados y evidencia interna. |
+| **L3** | Operador técnico / piloto (`admin_plataforma` o equivalente) | Configuración, ingesta, roles técnicos, auditoría de sistema (no “veto” político). |
 
 ---
 
-## 5. Modos de privacidad (público / confidencial / privado sin memoria)
+## 7. Modos de privacidad (resumen)
 
-Alineado al README: `public` · `confidential_community` · `private_no_memory`.
+| Modo | Descripción breve | Uso típico |
+|------|-------------------|------------|
+| **Público** | Respuestas sin datos personales. | FAQs, convocatorias. |
+| **Confidencial comunitario** | Agregados solo para roles L2 acordados. | Pulso para asamblea, informes internos. |
+| **Privado ciudadano** | Sin exposición a terceros; memoria mínima o nula. | Temas sensibles vía WhatsApp o web. |
 
-| Modo | Qué se guarda | Quién puede usarlo típicamente | Riesgo si se malconfigura |
-|------|----------------|----------------------------------|---------------------------|
-| **Público** | Preguntas y respuestas en memoria citable | Acuerdos explícitos de transparencia | Reidentificación si se mezcla con otros datos. |
-| **Confidencial comunitario** | Solo patrones agregados; **≥ N** contribuyentes para mostrar agregado | Por defecto recomendado para pulso ciudadano | Umbral mal puesto → filtrado de identidad. |
-| **Privado, sin memoria** | Nada retenido tras la sesión | Temas sensibles, salud, conflictos | Menos trazabilidad; útil para consulta puntual. |
+**Reglas transversales**
 
-**Default recomendado en MVP:** `confidential_community` + `aggregate_visibility: authorities_only` hasta que la asamblea decida lo contrario por escrito.
+- **K-anonimato** (p. ej. *k* ≥ 3) antes de mostrar conteos finos.
+- **Financiador:** solo **agregados** y canales acordados; sin microdatos de ciudadanos.
+- **WhatsApp:** política de retención y borrado alineada al modo activo del usuario.
 
 ---
 
-## 6. Modelo de roles (entidad–relación simplificado)
+## 8. Modelo de datos mínimo y `contributor_handle`
 
 ```mermaid
 erDiagram
-  COMMUNITY ||--o{ MEMBERSHIP : has
-  ROLE ||--o{ MEMBERSHIP : assigns
-  PERSON ||--o{ MEMBERSHIP : holds
+  COMMUNITY ||--o{ MEMBERSHIP : tiene
+  PERSON ||--o{ MEMBERSHIP : enrola
+  MEMBERSHIP }o--|| ROLE : asigna
+  DOCUMENT ||--o{ INGESTION_EVENT : registra
+  INGESTION_EVENT }o--|| MEMBERSHIP : "actor (handle)"
+  FEEDBACK ||--o{ MEMBERSHIP : "opcional"
+  COMMUNITY ||--o{ CHANNEL_BINDING : "p.ej. WhatsApp"
 
   COMMUNITY {
     string id
@@ -118,95 +161,54 @@ erDiagram
   }
   ROLE {
     string slug
-    string access_level
   }
   MEMBERSHIP {
     string contributor_handle
-    datetime valid_from
-    datetime valid_to
+    string channel_ref_hash
   }
-  PERSON {
-    string pseudonym_id
-    string role_slug_at_enrollment
+  DOCUMENT {
+    string uri
+    string sensitivity
   }
 ```
 
-- **`PERSON`:** identidad **interna** de quien usa el sistema; no tiene por qué ser el nombre civil. Lo público y lo agregado usan solo **handles** opacos.
-- **`MEMBERSHIP`:** une `PERSON` + `ROLE` + vigencia; puede registrarse el **rol declarado** al darse de alta para auditoría, sin exponerlo en pantallas ciudadanas.
+### 8.1 Identidad pseudónima (`contributor_handle`)
 
-### 6.1 Identidad pseudónima y “firma” de contribución (sin revelar quién es)
-
-**Objetivo:** cada interacción que deja huella (pregunta, feedback, ingesta de documento, cambio de config) debe poder atribuirse a **un sujeto responsable ante el sistema** (trazabilidad, antiabuso), **sin** que en agregados o en la UI ciudadana aparezca el nombre real ni datos que permitan reidentificar con facilidad.
-
-| Concepto | Definición breve |
-|----------|------------------|
-| **`contributor_handle` (ID opaco)** | Identificador estable **por persona y comunidad** (p. ej. UUID v4 generado al enrolarse, o derivado criptográficamente de un secreto de enrolamiento + `community_id` + factor de dispositivo). **No** debe incluir CURP, teléfono ni nombre. |
-| **Prefijo de rol (solo operador / auditoría)** | Opción de mostrar internamente `ciudadano_8f3a1c` para distinguir cohortes; en **vistas ciudadanas** de modo confidencial, no listar handles individuales en agregados. |
-| **“Firma” de acción** | En MVP: registrar `contributor_handle` + marca de tiempo + tipo de evento en **log de auditoría**. En fases posteriores: firma criptográfica (p. ej. Ed25519) ligada al handle para **no repudio** en ingestas sensibles, si la comunidad lo exige. |
-| **Separación agregado vs operador** | Los **agregados** solo cuentan “N personas del rol X” o temas; los **operadores L3** pueden ver handles en logs para revertir vandalismo o trazabilidad de ingesta, según `policy_config`. |
-| **Rotación y baja** | Política de revocación del handle al salir del cargo o del piloto; nuevas altas = nuevo handle (evita enlazar historiales indebidos). |
-
-**Reglas que el taller debe fijar por escrito:**
-
-1. ¿El enrolamiento es **presencial** (operador da de alta) o **autogestionado** con código de invitación por comité?  
-2. ¿Los menores (`joven`) comparten política de handle con tutoría documentada fuera del software?  
-3. ¿Qué eventos **exigen** handle visible solo a L3 (ingesta, cambio de SOUL, exportación masiva)?
+- Handle **opaco** por enrolamiento; rotación al cambiar rol si la comunidad lo exige.
+- **Canal WhatsApp:** guardar *referencia técnica hasheada* (`channel_ref_hash`) para enlazar conversación con membresía, **no** teléfono en claro en tablas de analítica.
+- Quién ve el handle: el propio ciudadano (opcional en UI), operadores L3 en logs de ingesta, **no** en agregados públicos.
 
 ---
 
-## 7. Matriz de permisos (MVP — borrador para validar en taller)
+## 9. Matriz etapas × rol (síntesis del CSV)
 
-**Leyenda visual:** ✅ permitido · ❌ denegado · ⚠️ solo con condición (texto entre paréntesis).
+Leyenda: **✅** permiso / responsabilidad principal · **⚠️** acotado o con condiciones · **—** fuera de alcance habitual.
 
-Las tablas anchas suelen **romperse en GitHub / móvil**; aquí van **dos tablas** (ciudadanía + externos | órgano + operación) y una **vista por fila** idéntica en contenido.
+**Etapas 1–4**
 
-### 7.1 Ciudadanía, visita y observación
+| Etapa | Secretaría | Coordinación | Comité | Tesorería | Validador | Ciudadano | Financiador |
+|-------|:------------:|:--------------:|:--------:|:-----------:|:-----------:|:-----------:|:-------------:|
+| Entender | ✅ | ✅ | ✅ | ✅ | — | ✅ | ⚠️ |
+| Proponer | ✅ | ✅ | ✅ | ✅ | — | ⚠️ | ⚠️ |
+| Decidir | ✅ | ✅ | ✅ | ✅ | — | ⚠️ | ⚠️ |
+| Ejecutar | ✅ | ✅ | ✅ | ✅ | — | ⚠️ | ⚠️ |
 
-| Capacidad | ciudadano | joven | adulto_mayor | visitante | observador_externo |
-|-----------|:---:|:---:|:---:|:---:|:---:|
-| Consultar Agente Ciudadano (citas) | ✅ | ✅ | ✅ | ⚠️ (solo público) | ⚠️ (solo público) |
-| Enviar feedback / pulso | ✅ | ⚠️ (edad / consentimiento) | ✅ | ❌ | ❌ |
-| Ver agregados de feedback | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Agente Autoridad (escenarios / impacto) | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Exportar informes (PDF, etc.) | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Ingestar documentos al Kernel | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Cambiar `policy_config` / SOUL | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Ver logs de auditoría completos | ❌ | ❌ | ❌ | ❌ | ❌ |
+**Etapas 5–8**
 
-### 7.2 Comité, autoridad, asesoría y operación
+| Etapa | Secretaría | Coordinación | Comité | Tesorería | Validador | Ciudadano | Financiador |
+|-------|:------------:|:--------------:|:--------:|:-----------:|:-----------:|:-----------:|:-------------:|
+| Verificar | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ |
+| Informar | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ |
+| Recordar | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Aprender | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
-| Capacidad | comite_miembro | presidente | secretario | regidor | asesor | admin | operador_piloto |
-|-----------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| Consultar Agente Ciudadano (citas) | ✅ | ✅ | ✅ | ✅ | ⚠️ (alcance delegado) | ✅ | ✅ |
-| Enviar feedback / pulso | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ |
-| Ver agregados de feedback | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ |
-| Agente Autoridad (escenarios / impacto) | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ |
-| Exportar informes (PDF, etc.) | ⚠️ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ |
-| Ingestar documentos al Kernel | ⚠️ | ✅ | ✅ | ❌ | ❌ | ✅ | ⚠️ (según mandato) |
-| Cambiar `policy_config` / SOUL | ❌ | ⚠️ (dual control) | ✅ | ❌ | ❌ | ✅ | ❌ |
-| Ver logs de auditoría completos | ❌ | ⚠️ | ✅ | ❌ | ❌ | ✅ | ⚠️ |
-
-### 7.3 Misma matriz, una capacidad por bloque (lectura en móvil)
-
-- **Consultar Agente Ciudadano (citas)** — ciudadano ✅ · joven ✅ · adulto_mayor ✅ · comite ✅ · presidente ✅ · secretario ✅ · regidor ✅ · asesor ⚠️ (alcance delegado) · visitante ⚠️ (solo público) · observador ⚠️ (solo público) · admin ✅ · operador_piloto ✅  
-- **Enviar feedback / pulso** — ciudadano ✅ · joven ⚠️ (edad / consentimiento) · adulto_mayor ✅ · comite ✅ · presidente ✅ · secretario ✅ · regidor ✅ · asesor ❌ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ✅  
-- **Ver agregados de feedback** — ciudadano ❌ · joven ❌ · adulto_mayor ❌ · comite ✅ · presidente ✅ · secretario ✅ · regidor ✅ · asesor ⚠️ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ✅  
-- **Agente Autoridad (escenarios / impacto)** — ciudadano ❌ · joven ❌ · adulto_mayor ❌ · comite ✅ · presidente ✅ · secretario ✅ · regidor ✅ · asesor ⚠️ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ✅  
-- **Exportar informes (PDF, etc.)** — ciudadano ❌ · joven ❌ · adulto_mayor ❌ · comite ⚠️ · presidente ✅ · secretario ✅ · regidor ✅ · asesor ❌ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ✅  
-- **Ingestar documentos al Kernel** — ciudadano ❌ · joven ❌ · adulto_mayor ❌ · comite ⚠️ · presidente ✅ · secretario ✅ · regidor ❌ · asesor ❌ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ⚠️ (según mandato)  
-- **Cambiar `policy_config` / SOUL** — ciudadano ❌ · joven ❌ · adulto_mayor ❌ · comite ❌ · presidente ⚠️ (dual control) · secretario ✅ · regidor ❌ · asesor ❌ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ❌  
-- **Ver logs de auditoría completos** — ciudadano ❌ · joven ❌ · adulto_mayor ❌ · comite ❌ · presidente ⚠️ · secretario ✅ · regidor ❌ · asesor ❌ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ⚠️  
-
-**Condiciones típicas (⚠️):**
-
-- **Asesor:** solo documentos y comités explícitamente listados en `policy_config`.
-- **Dual control:** dos firmas o dos roles `admin` para cambios sensibles (definir en taller si aplica).
+> **Criterio:** las celdas reflejan el texto narrativo del CSV; donde el CSV dice explícitamente que un rol *no* participa (p. ej. Validador en *Entender* / *Proponer* / *Decidir* / *Ejecutar*), se marca **—**. *Financiador* en etapas tempranas queda en **⚠️** (solo lectura / comentario agregado, sin intervención operativa). Ajustar en taller si una comunidad redefine límites.
 
 ---
 
-## 8. Esquema de comunidad de ejemplo (YAML)
+## 10. Esquema de comunidad de ejemplo (YAML)
 
-Copia base para `policy_config.yaml` o para el generador no-code. Ajustar nombres y listas en el taller.
+Copia base para `policy_config.yaml` o generador. Ajustar listas en el taller.
 
 ```yaml
 community:
@@ -214,40 +216,49 @@ community:
   name: "San Juan Ejemplo"
   governance: "usos_y_costumbres"
 
-# Niveles de acceso por slug (opcional; puede derivarse del rol)
+channels:
+  citizen_primary: "whatsapp"
+  whatsapp:
+    opt_in_required: true
+    privacy_policy_url: "https://ejemplo.org/privacidad"
+
 access_levels:
-  visitante: L0
-  observador_externo: L0
+  observe_external: L0
   ciudadano: L1
-  joven: L1
-  adulto_mayor: L1
+  financiador: L1
+  secretaria: L2
+  coordinacion: L2
   comite_miembro: L2
-  regidor: L2
-  presidente: L2
-  secretario: L2
-  asesor: L1   # o L2 si la comunidad delega explícitamente
-  admin: L3
-  operador_piloto: L3
+  tesoreria: L2
+  validador: L2
+  admin_plataforma: L3
 
 roles:
-  authorities: [presidente, secretario, regidor]
-  committees: [comite_agua, comite_obras]
-  admin: [secretario]
-  pilot_operators: [operador_piloto]
+  authorities:
+    - "secretaria"
+    - "coordinacion"
+  committees: []
+  treasury:
+    - "tesoreria"
+  validation:
+    - "validador"
+  admin:
+    - "admin_plataforma"
 
 privacy:
   default_mode: "confidential_community"
   aggregation_threshold: 3
   aggregate_visibility: "authorities_only"
-  # Identidad pseudónima: ver §6.1 del plan Día 2
   contributor_identity:
-    scheme: "opaque_uuid_per_enrollment"  # alternativa: clave derivada HKDF (community + secreto + dispositivo)
-    store_role_slug_with_membership: true   # para auditoría; no mostrar en agregados
+    scheme: "opaque_uuid_per_enrollment"
+    store_role_slug_with_membership: true
     show_handle_in_ui:
-      citizen_self: true          # "tu id interno" opcional
-      authority_aggregates: false # agregados sin listar handles
-      operator_audit_logs: true   # L3 ve handle en logs de ingesta / cambios
+      citizen_self: true
+      authority_aggregates: false
+      operator_audit_logs: true
     rotate_handle_on_role_change: true
+    channel_binding:
+      whatsapp: "hash_phone_or_wa_id"
 
 role_permissions:
   citizen:
@@ -268,33 +279,48 @@ role_permissions:
     can_manage_roles: true
 ```
 
-**Mapeo de roles del taller → `role_permissions`:** en el MVP, **joven** y **adulto_mayor** heredan el bloque `citizen` salvo excepciones; **comite_miembro** puede mapearse a `authority` o a un tercer bloque `committee` si el código lo soporta (Día 2 puede decidir si unifican en `authority` temporalmente).
+**Mapeo MVP código:** `secretaria`, `coordinacion`, `comite_miembro`, `tesoreria` y `validador` pueden compartir inicialmente el bloque `authority` salvo que el código distinga permisos finos; `financiador` hereda de `citizen` más flags de solo agregados; `admin_plataforma` → `admin`.
 
 ---
 
-## 9. User stories (para validar en Día 2)
+## 11. User stories (validación Día 2)
 
-1. **Como** secretaria **quiero** que solo presidenta, regidores y yo veamos agregados de pulso ciudadano **para** preparar la asamblea sin exponer nombres individuales.  
-2. **Como** ciudadana **quiero** preguntar en mixteco y recibir respuesta con cita a acta **para** confiar en la fuente sin ir al palacio municipal.  
-3. **Como** comité de agua **quiero** usar el Agente Autoridad para comparar dos escenarios de obra **para** llevar a la asamblea pros/contras documentados, no una “orden” del sistema.  
-4. **Como** visitante **quiero** ver solo la página de bienvenida y documentos marcados públicos **para** no acceder a minutas internas por error.  
-5. **Como** admin **quiero** registrar quién subió cada PDF **para** auditar ingesta sin usar eso como denuncia automática en el chat.  
-6. **Como** joven **quiero** usar el chat en modo privado sin memoria cuando pregunto un tema sensible **para** que no quede rastro en el Kernel.  
-7. **Como** operador piloto **quiero** ingestar el anuario INEGI con rol explícito **para** que la comunidad sepa que la fuente es externa y revisable.  
-8. **Como** observador externo **quiero** acceso de solo lectura a indicadores acordados **para** evaluar el piloto sin ver feedback identificable.  
-9. **Como** operadora **quiero** que cada PDF subido quede ligado a un **handle opaco** y al rol declarado **para** auditar sin publicar nombres en el chat ciudadano.  
-10. **Como** ciudadano **quiero** ver solo mi propio handle en ajustes **para** saber que mis aportes están contados sin exponerme en tableros agregados.
+1. **Como** secretaría **quiero** que solo el núcleo de gobernanza vea agregados de pulso **para** preparar la asamblea sin exponer nombres.
+2. **Como** ciudadana **quiero** preguntar por **WhatsApp** en mixteco y recibir respuesta con cita a acta **para** confiar sin ir al palacio.
+3. **Como** comité de agua **quiero** comparar dos escenarios documentados **para** deliberar en asamblea sin “orden” del sistema.
+4. **Como** financiador **quiero** ver solo indicadores agregados **para** acompañar sin condicionar la decisión.
+5. **Como** coordinación **quiero** ver el estado de cada etapa del ciclo **para** saber qué falta antes de informar.
+6. **Como** tesorería **quiero** que ninguna liberación de fondos sea solo por IA **para** mantener control humano.
+7. **Como** validador **quiero** checklist de evidencia en **Verificar** **para** firmar calidad sin sustituir al comité.
+8. **Como** ciudadano **quiero** modo privado sin memoria persistente **para** temas sensibles por WhatsApp.
+9. **Como** operadora L3 **quiero** cada PDF ligado a `contributor_handle` **para** auditar ingesta.
+10. **Como** ciudadano **quiero** ver solo mi handle en ajustes **para** saber que mis aportes cuentan sin exponerme.
 
 ---
 
-## 10. Salidas del taller (Día 2) — marcar al cerrar sesión
+## 12. Salidas del taller (marcar al cerrar)
 
-- [ ] **Modelo de roles** aprobado por el equipo (esta sección + diagrama ER).
-- [ ] **Política de `contributor_handle` / firma** acordada (enrolamiento, rotación, quién ve handles — §6.1).
-- [ ] **Matriz de permisos** consensuada (tabla §7 actualizada).
-- [ ] **Esquema YAML** de ejemplo validado con una comunidad ficticia.
-- [ ] **User stories** priorizadas (MVP vs post-MVP).
-- [ ] Lista de cambios a introducir en `plan_16_config_nocode.md` y en el **configurador web** (preguntas del asistente).
+- [ ] Roles y etapas validados con el CSV en `docs/roles/permission-matrix.csv`.
+- [ ] WhatsApp acordado (§2) con texto de opt-in y enlace a privacidad.
+- [ ] Matriz §9 revisada celda a celda con dueños de rol.
+- [ ] YAML de ejemplo validado con comunidad ficticia.
+- [ ] Cambios reflejados en `plan_16_config_nocode.md` y en el **configurador web** cuando aplique.
+
+---
+
+## 13. Adecuación del repo a `CONTEXTO-POPUP-VILLAGE.md` §18
+
+| Elemento §18 | Estado sugerido |
+|--------------|-----------------|
+| `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` | Pendientes Día 2 (crear en raíz cuando el equipo redacte). |
+| `docs/roles/role-model.md`, `permission-matrix.csv`, `user-stories.md` | Listos (`user-stories.md` enlazado a §11). |
+| `docs/pop-up-2026/day-N.md` | Carpeta y días: alinear con bitácora del Pop-Up. |
+| `config/roles.example.yaml` | Opcional; hoy basta `policy_config.example.yaml` si el YAML unificado cubre roles. |
+| `packages/connectors/` | Stub o README “WhatsApp” cuando arranque integración. |
+| `packages/audit-log/` | Añadido `README.md` (placeholder §18). |
+| `apps/web/`, `apps/api/` | Roadmap Día 4; documentar en `docs/architecture.md`. |
+
+**Commits:** mensajes en inglés, imperativo; ramas por día según convención del CONTEXTO.
 
 ---
 

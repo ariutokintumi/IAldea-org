@@ -4,9 +4,36 @@
 
 ---
 
+## Alineación con `CONTEXTO-POPUP-VILLAGE.md`
+
+El documento maestro del Pop-Up City (raíz del repo, **v2.0 · 12 mayo 2026**) manda sobre **alcance, voz, seguridad, calendario y entregables**. Este plan unificado es la **visión de producto** y los planes 01 / 08 / 13 / 16; si hay tensión, prevalece el CONTEXTO.
+
+**Outputs al cierre de la semana (Fase 01)** — resumen de [CONTEXTO-POPUP-VILLAGE.md](../../CONTEXTO-POPUP-VILLAGE.md) §1:
+
+- Repo open-source (MIT), README, MANIFESTO, SOUL y `policy_config` de ejemplo.
+- MVP: comunidad ficticia, ingesta de documentos, **chat ciudadano + autoridad** con citas, modos de privacidad, refusals, simulador de decisiones no críticas.
+- Red-team documentado, manifesto en ialdea.org, roadmap 6–12 meses, criterios de pilotos, outline del Implementation Playbook, materiales para el spotlight en Puebla (29–31 mayo).
+
+**Las cuatro fases del programa completo** (CONTEXTO §5):
+
+| Fase | Nombre | Fechas | Output principal |
+|------|--------|--------|------------------|
+| 01 | Pop-Up City: Seed-Phase | 11–18 mayo 2026 | Puerto Escondido — MVP, civic safety, demo dataset |
+| 02 | Hard-Testing & Debugging | 19–28 mayo 2026 | Remoto — MVP estabilizado, red-team final |
+| 03 | Presentation & Spotlight | 29–31 mayo 2026 | Puebla, ETH CDM — escenario público |
+| 04 | 3 Real Communities Pilot | 1 jun – 31 jul 2026 | 3 comunidades MX — Impact Report |
+
+**Audiencia y framing (CONTEXTO §4):** audiencia = **comunidades de menos de 500 habitantes** (diversas: periurbanas, cooperativas, campus, etc.). En comunicación pública **evitar** como framing del proyecto: “rural”, “pueblo olvidado”, “los más vulnerables”, “comunidades indígenas” salvo que una comunidad **se identifique así**. INEGI puede citarse con la palabra “rural” solo como **dato atribuido**, no como narrativa.
+
+**Integraciones de mensajería (CONTEXTO §11 / sponsors):** categoría explícita *Messaging* (WhatsApp, Telegram, Matrix, web). En este fork, el canal ciudadano acordado para consultas es **WhatsApp** — ver [dia_02_gobernanza_roles_y_accesos.md](dia_02_gobernanza_roles_y_accesos.md) §2 y [`packages/agents/README.md`](../../packages/agents/README.md).
+
+**Roles en runtime:** el modelo canónico de roles y etapas está en [`docs/roles/`](../roles/); los agentes se implementan como **perfiles** sobre la misma tubería (ciudadano / gobernanza / operador), no como siete LLM distintos.
+
+---
+
 ## El Contexto Real
 
-Eres líder de una comunidad de 500 personas. Tu día a día:
+Eres **líder o coordinación** en una comunidad de **menos de 500 habitantes**. Los retos de abajo son **ejemplos ilustrativos** de áreas de vida (no definen el tono “rural” del proyecto — véase la tabla de framing arriba). Tu día a día:
 
 | Área | Problemas reales |
 |---|---|
@@ -26,6 +53,8 @@ Eres líder de una comunidad de 500 personas. Tu día a día:
 ---
 
 ## La Solución: IAldea Comunidad
+
+**Nombre comercial / marca:** el proyecto público es **IAldea.org** (wordmark y reserva según CONTEXTO §2). *IAldea Comunidad* es la etiqueta de este documento para el **paquete de cuatro módulos** del fork; forks comunitarios pueden usar otra marca respetando la licencia.
 
 Un producto con **4 módulos integrados** que se alimentan entre sí:
 
@@ -105,6 +134,8 @@ sequenceDiagram
     IA->>IA: Actualiza SOUL.md<br/>Ejecuta simulación de prueba
     IA-->>L: ✅ Regla activada.<br/>10/10 pruebas pasaron.
 ```
+
+> **Nota (CONTEXTO §2–§3):** el sistema **no** compromete presupuesto ni decide por la asamblea. En el ejemplo de la mañana, IAldea solo **ilumina conexiones** documentadas (mapa de impacto); la reasignación de fondos sigue siendo decisión humana e institucional.
 
 ---
 
@@ -289,7 +320,7 @@ graph LR
 
 ## Arquitectura Unificada
 
-Esta sección define **qué hace cada capa**, sobre todo **Graph** (tres piezas), **quién es el agente principal**, **quién filtra** y **qué herramientas** encajan con el MVP offline-first. Detalle técnico paralelo: [docs/architecture.md](../architecture.md).
+Esta sección define **qué hace cada capa**, sobre todo **Graph** (tres piezas), **quién es el agente principal**, **quién filtra** y **qué herramientas** encajan con el MVP offline-first. Marco formal del Pop-Up: [CONTEXTO-POPUP-VILLAGE.md](../../CONTEXTO-POPUP-VILLAGE.md) §11–§13. Detalle técnico paralelo: [docs/architecture.md](../architecture.md).
 
 ### Diagrama de capas y datos (vista global)
 
@@ -301,7 +332,7 @@ flowchart TB
         I1["📸 Fotos"]
         I2["🎙️ Audio"]
         I3["📄 PDFs"]
-        I4["💬 Chat ciudadano"]
+        I4["💬 WhatsApp / web<br/>ciudadanía"]
         I5["❓ Consulta impacto"]
     end
 
@@ -319,8 +350,8 @@ flowchart TB
 
     subgraph AG["CAPA 3 — AGENTES"]
         A3["Motor traducción<br/>híbrido · idioma"]
-        A1["Agente Ciudadano<br/>citas + política ciudadana"]
-        A2["Agente Autoridad<br/>escenarios + impacto"]
+        A1["Perfil ciudadano<br/>(+ financiador acotado)"]
+        A2["Perfil gobernanza<br/>(secretaría… validador)"]
     end
 
     subgraph SF["CAPA 4 — SAFETY"]
@@ -374,13 +405,13 @@ sequenceDiagram
     autonumber
     participant U as Usuario
     participant T as Traducción híbrida
-    participant AC as Agente Ciudadano
-    participant AA as Agente Autoridad
+    participant AC as Perfil ciudadano
+    participant AA as Perfil gobernanza
     participant R as Graph G1+G2
     participant P as Propagación G3
     participant AUD as Auditor
 
-    Note over U,AUD: Camino ciudadano (chat bilingüe)
+    Note over U,AUD: Camino ciudadanía (WhatsApp / web, bilingüe)
     U->>T: mensaje (lengua A)
     T->>AC: normalizado / español si aplica
     AC->>R: consulta híbrida estructura + vectores
@@ -389,7 +420,7 @@ sequenceDiagram
     T-->>AUD: salida (bilingüe si aplica)
     AUD-->>U: respuesta validada o rechazo educado
 
-    Note over U,AUD: Camino autoridad (análisis de impacto)
+    Note over U,AUD: Camino gobernanza (análisis de impacto / comité)
     U->>AA: propuesta o pregunta de impacto
     AA->>P: semilla NLP + nodos clave
     P->>R: ampliar evidencia en grafo y textos
@@ -409,18 +440,22 @@ sequenceDiagram
 
 **Kernel vs Graph:** el Kernel responde *qué texto tenemos y con qué versión*; el Graph responde *cómo encajan las piezas entre sí* y *qué fragmentos parecen relevantes por significado*.
 
+### Modos de privacidad (CONTEXTO §12)
+
+Tres modos de primera clase: **público**, **confidencial comunitario**, **privado sin memoria**. Umbral de agregación por defecto **N ≥ 3** en síntesis de *concerns*. Para **nuevas comunidades**, el CONTEXTO fija como **default** el modo **`private_no_memory`** hasta que la asamblea configure lo contrario en `policy_config.yaml`.
+
 ### Agentes: principal, idioma y filtro
 
 | Rol en producto | Componente | Función |
 |-----------------|------------|---------|
-| **Agente principal (ciudadanía)** | Agente Ciudadano | Respuestas con **citas**, trámites/acuerdos públicos, feedback según privacidad; comparte política de acceso **ciudadana**. |
-| **Agente principal (autoridad / comité)** | Agente Autoridad | Asambleas, **2–3 escenarios** no críticos, agregados, borradores; orquesta **G3** en consultas de impacto. |
-| **Idioma (no es “el agente”)** | Motor traducción híbrido | Pre/post: detección de lengua, traducción, memoria de frases validadas por humanos; **no** decide política de seguridad. |
-| **Filtro duro de salida** | Auditor + SOUL + `policy_config` | **Última puerta**: legal/médico/electoral fuera de alcance, acusaciones, fugas de privacidad, alucinaciones, citas faltantes. |
-| **Opcional** | Clasificador ligero pre-LLM | Corta intents prohibidos **antes** del modelo (ahorro y claridad). |
-| **Definición / QA de políticas** | Configurador no-code + Simulador | El configurator **alimenta** reglas del Auditor; el simulador **prueba** escenarios; no interceptan cada mensaje en producción. |
+| **Principal (ciudadanía)** | Perfil ciudadano (`ciudadano`; `financiador` con recortes) | Citas, trámites/acuerdos públicos, feedback según privacidad. |
+| **Principal (gobernanza)** | Perfil gobernanza (`secretaria`, `coordinacion`, `comite_miembro`, `tesoreria`, `validador`) | Asambleas, escenarios no críticos, agregados, borradores; orquesta **G3** en impacto; tesorería sin liberar fondos por IA. |
+| **Idioma (no es “el agente”)** | Motor traducción híbrido | Pre/post; **no** decide política de seguridad. |
+| **Filtro duro de salida** | Auditor + SOUL + `policy_config` | **Última puerta** antes de entregar al canal (WhatsApp, web, etc.). |
+| **Opcional** | Clasificador ligero pre-LLM | Corta intents prohibidos **antes** del modelo. |
+| **Definición / QA** | Configurador no-code + Simulador | Alimentan y prueban reglas; no interceptan cada mensaje en producción. |
 
-**En una frase:** *Ciudadano u Autoridad redactan; Traducción adapta lengua; Auditor permite o bloquea la salida.*
+**En una frase:** *Perfil ciudadano o gobernanza redactan; traducción adapta lengua; auditor permite o bloquea la salida.* Contratos: [`packages/agents/README.md`](../../packages/agents/README.md).
 
 ### Herramientas recomendadas (MVP alineado a este documento)
 
@@ -442,46 +477,57 @@ sequenceDiagram
 | `packages/memory-kernel/` | SQLite, documentos, chunks, versiones, auditoría. |
 | `packages/graph/` | Modelo nodos/aristas, propagación G3. |
 | `packages/retrieval/` | BM25 + vectores + fusión híbrida (G2). |
-| `packages/agents/` | Orquestación Agente Ciudadano / Autoridad. |
+| `packages/agents/` | Perfiles ciudadano / gobernanza; contratos `citizen.md`, `authority.md`. |
 | `packages/civic-safety/` | Auditor, clasificadores, simulador. |
-| `packages/connectors/` | INEGI, ingestas externas permitidas. |
+| `packages/connectors/` | WhatsApp (canal ciudadano), INEGI, otras ingestas permitidas. |
+| `packages/audit-log/` | Registro append-only de acciones sensibles (CONTEXTO: auditable). |
 
 ---
 
 ## Roadmap de Construcción
 
+El **plan día a día** (focos, goals, outputs y paths en repo) está en [CONTEXTO-POPUP-VILLAGE.md](../../CONTEXTO-POPUP-VILLAGE.md) §10. La vista Gantt de abajo **resume** esos ocho días; los módulos A–D del producto unificado se reparten entre varios días (p. ej. ingesta y grafo en Día 3; chat en Día 4; simulador en Día 5).
+
 ```mermaid
 gantt
-    title Sprint de Construcción — Pop-Up City
+    title Pop-Up City — Fase 01 (CONTEXTO §10)
     dateFormat YYYY-MM-DD
     axisFormat %d/%m
 
-    section Día 1-2: Fundamentos
-    Configurador No-Code (Módulo D)      :d1, 2026-05-11, 2d
-    Estructura de datos del Kernel       :d2, 2026-05-11, 1d
+    section Día 1 · 11 may
+    Visión SOUL civic-safety        :done, a1, 2026-05-11, 1d
 
-    section Día 3-4: Captura
-    Pipeline OCR + Audio (Módulo A)      :d3, 2026-05-13, 2d
-    Grafo de conocimiento base           :d4, 2026-05-13, 2d
+    section Día 2 · 12 may
+    Roles permisos matriz           :active, a2, 2026-05-12, 1d
 
-    section Día 5-6: Inteligencia
-    Motor de Impacto (Módulo B)          :d5, 2026-05-15, 2d
-    Traducción híbrida (Módulo C)        :d6, 2026-05-15, 2d
+    section Día 3 · 13 may
+    Kernel grafo ingest pipeline    :a3, 2026-05-13, 1d
 
-    section Día 7: Integración
-    Integrar los 4 módulos               :d7, 2026-05-17, 1d
-    Demo con dataset ficticio            :d8, 2026-05-17, 1d
-    Documentación de operador            :d9, 2026-05-17, 1d
+    section Día 4 · 14 may
+    API chat citas refusals auditor :a4, 2026-05-14, 1d
+
+    section Día 5 · 15 may
+    Simulador decisiones no críticas :a5, 2026-05-15, 1d
+
+    section Día 6 · 16 may
+    Red-team privacidad checklist   :a6, 2026-05-16, 1d
+
+    section Día 7 · 17 may
+    Demo MANIFESTO ROADMAP pilotos  :a7, 2026-05-17, 1d
+
+    section Día 8 · 18 may
+    Cierre repo IMPACT_REPORT v0    :a8, 2026-05-18, 1d
 ```
 
-**Orden de prioridad si el tiempo no alcanza:**
+**Orden de prioridad si el tiempo no alcanza** (alineado al MVP del CONTEXTO §1: chat con citas, privacidad, refusals, simulador):
 
-| Prioridad | Módulo | Razón |
-|---|---|---|
-| 🥇 1° | D — Configuración No-Code | Sin esto, el líder no puede usar nada solo |
-| 🥈 2° | A — Captura Offline | Sin datos, no hay inteligencia posible |
-| 🥉 3° | B — Análisis de Impacto | El mayor valor diferenciador |
-| 4° | C — Traducción | Crítico para inclusión, pero puede empezar básico |
+| Prioridad | Entrega | Razón |
+|-----------|---------|--------|
+| 🥇 1° | D — Configuración + políticas (`SOUL` / `policy_config`) | Sin reglas claras no hay producto cívico defendible. |
+| 🥈 2° | Chat ciudadano + gobernanza + **auditor** (Día 4) | Valor núcleo antes que GIS o impacto profundo. |
+| 🥉 3° | A — Captura / ingesta mínima | Datos reales o ficticios para demostrar citas. |
+| 4° | B — Impacto / grafo completo | Diferenciador; puede acotarse a RAG + mapa ligero en el piloto. |
+| 5° | C — Traducción híbrida | Inclusión; puede arrancar en español + detección básica. |
 
 ---
 
@@ -490,8 +536,8 @@ gantt
 | Componente | Tecnología | Por qué |
 |---|---|---|
 | Frontend | HTML/CSS/JS vanilla | Funciona en cualquier navegador viejo |
-| Backend | Python 3.11+ (FastAPI) | Ecosistema NLP maduro |
-| Base de datos | SQLite | Sin servidor, portable, offline |
+| Backend | Python (FastAPI) **o** Node.js | CONTEXTO §11: consenso del equipo; el fork actual asume Python para NLP/agents. |
+| Base de datos | SQLite (Postgres opcional en despliegues grandes) | CONTEXTO §11; portable y auditable |
 | OCR | Tesseract 5 | Gratuito, offline, español soportado |
 | Audio | Whisper.cpp (modelo `small`) | Offline, buen español, 466 MB |
 | Grafo | NetworkX + SQLite | Ligero, sin infraestructura |
@@ -499,7 +545,9 @@ gantt
 | LLM | Configurable (local o API) | Ollama local / OpenAI / Anthropic |
 | Traducción | LLM + memoria de traducciones | Híbrido IA + humano |
 
-**Requisitos de hardware:** Laptop con 8 GB RAM. Sin GPU. Sin internet para captura.
+**Restricciones base (CONTEXTO §11):** autohospedable (p. ej. VPS **≥ 4 GB RAM**), licencia **MIT**, conexión intermitente tolerable, **modelo-agnóstico**, datos **exportables**, acciones importantes con registro **append-only** (`packages/audit-log/`).
+
+**Requisitos de hardware (desarrollo / demo):** laptop ~8 GB, sin GPU obligatoria, captura offline sin internet.
 
 ---
 
@@ -545,14 +593,14 @@ Los 4 módulos en una frase:
 
 ---
 
-*Documento generado como consolidación de los planes 01, 08, 13 y 16 de IAldea.*
+*Consolidación de los planes 01, 08, 13 y 16; criterios de alcance, voz y entregables alineados a [CONTEXTO-POPUP-VILLAGE.md](../../CONTEXTO-POPUP-VILLAGE.md).*
 
 ---
 
 ## 📊 Registro de Avances
 
-> Última actualización: **11 de mayo de 2026** — Pop-Up City, Puerto Escondido, Oaxaca
-> Commit: `f64ce8b` → [github.com/MarxMad/IAldea-org-26](https://github.com/MarxMad/IAldea-org-26)
+> Última actualización: **12 de mayo de 2026** — Pop-Up City, Puerto Escondido, Oaxaca (CONTEXTO v2.0: Día 1 completado; Día 2 en curso).  
+> Repo de trabajo: [github.com/MarxMad/IAldea-org-26](https://github.com/MarxMad/IAldea-org-26) · fork de [github.com/ariutokintumi/IAldea-org](https://github.com/ariutokintumi/IAldea-org) · rama típica `avances-dia-1`.
 
 ---
 
@@ -560,15 +608,19 @@ Los 4 módulos en una frase:
 
 | Módulo | Nombre | Estado | Avance |
 |---|---|---|---|
-| A | Captura Multimodal Offline | 🟡 En diseño | Plan completo, pendiente código |
-| B | Análisis Predictivo de Impacto | 🟢 Iniciado | Script GIS funcional, capas generadas |
-| C | Traducción a Lenguas Originarias | 🟡 En diseño | Plan completo, pendiente código |
-| D | Configuración No-Code | 🟡 En diseño | Plan completo, pendiente código |
-| GIS | Capas geoespaciales del territorio | ✅ Completado | 5 capas derivadas del MDT INEGI |
+| A | Captura multimodal offline | 🟡 En diseño | Plan `plan_01_*`; pipeline código pendiente |
+| B | Análisis de impacto (iluminar conexiones, no “predecir”) | 🟢 Paralelo GIS | Script MDT + 5 capas; motor grafo CONTEXTO Día 3–5 |
+| C | Traducción + chat bilingüe | 🟡 En diseño | Plan `plan_13_*`; canal ciudadano **WhatsApp** acordado (Día 2) |
+| D | Configuración no-code | 🟢 MVP local | `apps/web/configurator/` (HTML/JS) genera SOUL + `policy_config` |
+| GIS | Capas derivadas del MDT INEGI | ✅ Completado (piloto) | 5 GeoTIFF en `derivados/` (no sustituye MVP chat+citas) |
 
 ---
 
-### ✅ Completado
+### ✅ Completado (según CONTEXTO §10 + fork)
+
+#### Día 1 — Visión, límites y ética (11 mayo 2026)
+
+Outputs esperados en CONTEXTO: `docs/principles.md`, `soul/SOUL.example.md`, `docs/civic-safety.md`, `docs/positioning-v1.md`, `docs/pop-up-2026/day-1.md` — **validar en repo** antes de cerrar Día 2.
 
 #### Módulo B / GIS — Procesamiento del MDT INEGI (11 mayo 2026)
 
@@ -617,37 +669,38 @@ Fuente: MDT INEGI E14D58D1, resolución 1.5m, Valles Centrales de Oaxaca
 | `docs/planning/plan_08_analisis_impacto.md` | Plan completo: grafo de conocimiento, propagación de impacto | ~250 |
 | `docs/planning/plan_13_traduccion_lenguas.md` | Plan completo: sistema híbrido IA+humano, lenguas de Oaxaca | ~300 |
 | `docs/planning/plan_16_config_nocode.md` | Plan completo: asistente de 7 pasos, generación SOUL.md/YAML | ~350 |
-| `docs/planning/plan_producto_unificado.md` | Este documento — visión integrada para 10 áreas de la comunidad | ~450 |
+| `docs/planning/plan_producto_unificado.md` | Visión producto + arquitectura; alineado a CONTEXTO-POPUP-VILLAGE.md | — |
+| `docs/planning/dia_02_gobernanza_roles_y_accesos.md` | Día 2: roles CSV, WhatsApp, matriz, YAML | — |
+| `docs/roles/` | `role-model.md`, `permission-matrix.csv`, `user-stories.md` | — |
+| `packages/agents/` | README tubería + `citizen.md`, `authority.md` | — |
+| `CONTEXTO-POPUP-VILLAGE.md` | Documento maestro Pop-Up (raíz del repo) | — |
 | `metadatos/` | Metadatos INEGI del MDT (3 archivos, documentación oficial) | — |
-| `derivados/README.md` | Estadísticas completas del procesamiento MDT | 55 |
+| `derivados/README.md` | Estadísticas del procesamiento MDT | 55 |
 
 ---
 
-#### Infraestructura del Repositorio (11 mayo 2026)
+#### Infraestructura del repositorio (CONTEXTO §18)
+
+Árbol **objetivo** del monorepo (MANIFESTO, `docs/pop-up-2026/`, `apps/api`, `packages/memory-kernel`, …): ver [CONTEXTO-POPUP-VILLAGE.md](../../CONTEXTO-POPUP-VILLAGE.md) §18. Estado actual del fork (resumen):
 
 ```
 IAldea-org-26/
-├── .gitignore
+├── CONTEXTO-POPUP-VILLAGE.md      ← documento maestro
+├── README.md, LICENSE, config/, soul/
 ├── docs/
-│   └── planning/
-│       ├── ideas_desarrollo.md
-│       ├── plan_01_ingesta_multimodal.md   ← Módulo A
-│       ├── plan_08_analisis_impacto.md     ← Módulo B
-│       ├── plan_13_traduccion_lenguas.md   ← Módulo C
-│       ├── plan_16_config_nocode.md        ← Módulo D
-│       └── plan_producto_unificado.md       ← Este documento
-├── metadatos/
-│   ├── e14d58d1_mt.txt
-│   ├── e14d58d1_mt.xml
-│   └── metadatos_mdt_1.5m.txt
-├── scripts/
-│   ├── generar_capas_mdt.py
-│   └── init_kernel_db.py
-└── derivados/
-    └── README.md
+│   ├── architecture.md
+│   ├── roles/                     ← matriz CSV, user stories, role-model
+│   └── planning/                 ← planes 01, 08, 13, 16 + este archivo
+├── apps/
+│   ├── web/configurator/         ← MVP asistente 7 pasos (Módulo D)
+│   └── api/                      ← README; backend Día 4 según CONTEXTO
+├── packages/
+│   ├── memory-kernel/            ← schema.sql + README
+│   ├── agents/, connectors/, audit-log/, graph/, retrieval/, civic-safety/
+├── scripts/, examples/, tests/, metadatos/, derivados/
 ```
 
-**Repositorio:** [github.com/MarxMad/IAldea-org-26](https://github.com/MarxMad/IAldea-org-26)
+**Repositorio:** [github.com/MarxMad/IAldea-org-26](https://github.com/MarxMad/IAldea-org-26)  
 **Fork de:** [github.com/ariutokintumi/IAldea-org](https://github.com/ariutokintumi/IAldea-org)
 
 ---
@@ -669,36 +722,33 @@ IAldea-org-26/
 
 ---
 
-### 🔜 Próximos Pasos (ordenados por prioridad)
+### 🔜 Próximos pasos (alineados a CONTEXTO §10)
+
+Prioridad **semana Pop-Up**: cerrar outputs por día (minutas `docs/pop-up-2026/day-N.md`, `apps/api`, red-team Día 6, MANIFESTO/ROADMAP Día 7). La rama GIS / mapa Leaflet es **complementaria** al MVP de chat+citas.
 
 ```mermaid
 graph TD
-    A["✅ 5 capas GIS<br/>generadas"] --> B["🔜 Visualizador web<br/>mapa interactivo<br/>(Leaflet.js)"]
-    A --> C["🔜 Ingestar Anuario<br/>INEGI al Kernel<br/>(PyMuPDF)"]
-    B --> D["🔜 Módulo A:<br/>Pipeline de<br/>captura offline"]
-    C --> D
-    D --> E["🔜 Módulo B:<br/>Motor de impacto<br/>con datos del grafo"]
-    E --> F["🔜 Módulo C:<br/>Chat bilingüe<br/>Mixteco/Español"]
-    F --> G["🔜 Módulo D:<br/>Configurador<br/>no-code"]
-    G --> H["🎯 Demo integrado<br/>con dataset<br/>ficticio de Tlacolula"]
+    A["✅ GIS 5 capas<br/>(opcional demo)"] --> B["🔜 CONTEXTO D3:<br/>ingest + grafo + architecture"]
+    B --> C["🔜 CONTEXTO D4:<br/>apps/api + chat<br/>citas + auditor"]
+    C --> D["🔜 CONTEXTO D5:<br/>simulador escenarios"]
+    D --> E["🔜 CONTEXTO D6:<br/>red-team + refusals"]
+    E --> F["🔜 CONTEXTO D7:<br/>demo MANIFESTO ROADMAP"]
+    F --> G["🎯 CONTEXTO D8:<br/>cierre + IMPACT_REPORT v0"]
 
     style A fill:#4A7C59,color:#fff
-    style H fill:#1E4D5C,color:#fff
+    style G fill:#1E4D5C,color:#fff
 ```
 
-| # | Tarea | Módulo | Esfuerzo |
-|---|---|---|---|
-| 1 | Mapa web interactivo con las 5 capas GIS (Leaflet.js) | B/GIS | ~4 h |
-| 2 | Ingestar `resumen_Oaxaca.pdf` al Kernel con PyMuPDF | A | ~2 h |
-| 3 | Pipeline OCR básico (Tesseract) para fotos de actas | A | ~1 día |
-| 4 | Pipeline de transcripción de audio (Whisper.cpp) | A | ~1 día |
-| 5 | Grafo de conocimiento base (NetworkX + SQLite) | B | ~2 días |
-| 6 | Motor de análisis de impacto básico | B | ~2 días |
-| 7 | Chat bilingüe con LLM + detección de idioma | C | ~2 días |
-| 8 | Asistente no-code de configuración (7 pasos) | D | ~2 días |
-| 9 | Dataset ficticio de comunidad "San Juan Tlacolula" | Demo | ~1 día |
-| 10 | Demo integrado para presentación | Todos | ~1 día |
+| # | Tarea | Referencia CONTEXTO | Esfuerzo orientativo |
+|---|-------|----------------------|----------------------|
+| 1 | Pipeline ingesta + índice citas (`scripts/ingest-docs.py`) | Día 3 | ~1–2 días |
+| 2 | `apps/api` + chat por rol + `packages/civic-safety` auditor | Día 4 | ~1–2 días |
+| 3 | Simulador comparar 2–3 opciones (`docs/decision-template.md`) | Día 5 | ~1 día |
+| 4 | Red-team + `tests/red-team/report.md` | Día 6 | ~1 día |
+| 5 | Demo en vivo + MANIFESTO + ROADMAP + `docs/pilot-guide.md` | Día 7 | ~1 día |
+| 6 | Mapa Leaflet capas GIS (si sobra capacidad) | Extra | ~4 h |
+| 7 | Ingestar PDF anuario al Kernel | Extra / Día 3 | ~2 h |
 
 ---
 
-*Registro de avances actualizado el 11 de mayo de 2026 — ETH Cinco de Mayo Pop-Up City.*
+*Registro de avances alineado a CONTEXTO-POPUP-VILLAGE.md — revisión 12 de mayo de 2026.*

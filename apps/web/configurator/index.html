@@ -101,13 +101,14 @@
 
     <!-- Paso 5 -->
     <section class="step" data-step="5">
-      <h2>5 · Roles (por cargo, no nombres propios)</h2>
-      <label for="authorities">Autoridades (separadas por coma)</label>
-      <input type="text" id="authorities" value="presidente, secretario, tesorero" />
+      <h2>5 · Roles (matriz colaboradores; sin nombres propios)</h2>
+      <p class="hint">Slugs alineados a <code>docs/roles/permission-matrix.csv</code>: secretaría, coordinación, comité, tesorería, validador, ciudadano, financiador.</p>
+      <label for="authorities">Núcleo de gobernanza — <code>roles.authorities</code> (separados por coma)</label>
+      <input type="text" id="authorities" value="secretaria, coordinacion" />
       <label for="committees">Comités (separados por coma)</label>
-      <input type="text" id="committees" placeholder="comité de agua, comité de obras" />
+      <input type="text" id="committees" placeholder="comite_agua, comite_obras" />
       <label for="admins">Quién puede cambiar la configuración de IAldea (cargos)</label>
-      <input type="text" id="admins" value="secretario" />
+      <input type="text" id="admins" value="secretaria" />
       <div class="radio-row">
         <label><input type="checkbox" id="diffAuthCitizen" checked /> Los ciudadanos ven <em>menos</em> que las autoridades (recomendado para agregados)</label>
       </div>

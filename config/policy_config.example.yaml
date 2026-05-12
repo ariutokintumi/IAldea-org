@@ -9,6 +9,13 @@ community:
   size: 0
   governance: "usos_y_costumbres"
 
+# Medio ciudadano acordado (Día 2): WhatsApp — ver docs/planning/dia_02_gobernanza_roles_y_accesos.md §2
+channels:
+  citizen_primary: "whatsapp"
+  whatsapp:
+    opt_in_required: true
+    privacy_policy_url: ""
+
 language:
   primary: "es"
   secondary: ""
@@ -38,13 +45,19 @@ feedback:
   enabled: true
   mode: "confidential"
 
+# Roles canónicos: docs/roles/permission-matrix.csv
+# `authorities` agrupa núcleo de gobernanza (compat. configurador web); tesorería y validación como listas explícitas.
 roles:
   authorities:
-    - "presidente"
-    - "secretario"
+    - "secretaria"
+    - "coordinacion"
   committees: []
+  treasury:
+    - "tesoreria"
+  validation:
+    - "validador"
   admin:
-    - "secretario"
+    - "admin_plataforma"
 
 role_permissions:
   citizen:

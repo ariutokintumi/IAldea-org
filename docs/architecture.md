@@ -65,8 +65,10 @@ Ambos comparten memoria (Kernel + Graph) pero **políticas distintas** (`policy_
 
 | Agente | Rol principal | Usuario típico |
 |--------|----------------|----------------|
-| **Agente Ciudadano** | Responder dudas con **citas**, explicar trámites/acuerdos públicos, recoger feedback según modo de privacidad. Bilingüe cuando aplique. | Persona de la comunidad. |
-| **Agente Autoridad / comité** | Preparar asambleas, **comparar 2–3 escenarios** no críticos, resumir preocupaciones agregadas, borradores con fuentes, **consultas de análisis de impacto** (orquesta al motor de propagación). | Presidente, secretario, comités. |
+| **Agente Ciudadano** | Responder dudas con **citas**, explicar trámites/acuerdos públicos, recoger feedback según modo de privacidad. Bilingüe cuando aplique. | `ciudadano`, `financiador` (perfil restringido). |
+| **Agente Gobernanza** (antes “Autoridad / comité”) | Preparar asambleas, **comparar 2–3 escenarios** no críticos, resumir preocupaciones agregadas, borradores con fuentes, **consultas de análisis de impacto** cuando exista grafo. | `secretaria`, `coordinacion`, `comite_miembro`, `tesoreria`, `validador` (mismo tubería, `system`/tools por `role_slug`). |
+
+Tubería concreta (contexto → puerta previa → generador por rol → auditor): ver [`packages/agents/README.md`](../packages/agents/README.md) y contratos [`citizen.md`](../packages/agents/citizen.md) / [`authority.md`](../packages/agents/authority.md).
 
 Ninguno de los dos “gobierna”: ambos **rechazan** temas fuera de alcance y deben citar fuentes.
 
@@ -101,7 +103,7 @@ Los raster (MDT, pendientes, riesgo, etc.) pueden ser **nodos de tipo `PublicSou
 | `packages/memory-kernel/` | SQLite, documentos, chunks, versiones, auditoría de eventos. |
 | `packages/graph/` | Modelo de nodos/aristas, propagación, export/import. |
 | `packages/retrieval/` | BM25 + vector store + fusión híbrida. |
-| `packages/agents/` | Orquestación ciudadano/autoridad + prompts por rol. |
+| `packages/agents/` | Orquestación por rol: ensamblador de contexto, generador (ciudadano / gobernanza / operador), contratos en `citizen.md` y `authority.md`. |
 | `packages/civic-safety/` | Auditor, clasificadores, simulador. |
 | `packages/connectors/` | INEGI, ingestas, etc. |
 

@@ -152,7 +152,7 @@ function generatePolicyYaml(d) {
   lines.push("");
   lines.push("roles:");
   lines.push("  authorities:");
-  (authorities.length ? authorities : ["secretario"]).forEach((r) => lines.push(`    - ${yamlScalar(r)}`));
+  (authorities.length ? authorities : ["secretaria"]).forEach((r) => lines.push(`    - ${yamlScalar(r)}`));
   lines.push("  committees:");
   if (committees.length) {
     committees.forEach((r) => lines.push(`    - ${yamlScalar(r)}`));
@@ -163,7 +163,7 @@ function generatePolicyYaml(d) {
   if (admins.length) {
     admins.forEach((r) => lines.push(`    - ${yamlScalar(r)}`));
   } else {
-    lines.push("    - secretario");
+    lines.push("    - secretaria");
   }
   lines.push("");
   lines.push("role_permissions:");
