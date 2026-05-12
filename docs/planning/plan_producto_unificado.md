@@ -289,67 +289,162 @@ graph LR
 
 ## Arquitectura Unificada
 
+Esta sección define **qué hace cada capa**, sobre todo **Graph** (tres piezas), **quién es el agente principal**, **quién filtra** y **qué herramientas** encajan con el MVP offline-first. Detalle técnico paralelo: [docs/architecture.md](../architecture.md).
+
+### Diagrama de capas y datos (vista global)
+
+Flujo: **captura → Kernel → indexación en Graph → agentes consultan Graph → borrador → Auditor → usuario**. El configurador y el simulador **no** están en el camino en vivo de cada mensaje; definen y prueban las reglas del Auditor.
+
 ```mermaid
-graph TB
-    subgraph "ENTRADA"
+flowchart TB
+    subgraph EN["ENTRADA"]
         I1["📸 Fotos"]
         I2["🎙️ Audio"]
         I3["📄 PDFs"]
-        I4["💬 Chat ciudadano<br/>(bilingüe)"]
-        I5["❓ Consulta de<br/>análisis de impacto"]
+        I4["💬 Chat ciudadano"]
+        I5["❓ Consulta impacto"]
     end
 
-    subgraph "CAPA 1 — KERNEL"
-        K1["Motor OCR<br/>(Tesseract)"]
-        K2["Transcriptor<br/>(Whisper.cpp)"]
-        K3["Almacén versionado<br/>(SQLite)"]
+    subgraph K["CAPA 1 — KERNEL"]
+        K1["OCR · Tesseract"]
+        K2["STT · Whisper.cpp"]
+        K3[(SQLite versionado<br/>chunks + docs)]
     end
 
-    subgraph "CAPA 2 — GRAFO"
-        G1["Grafo de<br/>conocimiento"]
-        G2["Búsqueda<br/>vectorial"]
-        G3["Motor de<br/>propagación<br/>de impacto"]
+    subgraph G["CAPA 2 — GRAPH"]
+        G1["Grafo de conocimiento<br/>nodos + aristas"]
+        G2["Búsqueda vectorial<br/>RAG por significado"]
+        G3["Propagación de impacto<br/>recorrido + informe"]
     end
 
-    subgraph "CAPA 3 — AGENTES"
-        A1["Agente Ciudadano<br/>(bilingüe)"]
-        A2["Agente Autoridad<br/>(análisis)"]
-        A3["Motor de<br/>traducción<br/>híbrido"]
+    subgraph AG["CAPA 3 — AGENTES"]
+        A3["Motor traducción<br/>híbrido · idioma"]
+        A1["Agente Ciudadano<br/>citas + política ciudadana"]
+        A2["Agente Autoridad<br/>escenarios + impacto"]
     end
 
-    subgraph "CAPA 4 — SEGURIDAD"
-        S1["Auditor<br/>(SOUL.md)"]
-        S2["Configurador<br/>visual no-code"]
-        S3["Simulador<br/>de pruebas"]
+    subgraph SF["CAPA 4 — SAFETY"]
+        S2["Configurador no-code<br/>SOUL + YAML"]
+        S3["Simulador<br/>regresión políticas"]
+        S1["Auditor<br/>salida obligatoria"]
     end
+
+    OUT["✅ Respuesta al usuario"]
 
     I1 --> K1
-    I2 --> K2
     I3 --> K1
+    I2 --> K2
     K1 --> K3
     K2 --> K3
-    K3 --> G1
-    K3 --> G2
+
+    K3 -->|"indexa / enlaza"| G1
+    K3 -->|"embeddings"| G2
+
+    I4 --> A3
+    A3 --> A1
+    A1 --> G2
+    A1 --> G1
 
     I5 --> A2
     A2 --> G3
     G3 --> G1
     G3 --> G2
-
-    I4 --> A3
-    A3 --> A1
-    A1 --> G2
+    A2 --> G2
 
     A1 --> S1
     A2 --> S1
+    A3 -.->|"texto final<br/>pasa por"| S1
     S2 --> S1
     S2 --> S3
+    S1 --> OUT
 
     style K3 fill:#E89B3C,color:#1B1A17
     style G1 fill:#1E4D5C,color:#fff
+    style G2 fill:#1E4D5C,color:#fff
+    style G3 fill:#1E4D5C,color:#fff
     style A3 fill:#B8482E,color:#fff
-    style S2 fill:#4A7C59,color:#fff
+    style S1 fill:#4A7C59,color:#fff
+    style S2 fill:#6b9c7a,color:#1B1A17
 ```
+
+### Flujo por rol (dos caminos claros)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Usuario
+    participant T as Traducción híbrida
+    participant AC as Agente Ciudadano
+    participant AA as Agente Autoridad
+    participant R as Graph G1+G2
+    participant P as Propagación G3
+    participant AUD as Auditor
+
+    Note over U,AUD: Camino ciudadano (chat bilingüe)
+    U->>T: mensaje (lengua A)
+    T->>AC: normalizado / español si aplica
+    AC->>R: consulta híbrida estructura + vectores
+    R-->>AC: fragmentos + nodos citables
+    AC-->>T: borrador respuesta
+    T-->>AUD: salida (bilingüe si aplica)
+    AUD-->>U: respuesta validada o rechazo educado
+
+    Note over U,AUD: Camino autoridad (análisis de impacto)
+    U->>AA: propuesta o pregunta de impacto
+    AA->>P: semilla NLP + nodos clave
+    P->>R: ampliar evidencia en grafo y textos
+    R-->>P: trayectorias + documentos
+    P-->>AA: mapa de impacto (sin recomendar)
+    AA-->>AUD: informe borrador
+    AUD-->>U: informe validado
+```
+
+### Qué es la capa Graph (las tres cajas)
+
+| Pieza | Qué es | Qué no es |
+|-------|--------|-----------|
+| **G1 · Grafo de conocimiento** | Nodos tipados (acuerdo, proyecto, comité, recurso, documento, riesgo…) y **aristas con significado** para recorrer dependencias y trazabilidad. | Un segundo almacén de PDFs; lo no modelado como nodo/arista no se “recorre”. |
+| **G2 · Búsqueda vectorial** | Embeddings de **chunks** del Kernel; recuperación **por significado** (RAG) para citar actas aunque el usuario use otras palabras. | Sustituto del grafo relacional; convive en **híbrido** con G1. |
+| **G3 · Propagación de impacto** | Algoritmo (p. ej. BFS/DFS acotado) sobre G1, a veces enriquecido con evidencia de G2; arma el mapa “qué más está conectado” a una medida propuesta. | **No recomienda** decisión; solo ilumina conexiones ya documentadas (véase [plan_08_analisis_impacto.md](plan_08_analisis_impacto.md)). |
+
+**Kernel vs Graph:** el Kernel responde *qué texto tenemos y con qué versión*; el Graph responde *cómo encajan las piezas entre sí* y *qué fragmentos parecen relevantes por significado*.
+
+### Agentes: principal, idioma y filtro
+
+| Rol en producto | Componente | Función |
+|-----------------|------------|---------|
+| **Agente principal (ciudadanía)** | Agente Ciudadano | Respuestas con **citas**, trámites/acuerdos públicos, feedback según privacidad; comparte política de acceso **ciudadana**. |
+| **Agente principal (autoridad / comité)** | Agente Autoridad | Asambleas, **2–3 escenarios** no críticos, agregados, borradores; orquesta **G3** en consultas de impacto. |
+| **Idioma (no es “el agente”)** | Motor traducción híbrido | Pre/post: detección de lengua, traducción, memoria de frases validadas por humanos; **no** decide política de seguridad. |
+| **Filtro duro de salida** | Auditor + SOUL + `policy_config` | **Última puerta**: legal/médico/electoral fuera de alcance, acusaciones, fugas de privacidad, alucinaciones, citas faltantes. |
+| **Opcional** | Clasificador ligero pre-LLM | Corta intents prohibidos **antes** del modelo (ahorro y claridad). |
+| **Definición / QA de políticas** | Configurador no-code + Simulador | El configurator **alimenta** reglas del Auditor; el simulador **prueba** escenarios; no interceptan cada mensaje en producción. |
+
+**En una frase:** *Ciudadano u Autoridad redactan; Traducción adapta lengua; Auditor permite o bloquea la salida.*
+
+### Herramientas recomendadas (MVP alineado a este documento)
+
+| Capa / pieza | Herramienta | Motivo breve |
+|--------------|-------------|----------------|
+| Kernel | **SQLite** | Portable, offline, un archivo por comunidad. |
+| Grafo G1 + G3 | **NetworkX** (+ tablas en SQLite si se persiste) | Sin servidor de grafo; suficiente para demos y pueblos pequeños. |
+| Vectores G2 | **Chroma embedded** (o similar respaldado en SQLite) | Sin GPU obligatoria; encaja laptop 8 GB. |
+| API | **FastAPI** | Orquestación NLP y agentes cuando exista `apps/api`. |
+| Ingesta | **Tesseract**, **Whisper.cpp** | Offline ([plan_01_ingesta_multimodal.md](plan_01_ingesta_multimodal.md)). |
+| LLM / traducción | **Ollama o API** + memoria humana | Configurable por comunidad. |
+
+**GIS (MDT, riesgo, etc.):** pueden modelarse como nodos `Location` / `PublicSource` enlazados en G1 y citarse como cualquier fuente; complementan pero no sustituyen acuerdos internos.
+
+### Objetivo de paquetes en monorepo (referencia)
+
+| Carpeta | Contenido previsto |
+|---------|-------------------|
+| `packages/memory-kernel/` | SQLite, documentos, chunks, versiones, auditoría. |
+| `packages/graph/` | Modelo nodos/aristas, propagación G3. |
+| `packages/retrieval/` | BM25 + vectores + fusión híbrida (G2). |
+| `packages/agents/` | Orquestación Agente Ciudadano / Autoridad. |
+| `packages/civic-safety/` | Auditor, clasificadores, simulador. |
+| `packages/connectors/` | INEGI, ingestas externas permitidas. |
 
 ---
 
