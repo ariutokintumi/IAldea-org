@@ -1,0 +1,17 @@
+# Ejemplo de roles por cargo (sin personas). Copiar a roles.yaml o fusionar con policy_config según el despliegue.
+
+# Roles nominales que la comunidad reconoce (slugs en minúsculas, sin espacios).
+roles:
+  authorities:
+    - presidente
+    - secretario
+    - tesorero
+  committees:
+    - comite_agua
+    - comite_obras
+  citizen:
+    - ciudadano
+
+# Quién puede cambiar políticas del sistema (debe existir en roles.*)
+config_admins:
+  - secretario

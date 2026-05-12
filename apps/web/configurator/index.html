@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IAldea — Asistente de configuración (MVP)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>IAldea — Asistente de configuración</h1>
+    <p>7 pasos · genera <code>SOUL.md</code> y <code>policy_config.yaml</code> · sin servidor</p>
+  </header>
+
+  <main>
+    <div class="progress" id="progress" aria-label="Progreso"></div>
+
+    <!-- Paso 1 -->
+    <section class="step active" data-step="1">
+      <h2>1 · Identidad de la comunidad</h2>
+      <label for="communityName">Nombre de la comunidad</label>
+      <input type="text" id="communityName" placeholder="Ej. San Juan Tlacolula" />
+      <label for="municipality">Municipio</label>
+      <input type="text" id="municipality" placeholder="Ej. Tlacolula de Matamoros" />
+      <label for="state">Estado</label>
+      <input type="text" id="state" value="Oaxaca" />
+      <label for="size">Habitantes aproximados</label>
+      <input type="number" id="size" min="0" placeholder="320" />
+      <fieldset>
+        <legend>Tipo de gobierno</legend>
+        <div class="radio-row"><label><input type="radio" name="governance" value="usos_y_costumbres" checked /> Usos y costumbres</label></div>
+        <div class="radio-row"><label><input type="radio" name="governance" value="municipal" /> Municipal (ayuntamiento)</label></div>
+        <div class="radio-row"><label><input type="radio" name="governance" value="mixto" /> Mixto</label></div>
+      </fieldset>
+      <label for="vision">Breve descripción (1–2 frases)</label>
+      <textarea id="vision" placeholder="Quiénes son, qué les importa preservar…"></textarea>
+    </section>
+
+    <!-- Paso 2 -->
+    <section class="step" data-step="2">
+      <h2>2 · Idioma y tono</h2>
+      <label for="primaryLang">Lengua principal (código o nombre)</label>
+      <input type="text" id="primaryLang" value="es" />
+      <div class="radio-row">
+        <label><input type="checkbox" id="hasSecondary" /> También se usa una segunda lengua en la comunidad</label>
+      </div>
+      <label for="secondaryLang">Segunda lengua</label>
+      <input type="text" id="secondaryLang" placeholder="Ej. mixteco, zapoteco…" />
+      <fieldset>
+        <legend>Tono de IAldea</legend>
+        <div class="radio-row"><label><input type="radio" name="tone" value="formal" /> Formal</label></div>
+        <div class="radio-row"><label><input type="radio" name="tone" value="cercano" checked /> Cercano</label></div>
+        <div class="radio-row"><label><input type="radio" name="tone" value="neutro" /> Neutro</label></div>
+      </fieldset>
+      <fieldset>
+        <legend>Modo de respuesta</legend>
+        <div class="radio-row"><label><input type="radio" name="display_mode" value="monolingual" checked /> Principal solamente</label></div>
+        <div class="radio-row"><label><input type="radio" name="display_mode" value="bilingual" /> Bilingüe (cuando aplique)</label></div>
+      </fieldset>
+      <label for="glossary">Términos locales (separados por coma)</label>
+      <input type="text" id="glossary" placeholder="tequio, faena, comisariado…" />
+    </section>
+
+    <!-- Paso 3 -->
+    <section class="step" data-step="3">
+      <h2>3 · Temas permitidos y sensibles</h2>
+      <p class="hint">Marque en qué puede ayudar IAldea (siempre dentro de los límites globales del proyecto).</p>
+      <div class="check-grid">
+        <label><input type="checkbox" data-topic="allowed" value="tramites_gubernamentales" checked /> Trámites e información pública</label>
+        <label><input type="checkbox" data-topic="allowed" value="comparacion_proyectos" checked /> Comparar opciones de proyectos (no críticos)</label>
+        <label><input type="checkbox" data-topic="allowed" value="historia_comunitaria" checked /> Historia y acuerdos pasados</label>
+        <label><input type="checkbox" data-topic="allowed" value="presupuesto_publico" /> Presupuesto público documentado</label>
+        <label><input type="checkbox" data-topic="allowed" value="infraestructura_comunitaria" /> Infraestructura comunitaria (sin dictamen técnico)</label>
+      </div>
+      <label for="blockedLocal">Temas que IAldea no debe tocar (uno por línea)</label>
+      <textarea id="blockedLocal" placeholder="Ej. conflicto de linderos con comunidad vecina&#10;disputa minera específica"></textarea>
+      <p class="hint">Los temas electoral, legal, médico y acusaciones están bloqueados siempre.</p>
+      <div class="radio-row">
+        <label><input type="checkbox" id="feedbackEnabled" checked /> Permitir retroalimentación ciudadana (según privacidad)</label>
+      </div>
+    </section>
+
+    <!-- Paso 4 -->
+    <section class="step" data-step="4">
+      <h2>4 · Privacidad</h2>
+      <fieldset>
+        <legend>Modo por defecto de conversaciones</legend>
+        <div class="radio-row"><label><input type="radio" name="privacy_mode" value="public" /> Públicas (memoria citable)</label></div>
+        <div class="radio-row"><label><input type="radio" name="privacy_mode" value="confidential_community" checked /> Confidencial (solo agregados, sin nombres)</label></div>
+        <div class="radio-row"><label><input type="radio" name="privacy_mode" value="private_no_memory" /> Privadas, sin memoria</label></div>
+      </fieldset>
+      <label for="aggThreshold">Mínimo de personas para mostrar un agregado</label>
+      <input type="number" id="aggThreshold" min="3" value="3" />
+      <label for="aggregateVisibility">Quién puede ver agregados</label>
+      <select id="aggregateVisibility">
+        <option value="authorities_only">Solo autoridades</option>
+        <option value="committees">Autoridades y comités</option>
+        <option value="all">Toda la comunidad (resumen agregado)</option>
+      </select>
+    </section>
+
+    <!-- Paso 5 -->
+    <section class="step" data-step="5">
+      <h2>5 · Roles (por cargo, no nombres propios)</h2>
+      <label for="authorities">Autoridades (separadas por coma)</label>
+      <input type="text" id="authorities" value="presidente, secretario, tesorero" />
+      <label for="committees">Comités (separados por coma)</label>
+      <input type="text" id="committees" placeholder="comité de agua, comité de obras" />
+      <label for="admins">Quién puede cambiar la configuración de IAldea (cargos)</label>
+      <input type="text" id="admins" value="secretario" />
+      <div class="radio-row">
+        <label><input type="checkbox" id="diffAuthCitizen" checked /> Los ciudadanos ven <em>menos</em> que las autoridades (recomendado para agregados)</label>
+      </div>
+    </section>
+
+    <!-- Paso 6 -->
+    <section class="step" data-step="6">
+      <h2>6 · Fuentes de información</h2>
+      <p class="hint">¿Qué documentos tendrá la comunidad en el Kernel?</p>
+      <label><input type="checkbox" id="sourceActa" checked /> Actas de asamblea</label>
+      <label><input type="checkbox" id="sourceReg" checked /> Reglamento interno</label>
+      <label><input type="checkbox" id="sourcePres" /> Presupuesto</label>
+      <label><input type="checkbox" id="sourceMin" checked /> Minutas de comité</label>
+      <label><input type="checkbox" id="sourceOficio" checked /> Oficios de gobierno</label>
+      <div class="radio-row" style="margin-top:1rem;">
+        <label><input type="checkbox" id="externalSources" checked /> Permitir consultar fuentes externas oficiales (federal/estatal/INEGI)</label>
+      </div>
+      <label for="escalation">Texto de escalación (a dónde derivar temas sensibles)</label>
+      <textarea id="escalation" placeholder="Ej. Oficina municipal, Protección Civil, clínica local…"></textarea>
+    </section>
+
+    <!-- Paso 7 -->
+    <section class="step" data-step="7">
+      <h2>7 · Revisión, descarga y simulador básico</h2>
+      <p class="hint">Revise el texto. Descargue los archivos y guárdelos en la carpeta de su despliegue (p. ej. <code>soul/</code> y <code>config/</code>).</p>
+      <div class="actions">
+        <button type="button" class="btn-secondary" id="btnRefresh">Actualizar vista previa</button>
+        <button type="button" class="btn-primary" id="btnDownloadSoul">Descargar SOUL.md</button>
+        <button type="button" class="btn-primary" id="btnDownloadYaml">Descargar policy_config.yaml</button>
+        <button type="button" class="btn-deep" id="btnSim">Ejecutar simulador (5 casos)</button>
+      </div>
+      <label>Vista previa — SOUL.md</label>
+      <pre id="previewSoul" aria-label="Vista previa SOUL"></pre>
+      <label>Vista previa — policy_config.yaml</label>
+      <pre id="previewYaml" aria-label="Vista previa YAML"></pre>
+      <h3 style="font-size:0.95rem;margin-top:1rem;">Simulador MVP</h3>
+      <p class="hint">Clasificación heurística local (no sustituye al auditor completo del producto).</p>
+      <p><strong>Puntuación:</strong> <span id="simScore">—</span></p>
+      <table class="sim-result">
+        <thead>
+          <tr><th>Consulta de prueba</th><th>Esperado</th><th>Resultado</th><th>OK</th></tr>
+        </thead>
+        <tbody id="simBody"></tbody>
+      </table>
+    </section>
+
+    <div class="actions">
+      <button type="button" class="btn-secondary" id="btnPrev">Anterior</button>
+      <button type="button" class="btn-primary" id="btnNext">Siguiente</button>
+    </div>
+  </main>
+
+  <footer>IAldea · Gantt Día 1–2 · configurador MVP</footer>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -15,6 +15,12 @@ resumen_Oaxaca.pdf
 # Scripts temporales de análisis
 oaxaca_scan.py
 
+# Kernel local (generado)
+data/*.sqlite
+
+# Entornos locales de desarrollo
+.venv-pdf/
+
 # Python
 __pycache__/
 *.py[cod]

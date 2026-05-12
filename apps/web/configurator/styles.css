@@ -1,0 +1,219 @@
+:root {
+  --ink: #1b1a17;
+  --sand: #f5f0e8;
+  --accent: #e89b3c;
+  --deep: #1e4d5c;
+  --brick: #b8482e;
+  --green: #4a7c59;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  background: var(--sand);
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+header {
+  background: var(--deep);
+  color: #fff;
+  padding: 1rem 1.25rem;
+}
+
+header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+}
+
+header p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+main {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 3rem;
+}
+
+.step {
+  display: none;
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1rem;
+}
+
+.step.active {
+  display: block;
+}
+
+.step h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  color: var(--deep);
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin: 0.75rem 0 0.25rem;
+}
+
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font: inherit;
+}
+
+textarea {
+  min-height: 4rem;
+  resize: vertical;
+}
+
+fieldset {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin: 0.75rem 0;
+  padding: 0.5rem 0.75rem;
+}
+
+legend {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.radio-row {
+  margin: 0.35rem 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--ink);
+}
+
+.btn-secondary {
+  background: #e0dcd4;
+  color: var(--ink);
+}
+
+.btn-deep {
+  background: var(--deep);
+  color: #fff;
+}
+
+.progress {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  margin: 0.75rem 0 1rem;
+}
+
+.progress span {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: #ddd;
+  color: #666;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.progress span.done {
+  background: var(--green);
+  color: #fff;
+}
+
+.progress span.current {
+  background: var(--accent);
+  color: var(--ink);
+}
+
+#previewSoul,
+#previewYaml {
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  background: #f8f6f1;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem;
+  max-height: 14rem;
+  overflow: auto;
+}
+
+.sim-result {
+  font-size: 0.85rem;
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.sim-result th,
+.sim-result td {
+  border: 1px solid #ddd;
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+}
+
+.sim-result .pass {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.sim-result .fail {
+  color: var(--brick);
+  font-weight: 700;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #555;
+  margin: 0.15rem 0 0;
+}
+
+.check-grid label {
+  font-weight: 500;
+}
+
+.check-grid label input {
+  margin-right: 0.35rem;
+}
+
+footer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #666;
+  padding: 1rem;
+}
