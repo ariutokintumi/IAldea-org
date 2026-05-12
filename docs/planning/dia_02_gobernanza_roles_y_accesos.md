@@ -15,6 +15,7 @@
 | Niveles de acceso | **Niveles L0–L3** (o similar) sobre datos y acciones; qué rol entra en qué nivel. |
 | Separación autoridad / ciudadanía | Reglas explícitas: **qué ve** cada bando, **qué no ve**, y **qué requiere umbral de agregación**. |
 | Modos público / privado / confidencial | Definición operativa y **valor por defecto**; relación con roles y con el Agente Ciudadano vs Autoridad. |
+| Identidad sin revelar persona | **ID o firma pseudónima** por contribuyente (vinculada a rol y comunidad), trazable para auditoría operativa y **no** reidentificable en agregados. |
 
 ---
 
@@ -120,15 +121,36 @@ erDiagram
     string access_level
   }
   MEMBERSHIP {
+    string contributor_handle
     datetime valid_from
     datetime valid_to
   }
   PERSON {
     string pseudonym_id
+    string role_slug_at_enrollment
   }
 ```
 
-- **`PERSON`:** en logs y agregados, preferir **pseudónimos** o IDs internos; nombres reales solo donde la ley y la asamblea lo exijan y esté modelado en política.
+- **`PERSON`:** identidad **interna** de quien usa el sistema; no tiene por qué ser el nombre civil. Lo público y lo agregado usan solo **handles** opacos.
+- **`MEMBERSHIP`:** une `PERSON` + `ROLE` + vigencia; puede registrarse el **rol declarado** al darse de alta para auditoría, sin exponerlo en pantallas ciudadanas.
+
+### 6.1 Identidad pseudónima y “firma” de contribución (sin revelar quién es)
+
+**Objetivo:** cada interacción que deja huella (pregunta, feedback, ingesta de documento, cambio de config) debe poder atribuirse a **un sujeto responsable ante el sistema** (trazabilidad, antiabuso), **sin** que en agregados o en la UI ciudadana aparezca el nombre real ni datos que permitan reidentificar con facilidad.
+
+| Concepto | Definición breve |
+|----------|------------------|
+| **`contributor_handle` (ID opaco)** | Identificador estable **por persona y comunidad** (p. ej. UUID v4 generado al enrolarse, o derivado criptográficamente de un secreto de enrolamiento + `community_id` + factor de dispositivo). **No** debe incluir CURP, teléfono ni nombre. |
+| **Prefijo de rol (solo operador / auditoría)** | Opción de mostrar internamente `ciudadano_8f3a1c` para distinguir cohortes; en **vistas ciudadanas** de modo confidencial, no listar handles individuales en agregados. |
+| **“Firma” de acción** | En MVP: registrar `contributor_handle` + marca de tiempo + tipo de evento en **log de auditoría**. En fases posteriores: firma criptográfica (p. ej. Ed25519) ligada al handle para **no repudio** en ingestas sensibles, si la comunidad lo exige. |
+| **Separación agregado vs operador** | Los **agregados** solo cuentan “N personas del rol X” o temas; los **operadores L3** pueden ver handles en logs para revertir vandalismo o trazabilidad de ingesta, según `policy_config`. |
+| **Rotación y baja** | Política de revocación del handle al salir del cargo o del piloto; nuevas altas = nuevo handle (evita enlazar historiales indebidos). |
+
+**Reglas que el taller debe fijar por escrito:**
+
+1. ¿El enrolamiento es **presencial** (operador da de alta) o **autogestionado** con código de invitación por comité?  
+2. ¿Los menores (`joven`) comparten política de handle con tutoría documentada fuera del software?  
+3. ¿Qué eventos **exigen** handle visible solo a L3 (ingesta, cambio de SOUL, exportación masiva)?
 
 ---
 
@@ -136,16 +158,44 @@ erDiagram
 
 Leyenda: **✓** permitido · **—** denegado · **~** solo con condición (texto entre paréntesis).
 
-| Capacidad | ciudadano | joven | adulto_mayor | comite_miembro | presidente | secretario | regidor | asesor | visitante | observador_externo | admin | operador_piloto |
-|-----------|:---------:|:-----:|:------------:|:--------------:|:----------:|:-------:|:------:|:---------:|:------------------:|:-----:|:----------------:|
-| Consultar Agente Ciudadano (citas) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ~ (alcance delegado) | ~ (solo público) | ~ (solo público) | ✓ | ✓ |
-| Enviar feedback / pulso | ✓ | ~ (edad / consentimiento) | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | ✓ |
-| Ver agregados de feedback | — | — | — | ✓ | ✓ | ✓ | ✓ | ~ | — | — | ✓ | ✓ |
-| Agente Autoridad (escenarios / impacto) | — | — | — | ✓ | ✓ | ✓ | ✓ | ~ | — | — | ✓ | ✓ |
-| Exportar informes (PDF, etc.) | — | — | — | ~ | ✓ | ✓ | ✓ | — | — | — | ✓ | ✓ |
-| Ingestar documentos al Kernel | — | — | — | ~ | ✓ | ✓ | — | — | — | — | ✓ | ~ (según mandato) |
-| Cambiar `policy_config` / SOUL | — | — | — | — | ~ (dual control) | ✓ | — | — | — | — | ✓ | — |
-| Ver logs de auditoría completos | — | — | — | — | ~ | ✓ | — | — | — | — | ✓ | ~ |
+Las tablas anchas suelen **romperse en GitHub / móvil**; aquí van **dos tablas** (ciudadanía + externos | órgano + operación) y una **vista por fila** idéntica en contenido.
+
+### 7.1 Ciudadanía, visita y observación
+
+| Capacidad | ciudadano | joven | adulto_mayor | visitante | observador_externo |
+|-----------|-----------|-------|--------------|-----------|---------------------|
+| Consultar Agente Ciudadano (citas) | ✓ | ✓ | ✓ | ~ (solo público) | ~ (solo público) |
+| Enviar feedback / pulso | ✓ | ~ (edad / consentimiento) | ✓ | — | — |
+| Ver agregados de feedback | — | — | — | — | — |
+| Agente Autoridad (escenarios / impacto) | — | — | — | — | — |
+| Exportar informes (PDF, etc.) | — | — | — | — | — |
+| Ingestar documentos al Kernel | — | — | — | — | — |
+| Cambiar `policy_config` / SOUL | — | — | — | — | — |
+| Ver logs de auditoría completos | — | — | — | — | — |
+
+### 7.2 Comité, autoridad, asesoría y operación
+
+| Capacidad | comite_miembro | presidente | secretario | regidor | asesor | admin | operador_piloto |
+|-----------|----------------|------------|------------|---------|--------|-------|-----------------|
+| Consultar Agente Ciudadano (citas) | ✓ | ✓ | ✓ | ✓ | ~ (alcance delegado) | ✓ | ✓ |
+| Enviar feedback / pulso | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ |
+| Ver agregados de feedback | ✓ | ✓ | ✓ | ✓ | ~ | ✓ | ✓ |
+| Agente Autoridad (escenarios / impacto) | ✓ | ✓ | ✓ | ✓ | ~ | ✓ | ✓ |
+| Exportar informes (PDF, etc.) | ~ | ✓ | ✓ | ✓ | — | ✓ | ✓ |
+| Ingestar documentos al Kernel | ~ | ✓ | ✓ | — | — | ✓ | ~ (según mandato) |
+| Cambiar `policy_config` / SOUL | — | ~ (dual control) | ✓ | — | — | ✓ | — |
+| Ver logs de auditoría completos | — | ~ | ✓ | — | — | ✓ | ~ |
+
+### 7.3 Misma matriz, una capacidad por bloque (lectura en móvil)
+
+- **Consultar Agente Ciudadano (citas)** — ciudadano ✓ · joven ✓ · adulto_mayor ✓ · comite ✓ · presidente ✓ · secretario ✓ · regidor ✓ · asesor ~ (alcance delegado) · visitante ~ (solo público) · observador ~ (solo público) · admin ✓ · operador_piloto ✓  
+- **Enviar feedback / pulso** — ciudadano ✓ · joven ~ (edad / consentimiento) · adulto_mayor ✓ · comite ✓ · presidente ✓ · secretario ✓ · regidor ✓ · asesor — · visitante — · observador — · admin ✓ · operador_piloto ✓  
+- **Ver agregados de feedback** — ciudadano — · joven — · adulto_mayor — · comite ✓ · presidente ✓ · secretario ✓ · regidor ✓ · asesor ~ · visitante — · observador — · admin ✓ · operador_piloto ✓  
+- **Agente Autoridad (escenarios / impacto)** — ciudadano — · joven — · adulto_mayor — · comite ✓ · presidente ✓ · secretario ✓ · regidor ✓ · asesor ~ · visitante — · observador — · admin ✓ · operador_piloto ✓  
+- **Exportar informes (PDF, etc.)** — ciudadano — · joven — · adulto_mayor — · comite ~ · presidente ✓ · secretario ✓ · regidor ✓ · asesor — · visitante — · observador — · admin ✓ · operador_piloto ✓  
+- **Ingestar documentos al Kernel** — ciudadano — · joven — · adulto_mayor — · comite ~ · presidente ✓ · secretario ✓ · regidor — · asesor — · visitante — · observador — · admin ✓ · operador_piloto ~ (según mandato)  
+- **Cambiar `policy_config` / SOUL** — ciudadano — · joven — · adulto_mayor — · comite — · presidente ~ (dual control) · secretario ✓ · regidor — · asesor — · visitante — · observador — · admin ✓ · operador_piloto —  
+- **Ver logs de auditoría completos** — ciudadano — · joven — · adulto_mayor — · comite — · presidente ~ · secretario ✓ · regidor — · asesor — · visitante — · observador — · admin ✓ · operador_piloto ~  
 
 **Condiciones típicas (`~`):**
 
@@ -189,6 +239,15 @@ privacy:
   default_mode: "confidential_community"
   aggregation_threshold: 3
   aggregate_visibility: "authorities_only"
+  # Identidad pseudónima: ver §6.1 del plan Día 2
+  contributor_identity:
+    scheme: "opaque_uuid_per_enrollment"  # alternativa: clave derivada HKDF (community + secreto + dispositivo)
+    store_role_slug_with_membership: true   # para auditoría; no mostrar en agregados
+    show_handle_in_ui:
+      citizen_self: true          # "tu id interno" opcional
+      authority_aggregates: false # agregados sin listar handles
+      operator_audit_logs: true   # L3 ve handle en logs de ingesta / cambios
+    rotate_handle_on_role_change: true
 
 role_permissions:
   citizen:
@@ -222,13 +281,16 @@ role_permissions:
 5. **Como** admin **quiero** registrar quién subió cada PDF **para** auditar ingesta sin usar eso como denuncia automática en el chat.  
 6. **Como** joven **quiero** usar el chat en modo privado sin memoria cuando pregunto un tema sensible **para** que no quede rastro en el Kernel.  
 7. **Como** operador piloto **quiero** ingestar el anuario INEGI con rol explícito **para** que la comunidad sepa que la fuente es externa y revisable.  
-8. **Como** observador externo **quiero** acceso de solo lectura a indicadores acordados **para** evaluar el piloto sin ver feedback identificable.
+8. **Como** observador externo **quiero** acceso de solo lectura a indicadores acordados **para** evaluar el piloto sin ver feedback identificable.  
+9. **Como** operadora **quiero** que cada PDF subido quede ligado a un **handle opaco** y al rol declarado **para** auditar sin publicar nombres en el chat ciudadano.  
+10. **Como** ciudadano **quiero** ver solo mi propio handle en ajustes **para** saber que mis aportes están contados sin exponerme en tableros agregados.
 
 ---
 
 ## 10. Salidas del taller (Día 2) — marcar al cerrar sesión
 
 - [ ] **Modelo de roles** aprobado por el equipo (esta sección + diagrama ER).
+- [ ] **Política de `contributor_handle` / firma** acordada (enrolamiento, rotación, quién ve handles — §6.1).
 - [ ] **Matriz de permisos** consensuada (tabla §7 actualizada).
 - [ ] **Esquema YAML** de ejemplo validado con una comunidad ficticia.
 - [ ] **User stories** priorizadas (MVP vs post-MVP).

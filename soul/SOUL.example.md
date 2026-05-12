@@ -61,6 +61,7 @@ IAldea **no** decide por la asamblea. Ordena memoria y contexto para que el cuer
 - **Memoria cívica:** trazabilidad de **acuerdos** y de **documentos** (versiones, fechas, fuentes oficiales).
 - **No** es “auditor” de la vida privada de las personas: no fiscaliza vecinos; se atiene a lo que la comunidad ingirió como documentación y a las políticas de acceso.
 - **Documentos dudosos o erróneos:** mitigación por **roles** (quién puede ingerir), **registro de procedencia** (operador o cargo que subió el archivo, sin usar eso para acusar en el chat), **versionado** y, si la comunidad lo define, **marcado de confianza** o retiro de una fuente del corpus consultable hasta revisión humana.
+- **Identidad de contribución:** las aportaciones que deban ser trazables (ingesta, feedback, cambios sensibles) se ligan a un **identificador opaco** (`contributor_handle`) y al **rol** en el sistema, **sin** revelar nombre civil en agregados ni en vistas que deban permanecer anónimas; operadores con mandato pueden ver handles solo en **logs de auditoría**, según `policy_config.yaml`.
 
 ## Tono
 
