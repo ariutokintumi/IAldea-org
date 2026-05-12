@@ -156,48 +156,48 @@ erDiagram
 
 ## 7. Matriz de permisos (MVP — borrador para validar en taller)
 
-Leyenda: **✓** permitido · **—** denegado · **~** solo con condición (texto entre paréntesis).
+**Leyenda visual:** ✅ permitido · ❌ denegado · ⚠️ solo con condición (texto entre paréntesis).
 
 Las tablas anchas suelen **romperse en GitHub / móvil**; aquí van **dos tablas** (ciudadanía + externos | órgano + operación) y una **vista por fila** idéntica en contenido.
 
 ### 7.1 Ciudadanía, visita y observación
 
 | Capacidad | ciudadano | joven | adulto_mayor | visitante | observador_externo |
-|-----------|-----------|-------|--------------|-----------|---------------------|
-| Consultar Agente Ciudadano (citas) | ✓ | ✓ | ✓ | ~ (solo público) | ~ (solo público) |
-| Enviar feedback / pulso | ✓ | ~ (edad / consentimiento) | ✓ | — | — |
-| Ver agregados de feedback | — | — | — | — | — |
-| Agente Autoridad (escenarios / impacto) | — | — | — | — | — |
-| Exportar informes (PDF, etc.) | — | — | — | — | — |
-| Ingestar documentos al Kernel | — | — | — | — | — |
-| Cambiar `policy_config` / SOUL | — | — | — | — | — |
-| Ver logs de auditoría completos | — | — | — | — | — |
+|-----------|:---:|:---:|:---:|:---:|:---:|
+| Consultar Agente Ciudadano (citas) | ✅ | ✅ | ✅ | ⚠️ (solo público) | ⚠️ (solo público) |
+| Enviar feedback / pulso | ✅ | ⚠️ (edad / consentimiento) | ✅ | ❌ | ❌ |
+| Ver agregados de feedback | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Agente Autoridad (escenarios / impacto) | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Exportar informes (PDF, etc.) | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Ingestar documentos al Kernel | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Cambiar `policy_config` / SOUL | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Ver logs de auditoría completos | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 ### 7.2 Comité, autoridad, asesoría y operación
 
 | Capacidad | comite_miembro | presidente | secretario | regidor | asesor | admin | operador_piloto |
-|-----------|----------------|------------|------------|---------|--------|-------|-----------------|
-| Consultar Agente Ciudadano (citas) | ✓ | ✓ | ✓ | ✓ | ~ (alcance delegado) | ✓ | ✓ |
-| Enviar feedback / pulso | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ |
-| Ver agregados de feedback | ✓ | ✓ | ✓ | ✓ | ~ | ✓ | ✓ |
-| Agente Autoridad (escenarios / impacto) | ✓ | ✓ | ✓ | ✓ | ~ | ✓ | ✓ |
-| Exportar informes (PDF, etc.) | ~ | ✓ | ✓ | ✓ | — | ✓ | ✓ |
-| Ingestar documentos al Kernel | ~ | ✓ | ✓ | — | — | ✓ | ~ (según mandato) |
-| Cambiar `policy_config` / SOUL | — | ~ (dual control) | ✓ | — | — | ✓ | — |
-| Ver logs de auditoría completos | — | ~ | ✓ | — | — | ✓ | ~ |
+|-----------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| Consultar Agente Ciudadano (citas) | ✅ | ✅ | ✅ | ✅ | ⚠️ (alcance delegado) | ✅ | ✅ |
+| Enviar feedback / pulso | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Ver agregados de feedback | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| Agente Autoridad (escenarios / impacto) | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| Exportar informes (PDF, etc.) | ⚠️ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Ingestar documentos al Kernel | ⚠️ | ✅ | ✅ | ❌ | ❌ | ✅ | ⚠️ (según mandato) |
+| Cambiar `policy_config` / SOUL | ❌ | ⚠️ (dual control) | ✅ | ❌ | ❌ | ✅ | ❌ |
+| Ver logs de auditoría completos | ❌ | ⚠️ | ✅ | ❌ | ❌ | ✅ | ⚠️ |
 
 ### 7.3 Misma matriz, una capacidad por bloque (lectura en móvil)
 
-- **Consultar Agente Ciudadano (citas)** — ciudadano ✓ · joven ✓ · adulto_mayor ✓ · comite ✓ · presidente ✓ · secretario ✓ · regidor ✓ · asesor ~ (alcance delegado) · visitante ~ (solo público) · observador ~ (solo público) · admin ✓ · operador_piloto ✓  
-- **Enviar feedback / pulso** — ciudadano ✓ · joven ~ (edad / consentimiento) · adulto_mayor ✓ · comite ✓ · presidente ✓ · secretario ✓ · regidor ✓ · asesor — · visitante — · observador — · admin ✓ · operador_piloto ✓  
-- **Ver agregados de feedback** — ciudadano — · joven — · adulto_mayor — · comite ✓ · presidente ✓ · secretario ✓ · regidor ✓ · asesor ~ · visitante — · observador — · admin ✓ · operador_piloto ✓  
-- **Agente Autoridad (escenarios / impacto)** — ciudadano — · joven — · adulto_mayor — · comite ✓ · presidente ✓ · secretario ✓ · regidor ✓ · asesor ~ · visitante — · observador — · admin ✓ · operador_piloto ✓  
-- **Exportar informes (PDF, etc.)** — ciudadano — · joven — · adulto_mayor — · comite ~ · presidente ✓ · secretario ✓ · regidor ✓ · asesor — · visitante — · observador — · admin ✓ · operador_piloto ✓  
-- **Ingestar documentos al Kernel** — ciudadano — · joven — · adulto_mayor — · comite ~ · presidente ✓ · secretario ✓ · regidor — · asesor — · visitante — · observador — · admin ✓ · operador_piloto ~ (según mandato)  
-- **Cambiar `policy_config` / SOUL** — ciudadano — · joven — · adulto_mayor — · comite — · presidente ~ (dual control) · secretario ✓ · regidor — · asesor — · visitante — · observador — · admin ✓ · operador_piloto —  
-- **Ver logs de auditoría completos** — ciudadano — · joven — · adulto_mayor — · comite — · presidente ~ · secretario ✓ · regidor — · asesor — · visitante — · observador — · admin ✓ · operador_piloto ~  
+- **Consultar Agente Ciudadano (citas)** — ciudadano ✅ · joven ✅ · adulto_mayor ✅ · comite ✅ · presidente ✅ · secretario ✅ · regidor ✅ · asesor ⚠️ (alcance delegado) · visitante ⚠️ (solo público) · observador ⚠️ (solo público) · admin ✅ · operador_piloto ✅  
+- **Enviar feedback / pulso** — ciudadano ✅ · joven ⚠️ (edad / consentimiento) · adulto_mayor ✅ · comite ✅ · presidente ✅ · secretario ✅ · regidor ✅ · asesor ❌ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ✅  
+- **Ver agregados de feedback** — ciudadano ❌ · joven ❌ · adulto_mayor ❌ · comite ✅ · presidente ✅ · secretario ✅ · regidor ✅ · asesor ⚠️ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ✅  
+- **Agente Autoridad (escenarios / impacto)** — ciudadano ❌ · joven ❌ · adulto_mayor ❌ · comite ✅ · presidente ✅ · secretario ✅ · regidor ✅ · asesor ⚠️ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ✅  
+- **Exportar informes (PDF, etc.)** — ciudadano ❌ · joven ❌ · adulto_mayor ❌ · comite ⚠️ · presidente ✅ · secretario ✅ · regidor ✅ · asesor ❌ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ✅  
+- **Ingestar documentos al Kernel** — ciudadano ❌ · joven ❌ · adulto_mayor ❌ · comite ⚠️ · presidente ✅ · secretario ✅ · regidor ❌ · asesor ❌ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ⚠️ (según mandato)  
+- **Cambiar `policy_config` / SOUL** — ciudadano ❌ · joven ❌ · adulto_mayor ❌ · comite ❌ · presidente ⚠️ (dual control) · secretario ✅ · regidor ❌ · asesor ❌ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ❌  
+- **Ver logs de auditoría completos** — ciudadano ❌ · joven ❌ · adulto_mayor ❌ · comite ❌ · presidente ⚠️ · secretario ✅ · regidor ❌ · asesor ❌ · visitante ❌ · observador ❌ · admin ✅ · operador_piloto ⚠️  
 
-**Condiciones típicas (`~`):**
+**Condiciones típicas (⚠️):**
 
 - **Asesor:** solo documentos y comités explícitamente listados en `policy_config`.
 - **Dual control:** dos firmas o dos roles `admin` para cambios sensibles (definir en taller si aplica).
