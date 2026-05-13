@@ -2,7 +2,7 @@
 
 > Copia este archivo a `SOUL.md` (o el nombre que use tu despliegue) y reemplaza cada marcador `{{...}}`.  
 > Ejemplo narrativo completo: `SOUL.example.md`. Reglas automáticas: `policy_config.yaml`.  
-> Marco del programa: `CONTEXTO-POPUP-VILLAGE.md` · roles y matriz: `docs/roles/` · taller Día 2: `docs/planning/dia_02_gobernanza_roles_y_accesos.md`.
+> Marco del programa: `CONTEXTO-POPUP-VILLAGE.md` · árbol repo D1–2: `reestructura.md` · roles y matriz: `docs/roles/` · taller Día 2: `docs/planning/dia_02_gobernanza_roles_y_accesos.md`.
 
 ---
 
