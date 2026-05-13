@@ -3,7 +3,7 @@
 > Documento humano de visión, tono y límites. La comunidad lo edita con su operador cívico.  
 > La versión machine-enforceable vive en `policy_config.yaml`.
 
-**Referencias del proyecto:** [ialdea.org](https://ialdea.org/) · repo canónico [IAldea-org](https://github.com/ariutokintumi/IAldea-org) (MIT). En este fork: [`CONTEXTO-POPUP-VILLAGE.md`](../CONTEXTO-POPUP-VILLAGE.md) (alcance Pop-Up), [`docs/planning/plan_producto_unificado.md`](../docs/planning/plan_producto_unificado.md) (visión de producto), [`docs/planning/dia_02_gobernanza_roles_y_accesos.md`](../docs/planning/dia_02_gobernanza_roles_y_accesos.md) (roles, WhatsApp, privacidad), [`docs/roles/`](../docs/roles/) (matriz y slugs).
+**Referencias del proyecto:** [ialdea.org](https://ialdea.org/) · repo canónico [IAldea-org](https://github.com/ariutokintumi/IAldea-org) (MIT). En este fork: [`CONTEXTO-POPUP-VILLAGE.md`](../CONTEXTO-POPUP-VILLAGE.md) (alcance Pop-Up), [`reestructura.md`](../reestructura.md) (árbol permitido Día 1–2), [`docs/planning/dia_02_gobernanza_roles_y_accesos.md`](../docs/planning/dia_02_gobernanza_roles_y_accesos.md) (roles, WhatsApp, privacidad), [`docs/roles/`](../docs/roles/) (matriz y slugs).
 
 ---
 

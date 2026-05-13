@@ -2,19 +2,18 @@
 # IAldea — .gitignore
 # ──────────────────────────────────────────────
 
-# Datos geoespaciales pesados (no versionar)
+# Datos geoespaciales / experimentos (no versionar; Día 3+)
 conjunto_de_datos/
+metadatos/
+derivados/
 derivados/*.tif
 derivados/*.tfw
 derivados/*.ovr
 derivados/*.aux.xml
 
-# El PDF del anuario (pesado, disponible en INEGI)
+# PDFs de anuario / experimentos (no versionar)
 resumen_Oaxaca.pdf
 resumen_20.pdf
-
-# Metadatos / capas regenerables (no D1–2 en el árbol)
-metadatos/
 
 # Scripts temporales de análisis
 oaxaca_scan.py

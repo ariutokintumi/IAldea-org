@@ -51,11 +51,11 @@ Si más adelante el producto lo exige, se puede **partir** “Gobernanza” en d
 | [citizen.md](citizen.md) | Contrato de comportamiento del perfil ciudadano. |
 | [authority.md](authority.md) | Contrato del perfil gobernanza + notas por `tesoreria` / `validador`. |
 
-Implementación futura (Python/TS): un solo paquete que importe `packages/civic-safety`, `packages/retrieval`, `packages/memory-kernel` y exponga p. ej. `run_turn(context_pack) -> audited_reply`.
+Implementación futura (**Día 3+**, según CONTEXTO): un paquete que importe `packages/civic-safety`, `packages/retrieval`, `packages/memory-kernel` (cuando existan en el repo) y exponga p. ej. `run_turn(context_pack) -> audited_reply`.
 
 ---
 
 ## Referencias
 
 - Roles y etapas: [`docs/roles/permission-matrix.csv`](../../docs/roles/permission-matrix.csv), [Día 2 §4–§9](../../docs/planning/dia_02_gobernanza_roles_y_accesos.md).
-- Capas globales: [`docs/architecture.md`](../../docs/architecture.md).
+- Capas globales: [`CONTEXTO-POPUP-VILLAGE.md`](../../CONTEXTO-POPUP-VILLAGE.md) §11 y stub [`docs/architecture.md`](../../docs/architecture.md) (diagramas largos: Día 3+).

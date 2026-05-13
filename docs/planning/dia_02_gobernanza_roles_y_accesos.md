@@ -4,9 +4,9 @@
 
 **Fuentes canónicas:**
 
-- Matriz **Etapa × Rol** (CSV): [`docs/roles/permission-matrix.csv`](../roles/permission-matrix.csv) (copia estándar del archivo original en `docs/`).
+- Matriz **Etapa × Rol** (CSV): [`docs/roles/permission-matrix.csv`](../roles/permission-matrix.csv).
 - Resumen de roles: [`docs/roles/role-model.md`](../roles/role-model.md).
-- Árbol de repo esperado: `CONTEXTO-POPUP-VILLAGE.md` §18 (adecuación al final de este documento, §13).
+- **Árbol permitido en el repo (Día 1–2):** [`reestructura.md`](../../reestructura.md). El árbol completo del sprint sigue en `CONTEXTO-POPUP-VILLAGE.md` §18; la tabla §13 de este documento contrasta con el CONTEXTO.
 
 ---
 
@@ -39,7 +39,7 @@
 
 **Implementación en repo (roadmap)**
 
-- Conector en `packages/connectors/` (p. ej. WhatsApp Cloud API / proveedor acordado). Hasta que exista código, el flujo se documenta aquí y en `docs/architecture.md`.
+- Conector WhatsApp (p. ej. Cloud API / proveedor): **código en Día 4** según CONTEXTO; hasta entonces el contrato está en esta sección y en `reestructura.md`.
 - Identidad técnica: enlazar mensajes a **`contributor_handle`** (§8.1), no exponer teléfono en agregados ni en tableros públicos.
 
 **Relación con modos de privacidad**
@@ -304,7 +304,7 @@ role_permissions:
 - [ ] WhatsApp acordado (§2) con texto de opt-in y enlace a privacidad.
 - [ ] Matriz §9 revisada celda a celda con dueños de rol.
 - [ ] YAML de ejemplo validado con comunidad ficticia.
-- [ ] Cambios reflejados en `plan_16_config_nocode.md` y en el **configurador web** cuando aplique.
+- [ ] **Configurador web** (`apps/web/configurator/`) probado de punta a punta con una comunidad ficticia.
 
 ---
 
@@ -312,13 +312,13 @@ role_permissions:
 
 | Elemento §18 | Estado sugerido |
 |--------------|-----------------|
-| `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` | Pendientes Día 2 (crear en raíz cuando el equipo redacte). |
+| `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` | En raíz; revisar contenido con el equipo. |
 | `docs/roles/role-model.md`, `permission-matrix.csv`, `user-stories.md` | Listos (`user-stories.md` enlazado a §11). |
-| `docs/pop-up-2026/day-N.md` | Carpeta y días: alinear con bitácora del Pop-Up. |
-| `config/roles.example.yaml` | Opcional; hoy basta `policy_config.example.yaml` si el YAML unificado cubre roles. |
-| `packages/connectors/` | Stub o README “WhatsApp” cuando arranque integración. |
-| `packages/audit-log/` | Añadido `README.md` (placeholder §18). |
-| `apps/web/`, `apps/api/` | Roadmap Día 4; documentar en `docs/architecture.md`. |
+| `docs/pop-up-2026/day-N.md` | Crear cuando el scribe documente cada día. |
+| `config/roles.example.yaml` | Presente; coherente con `policy_config.example.yaml`. |
+| `apps/web/configurator/` | MVP Día 2 (no-code). |
+| `apps/api/`, `packages/connectors/`, Kernel, grafo, tests red-team | **Día 3+**; no deben aparecer en el repo hasta su día (ver `reestructura.md`). |
+| `docs/architecture.md` | Stub hasta Día 3; detalle en CONTEXTO §11. |
 
 **Commits:** mensajes en inglés, imperativo; ramas por día según convención del CONTEXTO.
 
