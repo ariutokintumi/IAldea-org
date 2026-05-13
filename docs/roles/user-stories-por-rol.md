@@ -2,6 +2,8 @@
 
 Contenido alineado con la pestaña **UserStories por rol** del libro *Role Model + Permission Matrix - IAldea* en Google Sheets.
 
+En el CSV del repo la columna **Rol** va repetida en cada fila (en Sheets a veces solo aparece en la primera fila del bloque); el texto de las historias coincide con la hoja.
+
 - **Datos tabulares (fuente en repo):** [user-stories-por-rol.csv](user-stories-por-rol.csv)
 - **Historias cortas del taller Día 2:** [user-stories.md](user-stories.md)
 - **Preguntas UX por etapa del ciclo:** [user-stories-matriz.md](user-stories-matriz.md)
