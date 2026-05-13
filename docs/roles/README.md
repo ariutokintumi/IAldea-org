@@ -1,5 +1,6 @@
 # `docs/roles/`
 
+- **[Role Model + Permission Matrix - IAldea.xlsx](../Role%20Model%20+%20Permission%20Matrix%20-%20IAldea.xlsx)** — libro Excel con **todas las pestañas** (matriz, user stories por rol, etc.); fuente cuando el equipo edita en Sheets y exporta a CSV aquí.
 - **[role-model.md](role-model.md)** — resumen de roles y slugs.
 - **[roles-por-etapa.md](roles-por-etapa.md)** — tabla legible **Etapa × Rol** derivada de la matriz (no sustituye al CSV).
 - **[permission-matrix.csv](permission-matrix.csv)** — matriz narrativa **Etapa × Rol** (versión reducida, canónica en repo).

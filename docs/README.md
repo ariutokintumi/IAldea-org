@@ -15,6 +15,7 @@
 
 - [`planning/dia_02_gobernanza_roles_y_accesos.md`](planning/dia_02_gobernanza_roles_y_accesos.md)
 - [`roles/`](roles/) — `permission-matrix.csv`, `role-model.md`, `user-stories.md`
+- [`Role Model + Permission Matrix - IAldea.xlsx`](Role%20Model%20+%20Permission%20Matrix%20-%20IAldea.xlsx) — libro con todas las hojas (complemento a los CSV en `roles/`)
 - `../config/policy_config.example.yaml`, `../config/roles.example.yaml`
 - `../examples/fictional-community/community-schema.json`
 - `pop-up-2026/day-2.md`
