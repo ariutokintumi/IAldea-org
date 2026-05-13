@@ -51,3 +51,6 @@ desktop.ini
 
 # Logs
 *.log
+
+# Guía local del árbol D1–2 (no versionar)
+reestructura.md
