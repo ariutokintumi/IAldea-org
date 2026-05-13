@@ -217,9 +217,9 @@ sequenceDiagram
 
 ---
 
-## 5. Relación con GIS / capas territoriales
+## 5. GIS y capas territoriales (fuera del alcance Días 1–2)
 
-Los raster (MDT, pendientes, riesgo, etc.) pueden ser **nodos de tipo `PublicSource` o `Layer`** enlazados a `Location` en el grafo y citados como cualquier otro documento. El motor de impacto puede **incorporar** esas relaciones si están modeladas; no sustituyen al grafo de acuerdos internos.
+Cuando el proyecto entre en **fase de datos geoespaciales** (Día 3+ o PR dedicado), los raster (MDT, pendientes, riesgo, etc.) pueden modelarse como nodos `PublicSource` o `Layer` enlazados a `Location` en el grafo y citarse como cualquier fuente. No sustituyen acuerdos internos. Hoy el repo **no** versiona rasters ni metadatos INEGI masivos; ver [`reestructura.md`](../reestructura.md).
 
 ---
 

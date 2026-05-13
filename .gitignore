@@ -11,6 +11,10 @@ derivados/*.aux.xml
 
 # El PDF del anuario (pesado, disponible en INEGI)
 resumen_Oaxaca.pdf
+resumen_20.pdf
+
+# Metadatos / capas regenerables (no D1–2 en el árbol)
+metadatos/
 
 # Scripts temporales de análisis
 oaxaca_scan.py

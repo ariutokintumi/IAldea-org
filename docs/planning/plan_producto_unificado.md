@@ -8,6 +8,8 @@
 
 El documento maestro del Pop-Up City (raíz del repo, **v2.0 · 12 mayo 2026**) manda sobre **alcance, voz, seguridad, calendario y entregables**. Este plan unificado es la **visión de producto** y los planes 01 / 08 / 13 / 16; si hay tensión, prevalece el CONTEXTO.
 
+**Árbol del repo en Días 1–2:** [`reestructura.md`](../../reestructura.md) delimita qué **no** versionar aún (GIS, rasters, PDFs de anuario, metadatos masivos) para no confundir con entregables diarios.
+
 **Outputs al cierre de la semana (Fase 01)** — resumen de [CONTEXTO-POPUP-VILLAGE.md](../../CONTEXTO-POPUP-VILLAGE.md) §1:
 
 - Repo open-source (MIT), README, MANIFESTO, SOUL y `policy_config` de ejemplo.
@@ -468,7 +470,7 @@ Tres modos de primera clase: **público**, **confidencial comunitario**, **priva
 | Ingesta | **Tesseract**, **Whisper.cpp** | Offline ([plan_01_ingesta_multimodal.md](plan_01_ingesta_multimodal.md)). |
 | LLM / traducción | **Ollama o API** + memoria humana | Configurable por comunidad. |
 
-**GIS (MDT, riesgo, etc.):** pueden modelarse como nodos `Location` / `PublicSource` enlazados en G1 y citarse como cualquier fuente; complementan pero no sustituyen acuerdos internos.
+**GIS (MDT, riesgo, etc.):** en diseño de producto pueden modelarse como nodos `Location` / `PublicSource` en G1 y citarse como fuente; **no** forman parte del árbol versionado en Días 1–2 (ver [`reestructura.md`](../../reestructura.md)).
 
 ### Objetivo de paquetes en monorepo (referencia)
 
@@ -524,7 +526,7 @@ gantt
 | Prioridad | Entrega | Razón |
 |-----------|---------|--------|
 | 🥇 1° | D — Configuración + políticas (`SOUL` / `policy_config`) | Sin reglas claras no hay producto cívico defendible. |
-| 🥈 2° | Chat ciudadano + gobernanza + **auditor** (Día 4) | Valor núcleo antes que GIS o impacto profundo. |
+| 🥈 2° | Chat ciudadano + gobernanza + **auditor** (Día 4) | Valor núcleo antes que GIS u otros extras (Día 3+). |
 | 🥉 3° | A — Captura / ingesta mínima | Datos reales o ficticios para demostrar citas. |
 | 4° | B — Impacto / grafo completo | Diferenciador; puede acotarse a RAG + mapa ligero en el piloto. |
 | 5° | C — Traducción híbrida | Inclusión; puede arrancar en español + detección básica. |
@@ -608,59 +610,28 @@ Los 4 módulos en una frase:
 
 | Módulo | Nombre | Estado | Avance |
 |---|---|---|---|
-| A | Captura multimodal offline | 🟡 En diseño | Plan `plan_01_*`; pipeline código pendiente |
-| B | Análisis de impacto (iluminar conexiones, no “predecir”) | 🟢 Paralelo GIS | Script MDT + 5 capas; motor grafo CONTEXTO Día 3–5 |
+| A | Captura multimodal offline | 🟡 En diseño | Plan `plan_01_*`; código en **Día 3+** (CONTEXTO §10) |
+| B | Análisis de impacto (iluminar conexiones) | 🟡 En diseño | Plan `plan_08_*`; grafo y motor en **Día 3–5** |
 | C | Traducción + chat bilingüe | 🟡 En diseño | Plan `plan_13_*`; canal ciudadano **WhatsApp** acordado (Día 2) |
-| D | Configuración no-code | 🟢 MVP local | `apps/web/configurator/` (HTML/JS) genera SOUL + `policy_config` |
-| GIS | Capas derivadas del MDT INEGI | ✅ Completado (piloto) | 5 GeoTIFF en `derivados/` (no sustituye MVP chat+citas) |
+| D | Configuración no-code | 🟢 MVP local | `apps/web/configurator/` genera SOUL + `policy_config` |
+
+> **Limpieza de repo (Días 1–2):** experimentación GIS/PDF/raster y metadatos INEGI **no** se versionan aquí; ver [`reestructura.md`](../../reestructura.md). Eso reduce ruido hasta que el equipo abra un PR dedicado (Día 3+).
 
 ---
 
-### ✅ Completado (según CONTEXTO §10 + fork)
+### ✅ Completado y en curso (Días 1–2)
 
 #### Día 1 — Visión, límites y ética (11 mayo 2026)
 
 Outputs esperados en CONTEXTO: `docs/principles.md`, `soul/SOUL.example.md`, `docs/civic-safety.md`, `docs/positioning-v1.md`, `docs/pop-up-2026/day-1.md` — **validar en repo** antes de cerrar Día 2.
 
-#### Módulo B / GIS — Procesamiento del MDT INEGI (11 mayo 2026)
+#### Día 2 — Roles, permisos, WhatsApp (12 mayo 2026)
 
-Script: [`scripts/generar_capas_mdt.py`](scripts/generar_capas_mdt.py)
-Fuente: MDT INEGI E14D58D1, resolución 1.5m, Valles Centrales de Oaxaca
-
-**5 capas geoespaciales generadas** del territorio piloto:
-
-| Capa | Archivo | Resultado clave |
-|---|---|---|
-| Pendientes | `derivados/pendientes.tif` | Media **19.9°** — terreno muy inclinado |
-| Orientación solar | `derivados/orientacion.tif` | **24.4%** del área apta para paneles solares |
-| Sombreado del relieve | `derivados/sombreado.tif` | Mapa visual 3D del territorio |
-| Riesgo de derrumbe | `derivados/riesgo_derrumbe.tif` | **22.6% en riesgo alto/crítico** = ~963 ha |
-| Humedad / inundación | `derivados/humedad_twi.tif` | **834 ha** con alta acumulación de agua |
-
-**Clasificación de riesgo real del territorio piloto (Tlacolula, Oaxaca):**
-
-| Nivel | Grados | Área | Implicación para la comunidad |
-|---|---|---|---|
-| 1 Bajo | 0–8° | 941.9 ha | Zonas seguras para vivienda y construcción |
-| 2 Moderado | 8–15° | 702.2 ha | Construir con precaución menor |
-| 3 Alto | 15–30° | 1,584.1 ha | Evaluar antes de construir — zona de riesgo |
-| 4 Muy alto | 30–45° | 816.2 ha | Riesgo activo de deslizamiento |
-| 5 Crítico | >45° | 126.9 ha | No apto para ningún uso humano |
-
-**Uso concreto por área:**
-
-```
-🌊 Desastres   → Mapa de riesgo_derrumbe.tif identifica 963 ha en peligro real
-⚡ Energía     → orientacion.tif señala laderas sur-suroeste para paneles solares
-🏗️ Infraestruc → pendientes.tif para elegir trazos de caminos con menor desnivel
-💧 Agua        → humedad_twi.tif delimita cuencas de captación natural
-🛡️ Seguridad   → pendientes.tif para ubicar puntos de vigilancia con visibilidad
-🌾 Producción  → zonas riesgo=1 (941 ha) son las más aptas para cultivo
-```
+Ver `docs/roles/`, `docs/planning/dia_02_gobernanza_roles_y_accesos.md`, `config/*.example.yaml`, `packages/agents/`.
 
 ---
 
-#### Documentación Estratégica (10–11 mayo 2026)
+#### Documentación de producto y arquitectura (fork)
 
 | Documento | Descripción | Líneas |
 |---|---|---|
@@ -674,8 +645,7 @@ Fuente: MDT INEGI E14D58D1, resolución 1.5m, Valles Centrales de Oaxaca
 | `docs/roles/` | `role-model.md`, `permission-matrix.csv`, `user-stories.md` | — |
 | `packages/agents/` | README tubería + `citizen.md`, `authority.md` | — |
 | `CONTEXTO-POPUP-VILLAGE.md` | Documento maestro Pop-Up (raíz del repo) | — |
-| `metadatos/` | Metadatos INEGI del MDT (3 archivos, documentación oficial) | — |
-| `derivados/README.md` | Estadísticas del procesamiento MDT | 55 |
+| `reestructura.md` | Alcance versionado solo Días 1–2 (evitar ruido GIS/PDF en el árbol) | — |
 
 ---
 
@@ -686,6 +656,7 @@ Fuente: MDT INEGI E14D58D1, resolución 1.5m, Valles Centrales de Oaxaca
 ```
 IAldea-org-26/
 ├── CONTEXTO-POPUP-VILLAGE.md      ← documento maestro
+├── reestructura.md                ← alcance Días 1–2 en el árbol
 ├── README.md, LICENSE, config/, soul/
 ├── docs/
 │   ├── architecture.md
@@ -697,7 +668,7 @@ IAldea-org-26/
 ├── packages/
 │   ├── memory-kernel/            ← schema.sql + README
 │   ├── agents/, connectors/, audit-log/, graph/, retrieval/, civic-safety/
-├── scripts/, examples/, tests/, metadatos/, derivados/
+├── scripts/, examples/, tests/
 ```
 
 **Repositorio:** [github.com/MarxMad/IAldea-org-26](https://github.com/MarxMad/IAldea-org-26)  
@@ -705,50 +676,30 @@ IAldea-org-26/
 
 ---
 
-### 🔄 En Progreso
+### 🔜 Próximos pasos (CONTEXTO §10, a partir del Día 3)
 
-#### Datos de entrada disponibles (no en repo por tamaño)
-
-| Dataset | Tamaño | Ubicación local | Estado |
-|---|---|---|---|
-| MDT INEGI E14D58D1 (BIL) | 72.4 MB | `conjunto_de_datos/` | ✅ Disponible |
-| MDT INEGI E14D58D1 (GeoTIFF) | 45.8 MB | `conjunto_de_datos/` | ✅ Disponible |
-| Anuario Estadístico Oaxaca 2021 (PDF) | ~15 MB | `resumen_Oaxaca.pdf` | ✅ Analizado, pendiente ingestión al Kernel |
-| `pendientes.tif` | 74.8 MB | `derivados/` | ✅ Generado |
-| `orientacion.tif` | 74.9 MB | `derivados/` | ✅ Generado |
-| `sombreado.tif` | 73.8 MB | `derivados/` | ✅ Generado |
-| `riesgo_derrumbe.tif` | 4.6 MB | `derivados/` | ✅ Generado |
-| `humedad_twi.tif` | 75.8 MB | `derivados/` | ✅ Generado |
-
----
-
-### 🔜 Próximos pasos (alineados a CONTEXTO §10)
-
-Prioridad **semana Pop-Up**: cerrar outputs por día (minutas `docs/pop-up-2026/day-N.md`, `apps/api`, red-team Día 6, MANIFESTO/ROADMAP Día 7). La rama GIS / mapa Leaflet es **complementaria** al MVP de chat+citas.
+Prioridad: cerrar **Día 3** (ingesta, grafo, `docs/architecture.md` operativo con código) antes de GIS opcional o PDFs de anuario. Datasets pesados viven **fuera del repo** o en `.gitignore` hasta un PR explícito.
 
 ```mermaid
 graph TD
-    A["✅ GIS 5 capas<br/>(opcional demo)"] --> B["🔜 CONTEXTO D3:<br/>ingest + grafo + architecture"]
-    B --> C["🔜 CONTEXTO D4:<br/>apps/api + chat<br/>citas + auditor"]
-    C --> D["🔜 CONTEXTO D5:<br/>simulador escenarios"]
-    D --> E["🔜 CONTEXTO D6:<br/>red-team + refusals"]
-    E --> F["🔜 CONTEXTO D7:<br/>demo MANIFESTO ROADMAP"]
-    F --> G["🎯 CONTEXTO D8:<br/>cierre + IMPACT_REPORT v0"]
+    B["🔜 D3: ingest + grafo + architecture"] --> C["🔜 D4: apps/api + chat + auditor"]
+    C --> D["🔜 D5: simulador escenarios"]
+    D --> E["🔜 D6: red-team + refusals"]
+    E --> F["🔜 D7: demo MANIFESTO ROADMAP"]
+    F --> G["🎯 D8: cierre + IMPACT_REPORT v0"]
 
-    style A fill:#4A7C59,color:#fff
+    style B fill:#E89B3C,color:#1B1A17
     style G fill:#1E4D5C,color:#fff
 ```
 
-| # | Tarea | Referencia CONTEXTO | Esfuerzo orientativo |
-|---|-------|----------------------|----------------------|
-| 1 | Pipeline ingesta + índice citas (`scripts/ingest-docs.py`) | Día 3 | ~1–2 días |
-| 2 | `apps/api` + chat por rol + `packages/civic-safety` auditor | Día 4 | ~1–2 días |
-| 3 | Simulador comparar 2–3 opciones (`docs/decision-template.md`) | Día 5 | ~1 día |
-| 4 | Red-team + `tests/red-team/report.md` | Día 6 | ~1 día |
-| 5 | Demo en vivo + MANIFESTO + ROADMAP + `docs/pilot-guide.md` | Día 7 | ~1 día |
-| 6 | Mapa Leaflet capas GIS (si sobra capacidad) | Extra | ~4 h |
-| 7 | Ingestar PDF anuario al Kernel | Extra / Día 3 | ~2 h |
+| # | Tarea | Día CONTEXTO | Notas |
+|---|-------|--------------|--------|
+| 1 | Pipeline ingesta + índice citas (`scripts/ingest-docs.py`) | 3 | Stubs existentes; implementar según §10 |
+| 2 | `apps/api` + chat por rol + auditor | 4 | |
+| 3 | Simulador 2–3 opciones | 5 | |
+| 4 | Red-team + `tests/red-team/report.md` | 6 | |
+| 5 | Demo + MANIFESTO + ROADMAP + `docs/pilot-guide.md` | 7 | |
 
 ---
 
-*Registro de avances alineado a CONTEXTO-POPUP-VILLAGE.md — revisión 12 de mayo de 2026.*
+*Registro de avances: foco Días 1–2 en el árbol; Día 3+ según CONTEXTO. Limpieza GIS/PDF: ver `reestructura.md`.*
