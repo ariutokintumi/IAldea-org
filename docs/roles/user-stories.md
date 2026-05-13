@@ -2,7 +2,9 @@
 
 Fuente alineada con [dia_02_gobernanza_roles_y_accesos.md](../planning/dia_02_gobernanza_roles_y_accesos.md) §11.
 
-**Historias por rol** (pestaña *UserStories por rol* del libro en Sheets): [user-stories-por-rol.md](user-stories-por-rol.md) · CSV: [user-stories-por-rol.csv](user-stories-por-rol.csv).
+**Historias por rol** (pestaña *UserStories por rol*): [user-stories-por-rol.md](user-stories-por-rol.md) · CSV: [user-stories-por-rol.csv](user-stories-por-rol.csv).
+
+**Historias transversales** (todos los roles): [user-stories-transversales.md](user-stories-transversales.md). **Índice Excel ↔ CSV:** [excel-sheets.md](excel-sheets.md).
 
 **Criterios por etapa del ciclo** (preguntas UX del export *Role Model + Permission Matrix*): [user-stories-matriz.md](user-stories-matriz.md) — complementa esta lista sin sustituirla.
 

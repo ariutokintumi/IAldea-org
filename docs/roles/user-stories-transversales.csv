@@ -1,0 +1,9 @@
+ID,User story,Aplica a,Requisito UX
+X-01,"Como usuario de IAldea, quiero saber siempre en qué modo de privacidad estoy, para entender qué se guarda y quién puede verlo.",Todos los roles,Selector o indicador persistente de privacidad.
+X-02,"Como usuario de IAldea, quiero ver las fuentes de cada respuesta, para confiar en la información.",Todos los roles,"Módulo de fuentes con documento, fecha, estado y validación."
+X-03,"Como usuario de IAldea, quiero que el sistema me diga cuando no sabe, para no confundir inferencias con hechos.",Todos los roles,Estado “información insuficiente” o “no verificable”.
+X-04,"Como usuario de IAldea, quiero que el sistema rechace usos peligrosos, para proteger a la comunidad.",Todos los roles,"Refusals claros, calmados y con alternativa segura."
+X-05,"Como usuario autorizado, quiero ver quién subió, validó o modificó una fuente, para entender la legitimidad de la información.","Secretaría, Coordinación, Comité, Validador, Admin, Operador",Vista de trazabilidad por fuente.
+X-06,"Como usuario de IAldea, quiero saber si una fuente está validada, pendiente, contradictoria o rechazada, para no usar información débil como verdad.",Todos los roles según permiso,Estado visible de fuente.
+X-07,"Como usuario de IAldea, quiero que el sistema distinga hechos, inferencias y sugerencias, para no interpretar una respuesta como decisión oficial.",Todos los roles,"Etiquetas claras: hecho, inferencia, sugerencia, revisión humana."
+X-08,"Como usuario de IAldea, quiero que las decisiones humanas queden registradas con proceso, fuente y fecha, para preservar memoria cívica.","Secretaría, Coordinación, Comité",Registro de acuerdo con trazabilidad.

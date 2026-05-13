@@ -2,8 +2,8 @@
 
 Este documento **no sustituye** el CSV; resume la columna narrativa por rol en cada etapa del ciclo de coordinación.
 
-- **Export completo (hoja Role Model + Permission Matrix):** [role-model-permission-matrix-full.csv](role-model-permission-matrix-full.csv)
-- **Matriz canónica reducida (repo):** [permission-matrix.csv](permission-matrix.csv)
+- **Export completo (hoja *Role Model + Permission Matrix*):** [role-model-permission-matrix-full.csv](role-model-permission-matrix-full.csv)
+- **Matriz canónica reducida (V1, sin columnas UX):** [permission-matrix.csv](permission-matrix.csv)
 
 ## Glosario de columnas (fila guía del export)
 
@@ -27,7 +27,7 @@ Este documento **no sustituye** el CSV; resume la columna narrativa por rol en c
 | **Ciudadano** | Quien participa en la comunidad |
 | **Financiador** | Quien aporta recursos para atender las necesidades de los ciudadanos |
 | **Preguntas clave para uX uI** | Preguntas clave para UX/UI |
-| **Respuestas** | Respuesta por pregunta (en el export actual suele ir vacía hasta completar la hoja) |
+| **Respuestas** | Respuesta por pregunta (completar en la hoja cuando aplique; a menudo vacía en export). |
 
 ## Ciclo: responsabilidades por rol
 

@@ -4,6 +4,8 @@ Este archivo resume el modelo acordado con colaboradores. El detalle operativo (
 
 Para la narrativa **por etapa del ciclo** (Entender → Aprender) y el glosario de columnas del export, ver [roles-por-etapa.md](roles-por-etapa.md) y el CSV [role-model-permission-matrix-full.csv](role-model-permission-matrix-full.csv).
 
+Para **experiencia por rol**, **comportamiento / firewall** y **decisiones de producto** por etapa, ver [role-experience-matrix.md](role-experience-matrix.md), [matriz-comportamiento-por-rol.md](matriz-comportamiento-por-rol.md) y [decisiones-de-producto.md](decisiones-de-producto.md); flujos resumidos en [flujos-por-etapa.md](flujos-por-etapa.md). Índice de todas las pestañas: [excel-sheets.md](excel-sheets.md).
+
 ## Roles canónicos (slugs)
 
 

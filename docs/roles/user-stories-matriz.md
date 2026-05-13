@@ -1,8 +1,8 @@
 # User stories y criterios — matriz de etapas
 
-Derivado del export [role-model-permission-matrix-full.csv](role-model-permission-matrix-full.csv) (columnas *Preguntas clave para uX uI* y *Respuestas*).
+Derivado de [role-model-permission-matrix-full.csv](role-model-permission-matrix-full.csv) (columnas *Preguntas clave para uX uI* y *Respuestas*).
 
-Las historias del taller (WhatsApp, L3, etc.) siguen en [user-stories.md](user-stories.md).
+Historias por rol: [user-stories-por-rol.md](user-stories-por-rol.md). Historias cortas del taller: [user-stories.md](user-stories.md).
 
 ## Etapa: **Entender**
 
@@ -18,7 +18,7 @@ Las historias del taller (WhatsApp, L3, etc.) siguen en [user-stories.md](user-s
 - ¿Cómo se evita que se convierta en denuncia o rumor?
 - ¿Cómo se muestra un patrón sin exponer personas?
 
-**Respuestas en export:** *(pendiente de rellenar en la hoja — columna Respuestas vacía en el archivo actual.)*
+**Respuestas en export:** *(pendiente en la hoja — columna Respuestas vacía.)*
 
 ## Etapa: **Proponer**
 
@@ -34,7 +34,7 @@ Las historias del taller (WhatsApp, L3, etc.) siguen en [user-stories.md](user-s
 - ¿Qué riesgos, datos faltantes o revisiones humanas deben aparecer?
 - ¿Quién puede comentar, editar, validar o archivar una propuesta?
 
-**Respuestas en export:** *(pendiente de rellenar en la hoja — columna Respuestas vacía en el archivo actual.)*
+**Respuestas en export:** *(pendiente en la hoja — columna Respuestas vacía.)*
 
 ## Etapa: **Decidir**
 
@@ -50,7 +50,7 @@ Las historias del taller (WhatsApp, L3, etc.) siguen en [user-stories.md](user-s
 - ¿Cómo dejamos claro que IAldea registra la decisión, pero no decide?
 - ¿Qué decisiones deben bloquearse por ser legales, médicas, electorales, presupuestales críticas o de emergencia?
 
-**Respuestas en export:** *(pendiente de rellenar en la hoja — columna Respuestas vacía en el archivo actual.)*
+**Respuestas en export:** *(pendiente en la hoja — columna Respuestas vacía.)*
 
 ## Etapa: **Ejecutar**
 
@@ -66,7 +66,7 @@ Las historias del taller (WhatsApp, L3, etc.) siguen en [user-stories.md](user-s
 - ¿Cómo damos seguimiento sin convertir IAldea en vigilancia o sistema punitivo?
 - ¿Quién puede actualizar, consultar o cerrar el compromiso?
 
-**Respuestas en export:** *(pendiente de rellenar en la hoja — columna Respuestas vacía en el archivo actual.)*
+**Respuestas en export:** *(pendiente en la hoja — columna Respuestas vacía.)*
 
 ## Etapa: **Verificar**
 
@@ -82,7 +82,7 @@ Las historias del taller (WhatsApp, L3, etc.) siguen en [user-stories.md](user-s
 - ¿Cómo muestra IAldea inconsistencias sin acusar ni juzgar personas?
 - ¿Qué resultado puede tener la verificación: validado, pendiente, no concluyente o requiere revisión humana?
 
-**Respuestas en export:** *(pendiente de rellenar en la hoja — columna Respuestas vacía en el archivo actual.)*
+**Respuestas en export:** *(pendiente en la hoja — columna Respuestas vacía.)*
 
 ## Etapa: **Informar**
 
@@ -98,7 +98,7 @@ Las historias del taller (WhatsApp, L3, etc.) siguen en [user-stories.md](user-s
 - ¿Cómo evitamos propaganda, manipulación o suplantación de identidad?
 - ¿Qué información debe omitirse por privacidad o seguridad?
 
-**Respuestas en export:** *(pendiente de rellenar en la hoja — columna Respuestas vacía en el archivo actual.)*
+**Respuestas en export:** *(pendiente en la hoja — columna Respuestas vacía.)*
 
 ## Etapa: **Recordar**
 
@@ -114,7 +114,7 @@ Las historias del taller (WhatsApp, L3, etc.) siguen en [user-stories.md](user-s
 - ¿Cómo evita revelar información privada o actividad individual de otra persona?
 - ¿Qué pasa cuando no hay fuentes suficientes para responder?
 
-**Respuestas en export:** *(pendiente de rellenar en la hoja — columna Respuestas vacía en el archivo actual.)*
+**Respuestas en export:** *(pendiente en la hoja — columna Respuestas vacía.)*
 
 ## Etapa: **Aprender**
 
@@ -130,5 +130,5 @@ Las historias del taller (WhatsApp, L3, etc.) siguen en [user-stories.md](user-s
 - ¿Cómo evitamos que IAldea cambie reglas o políticas automáticamente?
 - ¿Cómo protegemos feedback minoritario, confidencial o sensible durante esta etapa?
 
-**Respuestas en export:** *(pendiente de rellenar en la hoja — columna Respuestas vacía en el archivo actual.)*
+**Respuestas en export:** *(pendiente en la hoja — columna Respuestas vacía.)*
 
