@@ -2,6 +2,8 @@
 
 Fuente alineada con [dia_02_gobernanza_roles_y_accesos.md](../planning/dia_02_gobernanza_roles_y_accesos.md) §11.
 
+**Historias por rol** (pestaña *UserStories por rol* del libro en Sheets): [user-stories-por-rol.md](user-stories-por-rol.md) · CSV: [user-stories-por-rol.csv](user-stories-por-rol.csv).
+
 **Criterios por etapa del ciclo** (preguntas UX del export *Role Model + Permission Matrix*): [user-stories-matriz.md](user-stories-matriz.md) — complementa esta lista sin sustituirla.
 
 1. **Como** secretaría **quiero** que solo el núcleo de gobernanza vea agregados de pulso **para** preparar la asamblea sin exponer nombres.

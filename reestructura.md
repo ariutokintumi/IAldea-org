@@ -32,6 +32,7 @@ Raíz: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `README.md`, `LIC
 | [`docs/roles/role-model-permission-matrix-full.csv`](docs/roles/role-model-permission-matrix-full.csv) | Export hoja *Role Model + Permission Matrix* (columnas UX; lectura en [roles-por-etapa.md](docs/roles/roles-por-etapa.md) / [user-stories-matriz.md](docs/roles/user-stories-matriz.md)) |
 | [`examples/fictional-community/community-schema.json`](examples/fictional-community/community-schema.json) | Esquema ~300 hab. ficticio |
 | [`docs/roles/user-stories.md`](docs/roles/user-stories.md) | ✓ |
+| [`docs/roles/user-stories-por-rol.csv`](docs/roles/user-stories-por-rol.csv) | Pestaña *UserStories por rol* (export; lectura [user-stories-por-rol.md](docs/roles/user-stories-por-rol.md)) |
 | [`docs/pop-up-2026/day-2.md`](docs/pop-up-2026/day-2.md) | Minuta Día 2 |
 | [`config/policy_config.example.yaml`](config/policy_config.example.yaml) | Política machine-enforceable |
 | [`docs/planning/dia_02_gobernanza_roles_y_accesos.md`](docs/planning/dia_02_gobernanza_roles_y_accesos.md) | Taller Día 2 (detalle; no sustituye CSV/YAML) |
@@ -62,7 +63,7 @@ Raíz: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `README.md`, `LIC
 │   ├── README.md
 │   ├── pop-up-2026/day-1.md, day-2.md
 │   ├── planning/README.md, dia_02_gobernanza_roles_y_accesos.md
-│   └── roles/README.md, permission-matrix.csv, role-model-permission-matrix-full.csv, role-model.md, roles-por-etapa.md, user-stories.md, user-stories-matriz.md
+│   └── roles/README.md, permission-matrix.csv, role-model-permission-matrix-full.csv, role-model.md, roles-por-etapa.md, user-stories.md, user-stories-por-rol.csv, user-stories-por-rol.md, user-stories-matriz.md
 ├── examples/fictional-community/community-schema.json
 ├── soul/SOUL.example.md, SOUL.community-template.md
 └── config/policy_config.example.yaml, roles.example.yaml

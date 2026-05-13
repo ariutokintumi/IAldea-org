@@ -6,15 +6,20 @@ Para la narrativa **por etapa del ciclo** (Entender → Aprender) y el glosario 
 
 ## Roles canónicos (slugs)
 
-| Rol en UI | `slug` | Notas |
-|-----------|--------|--------|
-| Secretaría | `secretaria` | Memoria, actas, registro de etapas. |
-| Coordinación | `coordinacion` | Orquesta procesos entre actores. |
-| Miembro de Comité | `comite_miembro` | Propone, ejecuta, evidencia. |
-| Tesorería | `tesoreria` | Viabilidad y registro de recursos; **no** libera fondos sin humano. |
-| Validador | `validador` | Cumplimiento y exactitud en etapas de verificación / informe. |
-| Ciudadano | `ciudadano` | Input, consulta, memoria según modo de privacidad. |
-| Financiador | `financiador` | Visión agregada y comentarios de financiamiento **sin** condicionar decisiones. |
+
+| Rol en UI         | `slug`           | Notas                                                                           |
+| ----------------- | ---------------- | ------------------------------------------------------------------------------- |
+| Secretaría        | `secretaria`     | Memoria, actas, registro de etapas.                                             |
+| Coordinación      | `coordinacion`   | Orquesta procesos entre actores.                                                |
+| Miembro de Comité | `comite_miembro` | Propone, ejecuta, evidencia.                                                    |
+| Tesorería         | `tesoreria`      | Viabilidad y registro de recursos; **no** libera fondos sin humano.             |
+| Validador         | `validador`      | Cumplimiento y exactitud en etapas de verificación / informe.                   |
+| Ciudadano         | `ciudadano`      | Input, consulta, memoria según modo de privacidad.                              |
+| Financiador       | `financiador`    | Visión agregada y comentarios de financiamiento **sin** condicionar decisiones. |
+| Admin técnico     | *(operación)*   | Configuración técnica, logs y fuentes; historias en [user-stories-por-rol.md](user-stories-por-rol.md). |
+| Operador de Piloto | *(operación)* | Despliegue y adopción del piloto; mismas historias. |
+
+Los slugs `admin_tecnico` y `operador_piloto` pueden añadirse en `roles.example.yaml` cuando el comité los formalice.
 
 ## Ciclo por etapas
 
@@ -26,4 +31,4 @@ Ver columnas **Etapa** y roles en [permission-matrix.csv](permission-matrix.csv)
 
 ## Runtime (Día 4+)
 
-Comportamiento conversacional por rol y capas Kernel/Graph/Safety: [`CONTEXTO-POPUP-VILLAGE.md`](../../CONTEXTO-POPUP-VILLAGE.md) §11 y entregables del **Día 4** (agente ciudadano / comité, auditor).
+Comportamiento conversacional por rol y capas Kernel/Graph/Safety: `[CONTEXTO-POPUP-VILLAGE.md](../../CONTEXTO-POPUP-VILLAGE.md)` §11 y entregables del **Día 4** (agente ciudadano / comité, auditor).
