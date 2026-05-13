@@ -2,6 +2,8 @@
 
 Este archivo resume el modelo acordado con colaboradores. El detalle operativo (WhatsApp, `contributor_handle`, L0–L3, YAML) está en [dia_02_gobernanza_roles_y_accesos.md](../planning/dia_02_gobernanza_roles_y_accesos.md).
 
+Para la narrativa **por etapa del ciclo** (Entender → Aprender) y el glosario de columnas del export, ver [roles-por-etapa.md](roles-por-etapa.md) y el CSV [role-model-permission-matrix-full.csv](role-model-permission-matrix-full.csv).
+
 ## Roles canónicos (slugs)
 
 | Rol en UI | `slug` | Notas |
@@ -16,7 +18,7 @@ Este archivo resume el modelo acordado con colaboradores. El detalle operativo (
 
 ## Ciclo por etapas
 
-Ver columnas **Etapa** y roles en [permission-matrix.csv](permission-matrix.csv).
+Ver columnas **Etapa** y roles en [permission-matrix.csv](permission-matrix.csv). La versión ampliada del export (mismas filas de etapa, columnas UX y plantilla) está en [role-model-permission-matrix-full.csv](role-model-permission-matrix-full.csv); lectura tabular en [roles-por-etapa.md](roles-por-etapa.md).
 
 ## Medio de consulta ciudadana
 

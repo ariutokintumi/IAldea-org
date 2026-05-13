@@ -2,6 +2,8 @@
 
 Fuente alineada con [dia_02_gobernanza_roles_y_accesos.md](../planning/dia_02_gobernanza_roles_y_accesos.md) §11.
 
+**Criterios por etapa del ciclo** (preguntas UX del export *Role Model + Permission Matrix*): [user-stories-matriz.md](user-stories-matriz.md) — complementa esta lista sin sustituirla.
+
 1. **Como** secretaría **quiero** que solo el núcleo de gobernanza vea agregados de pulso **para** preparar la asamblea sin exponer nombres.
 2. **Como** ciudadana **quiero** preguntar por **WhatsApp** en mixteco y recibir respuesta con cita a acta **para** confiar sin ir al palacio.
 3. **Como** comité de agua **quiero** comparar dos escenarios documentados **para** deliberar en asamblea sin “orden” del sistema.

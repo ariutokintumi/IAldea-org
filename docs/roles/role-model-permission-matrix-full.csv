@@ -1,0 +1,50 @@
+,,,,,,,,,,Roles,,,,,,,,
+Etapa,Descripción de la etapa,Coordination Object,Qué hace la IA,Capability principal,Firewall,Legitimacy trails,Source,Privacy,Review Cycle,Secretaría,Coordinación,Miembro de Comité,Tesorería,Validador,Ciudadano,Financiador,Preguntas clave para uX uI,Respuestas
+,Cuál es el propósito de esta etapa ,Palabra clave para detonar el proceso ,Cuál es el rol del agente AI ,Lo que entiende el backend.,Cuáles son las red flags que requieren activar el firewall,Qué datos se registran onchain para ser verificables,De quién viene la información ,Para quién es visible el output ,Cada cuándo hay que repetir esta etapa ,Quien lleva la minuta de la reunión ,Quien vela por los objetivos del comité ,Quien participa en la toma de decisiones,Quien gestiona la tesorería,Quien revisa que los compromisos se cumplieron,Quien participa en la comunidad,Quien aporta recursos para atender las necesidades de los ciudadanos,preguntas clave para uX uI,Respuesta por pregunta
+Entender,"Identificar necesidades, tensiones o problemas de la comunidad.",Tensión / Necesidad,Sintetiza patrones y detecta temas recurrentes,Crear input comunitario,"Datos sensibles, acusaciones, conflictos activos, rumores, manipulación",Feedback ciudadano autorizado,Comunidad,Público para la comunidad / confidencial si hay datos sensibles,Cada 6 meses o cuando surja una tensión relevante,Registra necesidades y antecedentes,Organiza el proceso de escucha,Ayuda a interpretar el problema,Estima capacidad financiera preliminar,No aplica,Da input sobre necesidades,Puede señalar prioridades financiables sin condicionar decisiones,"¿Cómo deja una persona una necesidad?
+¿Puede hacerlo en público, confidencial o privado?
+¿Cómo se le explica qué pasará con su información?
+¿Cómo se evita que se convierta en denuncia o rumor?
+¿Cómo se muestra un patrón sin exponer personas?",
+Proponer,Generar posibles soluciones o caminos de acción.,Propuesta,"Compara opciones, riesgos y datos faltantes",Crear propuesta,"Propuesta que dañe ciudadanía, excluya actores clave o prometa acciones fuera de alcance",Propuesta registrada con autoría,Miembro de Comité / Coordinación,Visible para comité; resumen público si procede,Cada reunión o cuando haya una necesidad priorizada,Registra propuestas,Revisa alineación con objetivos,Genera o mejora propuestas,Revisa viabilidad presupuestal,No aplica,Puede comentar si el proceso lo permite,Puede comentar restricciones de financiamiento sin imponer,"¿Quién puede crear una propuesta y desde qué información puede partir?
+¿Qué fuentes o necesidades respaldan la propuesta?
+¿Cómo muestra IAldea opciones sin recomendar una como decisión final?
+¿Qué riesgos, datos faltantes o revisiones humanas deben aparecer?
+¿Quién puede comentar, editar, validar o archivar una propuesta?",
+Decidir,Elegir una propuesta o dejar constancia de un acuerdo.,Decisión / Acuerdo,"Resume decisión, razones, objeciones y fuentes",Registrar decisión,"Comprometer presupuesto público, reemplazar asamblea, decisión legal/médica/emergencia","Acuerdo, consentimiento o acta",Comité / Asamblea / autoridad correspondiente,Visible para comité; público cuando sea acuerdo comunitario,Cada reunión o cuando se cierre una decisión,Registra la decisión y su razón,Verifica que el proceso fue adecuado,Participa en la decisión,Libera fondos solo si existe autorización humana,No aplica,Consulta resultado cuando sea público,Consulta resultado y condiciones públicas,"¿Qué proceso humano respalda esta decisión: asamblea, comité, coordinación u otro?
+¿Qué documento o fuente prueba que la decisión fue tomada legítimamente?
+¿Quién puede registrar, revisar y publicar el acuerdo?
+¿Cómo dejamos claro que IAldea registra la decisión, pero no decide?
+¿Qué decisiones deben bloquearse por ser legales, médicas, electorales, presupuestales críticas o de emergencia?",
+Ejecutar,Dar seguimiento a compromisos asumidos.,Responsabilidad / Compromiso,"Recuerda pendientes, fechas y responsables",Actualizar estado,"Asignar responsabilidad legal, ordenar acciones, exponer datos personales",Registro de responsable y avance,Miembro de Comité / responsable asignado,Visible para comité; público si afecta a comunidad,"Asincrónico, según fechas del compromiso",Registra avances,Da seguimiento a responsables,Ejecuta actividades,Registra uso de recursos,No aplica,Consulta estado público,Consulta estado agregado,"¿Qué compromiso concreto nace del acuerdo?
+¿Quién o qué rol es responsable de darle seguimiento?
+¿Qué evidencia se necesita para mostrar avance?
+¿Cómo damos seguimiento sin convertir IAldea en vigilancia o sistema punitivo?
+¿Quién puede actualizar, consultar o cerrar el compromiso?",
+Verificar,Revisar si los compromisos se cumplieron.,Rendición de cuentas,Detecta inconsistencias y organiza evidencia,Validar cumplimiento,"Evidencia insuficiente, conflicto de interés, acusación personal, auditoría invasiva","Métricas, evidencia, validación humana",Validador,"Público para comunidad, salvo evidencia sensible",Según resultados o cierre de compromiso,Registra resultado,Coordina revisión,Presenta evidencia,Reporta uso de recursos,Revisa cumplimiento,Consulta resultado público,Consulta métricas agregadas,"¿Qué evidencia demuestra que algo se cumplió o no se puede confirmar?
+¿Quién tiene permiso para validar esa evidencia?
+¿Qué pasa si la evidencia es insuficiente, contradictoria o sensible?
+¿Cómo muestra IAldea inconsistencias sin acusar ni juzgar personas?
+¿Qué resultado puede tener la verificación: validado, pendiente, no concluyente o requiere revisión humana?",
+Informar,"Comunicar resultados, decisiones o avances.",Noticia / Comunicado,Genera resumen claro con fuentes,Publicar resumen,"Propaganda, manipulación, suplantación, información no verificada",Comunicado aprobado,Memoria colectiva / Coordinación,Público para comunidad,Según resultados o hitos,Redacta minuta o comunicado,Autoriza mensaje,Revisa contexto,Revisa datos financieros,Valida exactitud si aplica,Recibe y consulta información,Recibe reporte agregado,"¿Qué información está suficientemente validada para comunicarse?
+¿Quién puede redactar, revisar, aprobar y publicar el comunicado?
+¿Qué fuentes deben mostrarse junto al comunicado?
+¿Cómo evitamos propaganda, manipulación o suplantación de identidad?
+¿Qué información debe omitirse por privacidad o seguridad?",
+Recordar,Recuperar memoria colectiva para responder preguntas.,Memoria,Responde con citas y marca incertidumbre,Recuperar contexto,"Vigilancia interpersonal, revelar preguntas privadas, fuentes no citadas",Consulta registrada con fuentes,Memoria colectiva,Según permisos del usuario,Permanente / chatbot ciudadano,Consulta historial,Consulta historial,Consulta historial,Consulta historial financiero autorizado,Consulta historial de validaciones,Pregunta sobre memoria colectiva,Ve métricas agregadas públicas,"¿Qué puede consultar cada rol según sus permisos?
+¿Qué fuentes usa IAldea para responder y cómo las muestra?
+¿Cómo diferencia hechos, inferencias, contradicciones e información no disponible?
+¿Cómo evita revelar información privada o actividad individual de otra persona?
+¿Qué pasa cuando no hay fuentes suficientes para responder?",
+Aprender,Ajustar acuerdos o prácticas a partir de experiencia.,Retroalimentación / Cambio de política,Sintetiza aprendizajes y sugiere revisión humana,Proponer revisión,"Cambios de reglas sin proceso, captura por financiador, inferencias sin evidencia",Cambio de política / aprendizaje registrado,Comité / comunidad,Visible para comité; público si cambia reglas comunitarias,Al cerrar cada proceso o cada 6 meses,Registra cambios,Coordina revisión,Propone mejoras,Ajusta criterios financieros,Valida impacto,Da feedback,Da feedback sobre resultados agregados,"¿Qué patrón, problema recurrente o aprendizaje detectó IAldea?
+¿Qué evidencia respalda ese aprendizaje?
+¿Quién puede convertir ese aprendizaje en una propuesta de revisión?
+¿Cómo evitamos que IAldea cambie reglas o políticas automáticamente?
+¿Cómo protegemos feedback minoritario, confidencial o sensible durante esta etapa?",
+,,,,,,,,,Qué ve,,,,,,,,,
+,,,,,,,,,Qué puede hacer,,,,,,,,,
+,,,,,,,,,Qué no puede hacer,,,,,,,,,
+,,,,,,,,,Qué necesita confirmar,,,,,,,,,
+,,,,,,,,,Qué fuente debe aparecer,,,,,,,,,
+,,,,,,,,,Mensaje limite al cruzar firewall,,,,,,,,,
+,,,,,,,,,Cómo se ve la trazabilidad,,,,,,,,,
