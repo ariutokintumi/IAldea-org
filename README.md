@@ -17,7 +17,7 @@ This repository is **pre-build**. The build sprint starts at the Pop-Up City in 
 
 If you are arriving for the build sprint, jump to [Getting involved](#getting-involved). If you are not, watch this repo and follow [ialdea.org](https://ialdea.org); the first commits land May 11.
 
-**This fork (Pop-Up week):** tracked files follow **[`reestructura.md`](reestructura.md)** — Days **1–2** only (vision, SOUL, roles, policy YAML, static configurator, agent contracts). Heavier code and datasets land on later days per [`CONTEXTO-POPUP-VILLAGE.md`](CONTEXTO-POPUP-VILLAGE.md) §10.
+**This fork (Pop-Up week):** tracked files follow **[`reestructura.md`](reestructura.md)** — **Días 1–2** según [`CONTEXTO-POPUP-VILLAGE.md`](CONTEXTO-POPUP-VILLAGE.md) §10 (visión, SOUL, roles, matriz, YAML, `community-schema.json`, minutas). Calendario del equipo: [`guia-diaria.md`](guia-diaria.md). Arquitectura detallada, web chat y agentes: **Día 3+**.
 
 ---
 
@@ -173,29 +173,26 @@ Detailed week schedule for the Pop-Up City: <https://ialdea.org#popup>.
 
 ---
 
-## Repository structure (Days 1–2 in this branch)
+## Repository structure — cierre **Día 2**
 
-The **canonical tree** for what may exist in the repo right now is **[`reestructura.md`](reestructura.md)**. Summary:
+El árbol permitido está en **[`reestructura.md`](reestructura.md)**. Resumen:
 
 ```
 ialdea-org/
-├── CONTEXTO-POPUP-VILLAGE.md    master context (full sprint)
-├── reestructura.md              allowed paths Days 1–2
+├── CONTEXTO-POPUP-VILLAGE.md, guia-diaria.md, reestructura.md
 ├── README.md, LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md
 ├── docs/
-│   ├── vision.md, principles.md, civic-safety.md, privacy.md
-│   ├── architecture.md          stub until Day 3 (see CONTEXTO §11)
+│   ├── vision.md, principles.md, civic-safety.md, privacy.md, positioning-v1.md
 │   ├── README.md
-│   ├── planning/
-│   │   └── dia_02_gobernanza_roles_y_accesos.md
-│   └── roles/                   permission-matrix.csv, role-model, user-stories
+│   ├── pop-up-2026/day-1.md, day-2.md
+│   ├── planning/                dia_02 + README
+│   └── roles/                   CSV, role-model, user-stories
+├── examples/fictional-community/community-schema.json
 ├── soul/
-├── config/                      policy_config + roles examples
-├── apps/web/configurator/       static no-code assistant (Day 2)
-└── packages/agents/             agent pipeline docs (Day 2)
+└── config/                      policy_config.example + roles.example
 ```
 
-Day **3+** outputs (API, Kernel, ingest scripts, graph, tests, connectors, etc.) are **not** part of this tree until their day; see `CONTEXTO-POPUP-VILLAGE.md` §10 and update `reestructura.md` when you open the next slice.
+**Día 3+** (arquitectura, Kernel, `apps/web`, agentes, ingesta): ver §10 del CONTEXTO; ampliar `reestructura.md` al abrir cada día.
 
 ---
 

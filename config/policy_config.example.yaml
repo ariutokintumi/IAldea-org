@@ -46,7 +46,7 @@ feedback:
   mode: "confidential"
 
 # Roles canónicos: docs/roles/permission-matrix.csv
-# `authorities` agrupa núcleo de gobernanza (compat. configurador web); tesorería y validación como listas explícitas.
+# `authorities` agrupa núcleo de gobernanza; tesorería y validación como listas explícitas.
 roles:
   authorities:
     - "secretaria"

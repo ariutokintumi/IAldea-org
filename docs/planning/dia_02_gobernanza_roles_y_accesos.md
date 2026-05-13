@@ -39,7 +39,7 @@
 
 **Implementación en repo (roadmap)**
 
-- Conector WhatsApp (p. ej. Cloud API / proveedor): **código en Día 4** según CONTEXTO; hasta entonces el contrato está en esta sección y en `reestructura.md`.
+- Conector WhatsApp (p. ej. Cloud API / proveedor): **código en Día 4** según CONTEXTO; hasta entonces el contrato está en esta sección; ver [`CONTEXTO-POPUP-VILLAGE.md`](../../CONTEXTO-POPUP-VILLAGE.md) §11.
 - Identidad técnica: enlazar mensajes a **`contributor_handle`** (§8.1), no exponer teléfono en agregados ni en tableros públicos.
 
 **Relación con modos de privacidad**
@@ -304,21 +304,18 @@ role_permissions:
 - [ ] WhatsApp acordado (§2) con texto de opt-in y enlace a privacidad.
 - [ ] Matriz §9 revisada celda a celda con dueños de rol.
 - [ ] YAML de ejemplo validado con comunidad ficticia.
-- [ ] **Configurador web** (`apps/web/configurator/`) probado de punta a punta con una comunidad ficticia.
+- [ ] Ejemplos `policy_config` + `roles` probados a mano o con plantilla ficticia (`examples/fictional-community/community-schema.json`).
 
 ---
 
 ## 13. Adecuación del repo a `CONTEXTO-POPUP-VILLAGE.md` §18
 
-| Elemento §18 | Estado sugerido |
-|--------------|-----------------|
-| `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` | En raíz; revisar contenido con el equipo. |
-| `docs/roles/role-model.md`, `permission-matrix.csv`, `user-stories.md` | Listos (`user-stories.md` enlazado a §11). |
-| `docs/pop-up-2026/day-N.md` | Crear cuando el scribe documente cada día. |
-| `config/roles.example.yaml` | Presente; coherente con `policy_config.example.yaml`. |
-| `apps/web/configurator/` | MVP Día 2 (no-code). |
-| `apps/api/`, `packages/connectors/`, Kernel, grafo, tests red-team | **Día 3+**; no deben aparecer en el repo hasta su día (ver `reestructura.md`). |
-| `docs/architecture.md` | Stub hasta Día 3; detalle en CONTEXTO §11. |
+| Elemento §18 (CONTEXTO) | Estado al cierre Día 2 |
+|--------------------------|-------------------------|
+| `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` | Raíz; revisar con el equipo. |
+| `docs/roles/*`, `config/roles.example.yaml`, `community-schema.json` | Entregables Día 2 (ver `reestructura.md`). |
+| `docs/pop-up-2026/day-1.md`, `day-2.md` | Minutas. |
+| `docs/architecture.md`, `apps/web/`, `apps/api/`, `packages/*` código | **Día 3+** — fuera del repo hasta su día (`reestructura.md`). |
 
 **Commits:** mensajes en inglés, imperativo; ramas por día según convención del CONTEXTO.
 

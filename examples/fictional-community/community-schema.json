@@ -1,0 +1,49 @@
+{
+  "$schema_note": "Ejemplo comunidad ficticia ~300 habitantes — output Día 2 (CONTEXTO). Ajustar con la asamblea.",
+  "community": {
+    "id": "pueblo_ejemplo_300",
+    "name": "Comunidad Ejemplo Piloto",
+    "approx_inhabitants": 300,
+    "municipality": "",
+    "state": "Oaxaca",
+    "governance": "usos_y_costumbres"
+  },
+  "channels": {
+    "citizen_primary": "whatsapp",
+    "whatsapp": {
+      "opt_in_required": true,
+      "privacy_policy_url": ""
+    }
+  },
+  "roles_slugs": {
+    "governance_core": ["secretaria", "coordinacion"],
+    "committees": ["comite_agua"],
+    "treasury": ["tesoreria"],
+    "validation": ["validador"],
+    "citizen": ["ciudadano"],
+    "financier": ["financiador"],
+    "platform_admin": ["admin_plataforma"]
+  },
+  "access_levels": {
+    "L0_observe": ["visitante_externo"],
+    "L1_citizen": ["ciudadano", "financiador"],
+    "L2_governance": [
+      "secretaria",
+      "coordinacion",
+      "comite_miembro",
+      "tesoreria",
+      "validador"
+    ],
+    "L3_operator": ["admin_plataforma"]
+  },
+  "privacy_modes_allowed": [
+    "public",
+    "confidential_community",
+    "private_no_memory"
+  ],
+  "policy_files": {
+    "soul_example": "soul/SOUL.example.md",
+    "policy_config_example": "config/policy_config.example.yaml",
+    "roles_example": "config/roles.example.yaml"
+  }
+}

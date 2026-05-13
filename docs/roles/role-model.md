@@ -22,6 +22,6 @@ Ver columnas **Etapa** y roles en [permission-matrix.csv](permission-matrix.csv)
 
 **WhatsApp** como canal principal para consultas ciudadanas (ver plan Día 2 §2).
 
-## Agentes por rol (runtime)
+## Runtime (Día 4+)
 
-Misma tubería de seguridad; cambian instrucciones y herramientas según `role_slug`: [`packages/agents/README.md`](../../packages/agents/README.md).
+Comportamiento conversacional por rol y capas Kernel/Graph/Safety: [`CONTEXTO-POPUP-VILLAGE.md`](../../CONTEXTO-POPUP-VILLAGE.md) §11 y entregables del **Día 4** (agente ciudadano / comité, auditor).
