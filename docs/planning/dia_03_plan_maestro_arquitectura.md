@@ -124,14 +124,14 @@ Utilizamos **eVVM** (Virtual Blockchain) para asegurar la integridad de la memor
 
 ## 5. Hoja de Ruta: Pasos Detallados de Implementación
 
-### Fase 1: Infraestructura (El Kernel)
-1. **Docker Setup:** Configurar `docker-compose.yml` con `ankane/pgvector` y persistencia de volúmenes.
-2. **DDL de Base de Datos:**
+### Fase 1: Infraestructura (El Kernel) ✅ FINALIZADA
+1. **Docker Setup:** Configurar `docker-compose.yml` con `ankane/pgvector` y persistencia de volúmenes. (OK)
+2. **DDL de Base de Datos:** (OK)
    - Tabla `memberships` (Auth Gatekeeper).
    - Tabla `documents` y `document_versions` (Kernel).
    - Tabla `blockchain_anchors` (Trust Layer).
    - Tabla `graph_edges` (Relaciones).
-3. **Node.js Auth Gatekeeper:** Implementar el middleware que hashea el número de teléfono y valida contra la tabla `memberships`.
+3. **Node.js Auth Gatekeeper:** Inicialización del paquete `@kernel` y validación de conexión. (OK)
 
 ### Fase 2: Pipeline de Ingesta
 1. **Parser Service:** Implementar extractor de texto para PDF y Docx (usando `pdf-parse` o similar).
