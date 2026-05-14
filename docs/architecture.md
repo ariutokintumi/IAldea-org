@@ -29,8 +29,8 @@
 │  01 / KERNEL     Memory Kernel (Postgres + pgvector)             │
 │                  Documentos, actas, acuerdos, versiones.         │
 ├──────────────────────────────────────────────────────────────────┤
-│  00 / TRUST      Blockchain (Monad / EVM)                        │
-│                  Anclaje de Hashes, Integridad y Trazabilidad.   │
+│  00 / TRUST      eVVM (Virtual Blockchain)                       │
+│                  Anclaje de Hashes, IDs (Teléfono) y Trazabilidad.│
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -144,7 +144,7 @@ flowchart TD
   ORCS --> SW[Conmutador\nTúnel Cifrado]
   SW --> MEM[Subagentes\nMemoria / FAQ]
   MEM --> KERN[(Kernel\nPostgres)]
-  KERN --> BC{Blockchain\nTrust Layer}
+  KERN --> BC{eVVM\nVirtual Blockchain}
   BC -->|Integridad OK| SW
   SW --> AUD[Auditor\nCapa Safety]
   AUD --> WA2([✅ Respuesta con Citas])
@@ -252,39 +252,37 @@ flowchart LR
 
 ---
 
-## Capa 00 / Trust — Blockchain
+## Capa 00 / Trust — eVVM
 
-Ancla la verdad del Kernel fuera del control de un solo administrador. Asegura que los documentos citados por la IA no han sido manipulados.
+Utiliza **eVVM** (Virtual Blockchain) para anclar la verdad del Kernel. eVVM permite desplegar una infraestructura de confianza soberana sobre cualquier cadena, facilitando el uso de identificadores como teléfonos o correos electrónicos.
 
-### Modelo de datos — Anclajes Blockchain
+### Modelo de datos — Anclajes eVVM
 
 ```sql
 CREATE TABLE blockchain_anchors (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   document_version_id UUID NOT NULL REFERENCES document_versions(id),
   content_hash        TEXT NOT NULL,        -- SHA-256 del documento
-  tx_hash             TEXT NOT NULL,        -- Hash de transacción en Monad/EVM
-  chain_id            INTEGER NOT NULL,
+  tx_hash             TEXT NOT NULL,        -- Hash de transacción en eVVM
   anchored_at         TIMESTAMPTZ DEFAULT now(),
   verified            BOOLEAN DEFAULT FALSE
 );
 ```
 
-### Flujo de Verificación (Consulta)
-
-1.  El subagente recupera el fragmento del Kernel.
-2.  Obtiene el `content_hash` de la versión del documento.
-3.  Consulta (vía RPC o indexador) si existe el `tx_hash` para ese `content_hash`.
-4.  Si coincide, la IA puede declarar: *"Documento íntegro verificado en cadena"*.
+### Por qué eVVM:
+- **Identidad:** Soporte nativo para usar números de teléfono como IDs (alineado con WhatsApp).
+- **Soberanía:** Permite un entorno permisionado ("Your environment = Your rules") ideal para la gobernanza comunitaria.
+- **Eficiencia:** Despliegue de una "Virtual Blockchain" optimizada para las necesidades de la comunidad.
 
 ---
 
 ## Decisiones de Día 3 — Finalizadas ✅
 
-- [x] **LLM:** Claude 3.5 Sonnet (Cerebro de orquestadores y subagentes).
-- [x] **Embeddings:** OpenAI `text-embedding-3-small` (Migración a local Nomic en Día 6).
-- [x] **Vector DB:** `pgvector` en Postgres (Simplicidad y robustez).
-- [x] **Graph DB:** Relacional con Edges en Postgres (Eficiencia para <500 personas).
+- [x] **LLM:** Claude 3.5 Sonnet.
+- [x] **Embeddings:** OpenAI `text-embedding-3-small`.
+- [x] **Vector DB:** `pgvector` en Postgres.
+- [x] **Graph DB:** Relacional con Edges en Postgres.
+- [x] **Blockchain:** eVVM (Virtual Blockchain).
 - [ ] System prompts completos por subagente (Borrador en Day 4).
 - [ ] Tools disponibles por subagente y nivel (Alineado a `policy_config`).
 

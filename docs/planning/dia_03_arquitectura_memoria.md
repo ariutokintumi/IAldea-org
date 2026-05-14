@@ -32,7 +32,7 @@ El sistema se divide en 4 capas verticales, cada una con responsabilidad acotada
 | **01** | Kernel — Memory | Almacén persistente de documentos comunitarios. Versionado, exportable. |
 | **02** | Graph + Vectors | Grafo de entidades/relaciones + índice semántico para recuperación. |
 | **01** | Kernel — Memory | Almacén persistente de documentos comunitarios. Postgres + pgvector. |
-| **00** | Trust — Blockchain | Anclaje de hashes y firmas (Monad/EVM) para integridad documental. |
+| **00** | Trust — eVVM | Anclaje de hashes y firmas (eVVM) para integridad documental e IDs de teléfono. |
 | **04** | Safety | Auditor que valida toda respuesta contra `SOUL.md` + `policy_config.yaml` antes de salir. |
 
 **Principio de diseño:** cada capa solo expone lo que la capa superior necesita. El Kernel no sabe de agentes; el Auditor no sabe de vectores.
@@ -204,19 +204,18 @@ CREATE TABLE memberships (
 
 ---
 
-## 10. Capa 00 / Trust — Blockchain
+## 10. Capa 00 / Trust — eVVM
 
-Ancla la verdad del Kernel fuera del control de un solo administrador.
+Utiliza **eVVM** (Virtual Blockchain) para anclar la verdad del Kernel. 
 
-### Modelo de datos — Anclajes Blockchain
+### Modelo de datos — Anclajes eVVM
 
 ```sql
 CREATE TABLE blockchain_anchors (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   document_version_id UUID NOT NULL REFERENCES document_versions(id),
   content_hash        TEXT NOT NULL,        -- SHA-256 del documento
-  tx_hash             TEXT NOT NULL,        -- Hash de transacción en Monad/EVM
-  chain_id            INTEGER NOT NULL,
+  tx_hash             TEXT NOT NULL,        -- Hash de transacción en eVVM
   anchored_at         TIMESTAMPTZ DEFAULT now(),
   verified            BOOLEAN DEFAULT FALSE
 );
@@ -230,12 +229,13 @@ CREATE TABLE blockchain_anchors (
 - [x] **Embeddings:** OpenAI `text-embedding-3-small`.
 - [x] **Vector DB:** `pgvector` en Postgres.
 - [x] **Graph DB:** Relacional con Edges en Postgres.
+- [x] **Blockchain:** eVVM (Virtual Blockchain).
 
 ---
 
 ## 12. Salidas del taller (marcar al cerrar)
 
-- [x] Stack de 5 capas definido (incluyendo Capa 00 Blockchain).
+- [x] Stack de 5 capas definido (incluyendo Capa 00 eVVM).
 - [x] Entidades del grafo (13 tipos) con reglas de acceso por nivel.
 - [x] Pipeline de ingesta end-to-end con jerarquía de fuentes.
 - [x] DB schema de usuarios con `channel_ref_hash`.
