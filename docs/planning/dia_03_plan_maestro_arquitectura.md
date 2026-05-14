@@ -138,14 +138,22 @@ Utilizamos **eVVM** (Virtual Blockchain) para asegurar la integridad de la memor
 2. **Chunking Strategy:** Lógica para dividir texto en fragmentos con metadatos. (OK)
 3. **Vector Storage:** Almacenamiento en `pgvector` validado. (OK - Embeddings opcionales según API Key).
 
-### Fase 3: Integración eVVM
-1. **eVVM Anchoring:** Script para enviar el `content_hash` a la Virtual Blockchain y recuperar el `tx_hash`.
-2. **Integrity Check:** Función de utilidad que compara el hash local contra el registro on-chain durante la recuperación.
+### Fase 3: Integración eVVM ✅ FINALIZADA
+1. **eVVM Anchoring:** Script para enviar el `content_hash` a la Virtual Blockchain. (OK)
+2. **Integrity Check:** Función de utilidad para comparar hashes. (OK)
 
-### Fase 4: Orquestadores y RAG
-1. **Conmutador Service:** Implementar cifrado/descifrado AES-256-GCM para la comunicación entre agentes.
-2. **Router de Rol:** Lógica que instancia el orquestador correcto (Sonnet 3.5) según el `role_slug` detectado.
-3. **RAG Tool:** Implementar la herramienta de búsqueda que el orquestador usa para consultar Postgres filtrando por nivel de acceso.
+### Fase 4: Orquestadores y RAG ✅ FINALIZADA
+1. **Conmutador Service:** Implementado cifrado AES-256-GCM. (OK)
+2. **Router de Rol:** Lógica de instanciación de orquestadores. (OK)
+3. **RAG Tool:** Herramienta de búsqueda semántica integrada con Claude 3.5. (OK)
+
+---
+
+## 📈 Futura Escala y Soberanía (Open Source)
+Para comunidades de <500 personas, se contempla la migración a un stack 100% Open Source:
+- **Orquestación:** [Dify](https://dify.ai/) (Self-hosted).
+- **Modelos:** Llama 3 (8B/70B) vía **Ollama** o **vLLM**.
+- **Ventaja:** Cero costo por token y soberanía absoluta de los datos comunitarios.
 
 ---
 
