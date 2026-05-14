@@ -2,6 +2,7 @@ const { parseDocument } = require('./parser');
 const { chunkText } = require('./chunker');
 const { generateEmbedding } = require('./embedder');
 const { pool } = require('../kernel/db');
+const trust = require('../trust/evvm');
 const crypto = require('crypto');
 
 /**
@@ -37,7 +38,16 @@ async function ingestFile(filePath, metadata) {
       );
       const versionId = versionRes.rows[0].id;
 
-      // 3. Generar Chunks e Insertar con Embeddings
+      // 3. Anclaje en eVVM (Trust Layer)
+      const anchor = await trust.anchorHash(contentHash);
+      if (anchor.status === 'anchored') {
+        await client.query(
+          'INSERT INTO blockchain_anchors (version_id, content_hash, tx_hash, chain_id) VALUES ($1, $2, $3, $4)',
+          [versionId, contentHash, anchor.txHash, anchor.chainId]
+        );
+      }
+
+      // 4. Generar Chunks e Insertar con Embeddings
       const chunks = chunkText(text);
       console.log(`✂️  Texto dividido en ${chunks.length} fragmentos.`);
 

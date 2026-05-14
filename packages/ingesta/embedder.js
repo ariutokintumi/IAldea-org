@@ -1,5 +1,7 @@
 const { OpenAI } = require('openai');
-require('dotenv').config({ path: '../../.env' });
+const path = require('path');
+// Cargar .env desde la raíz del proyecto
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 let openai = null;
 if (process.env.OPENAI_API_KEY) {
