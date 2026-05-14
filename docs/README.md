@@ -2,7 +2,7 @@
 
 ## Guías
 
-- **[`reestructura.md`](../reestructura.md)** — árbol permitido **solo Día 1–2** (CONTEXTO §10).
+- **[`repo-structure.md`](../repo-structure.md)** — árbol permitido **solo Día 1–2** (CONTEXTO §10).
 - **[`guia-diaria.md`](../guia-diaria.md)** — recordatorio diario del equipo (incluye Día 3+ como referencia).
 
 ## Día 1

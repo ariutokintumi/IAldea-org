@@ -6,7 +6,7 @@
 
 - Matriz **Etapa × Rol** (CSV): `[docs/roles/permission-matrix.csv](../roles/permission-matrix.csv)`.
 - Resumen de roles: `[docs/roles/role-model.md](../roles/role-model.md)`.
-- **Árbol permitido en el repo (Día 1–2):** `[reestructura.md](../../reestructura.md)`. El árbol completo del sprint sigue en `CONTEXTO-POPUP-VILLAGE.md` §18; la tabla §13 de este documento contrasta con el CONTEXTO.
+- **Árbol permitido en el repo (Día 1–2):** `[repo-structure.md](../../repo-structure.md)`. El árbol completo del sprint sigue en `CONTEXTO-POPUP-VILLAGE.md` §18; la tabla §13 de este documento contrasta con el CONTEXTO.
 
 ---
 
@@ -330,9 +330,9 @@ role_permissions:
 | Elemento §18 (CONTEXTO)                                               | Estado al cierre Día 2                                        |
 | --------------------------------------------------------------------- | ------------------------------------------------------------- |
 | `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`                               | Raíz; revisar con el equipo.                                  |
-| `docs/roles/`*, `config/roles.example.yaml`, `community-schema.json`  | Entregables Día 2 (ver `reestructura.md`).                    |
+| `docs/roles/`*, `config/roles.example.yaml`, `community-schema.json`  | Entregables Día 2 (ver `repo-structure.md`).                    |
 | `docs/pop-up-2026/day-1.md`, `day-2.md`                               | Minutas.                                                      |
-| `docs/architecture.md`, `apps/web/`, `apps/api/`, `packages/*` código | **Día 3+** — fuera del repo hasta su día (`reestructura.md`). |
+| `docs/architecture.md`, `apps/web/`, `apps/api/`, `packages/*` código | **Día 3+** — fuera del repo hasta su día (`repo-structure.md`). |
 
 
 **Commits:** mensajes en inglés, imperativo; ramas por día según convención del CONTEXTO.

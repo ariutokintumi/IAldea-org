@@ -17,7 +17,7 @@ This repository is **pre-build**. The build sprint starts at the Pop-Up City in 
 
 If you are arriving for the build sprint, jump to [Getting involved](#getting-involved). If you are not, watch this repo and follow [ialdea.org](https://ialdea.org); the first commits land May 11.
 
-**This fork (Pop-Up week):** tracked files follow **[`reestructura.md`](reestructura.md)** — **Días 1–2** según [`CONTEXTO-POPUP-VILLAGE.md`](CONTEXTO-POPUP-VILLAGE.md) §10 (visión, SOUL, roles, matriz, YAML, `community-schema.json`, minutas). Calendario del equipo: [`guia-diaria.md`](guia-diaria.md). Arquitectura detallada, web chat y agentes: **Día 3+**.
+**This fork (Pop-Up week):** tracked files follow **[`repo-structure.md`](repo-structure.md)** — **Días 1–2** según [`CONTEXTO-POPUP-VILLAGE.md`](CONTEXTO-POPUP-VILLAGE.md) §10 (visión, SOUL, roles, matriz, YAML, `community-schema.json`, minutas). Calendario del equipo: [`guia-diaria.md`](guia-diaria.md). Arquitectura detallada, web chat y agentes: **Día 3+**.
 
 ---
 
@@ -175,11 +175,11 @@ Detailed week schedule for the Pop-Up City: <https://ialdea.org#popup>.
 
 ## Repository structure — cierre **Día 2**
 
-El árbol permitido está en **[`reestructura.md`](reestructura.md)**. Resumen:
+El árbol permitido está en **[`repo-structure.md`](repo-structure.md)**. Resumen:
 
 ```
 ialdea-org/
-├── CONTEXTO-POPUP-VILLAGE.md, guia-diaria.md, reestructura.md
+├── CONTEXTO-POPUP-VILLAGE.md, guia-diaria.md, repo-structure.md
 ├── README.md, LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md
 ├── docs/
 │   ├── vision.md, principles.md, civic-safety.md, privacy.md, positioning-v1.md
@@ -192,7 +192,7 @@ ialdea-org/
 └── config/                      policy_config.example + roles.example
 ```
 
-**Día 3+** (arquitectura, Kernel, `apps/web`, agentes, ingesta): ver §10 del CONTEXTO; ampliar `reestructura.md` al abrir cada día.
+**Día 3+** (arquitectura, Kernel, `apps/web`, agentes, ingesta): ver §10 del CONTEXTO; ampliar `repo-structure.md` al abrir cada día.
 
 ---
 

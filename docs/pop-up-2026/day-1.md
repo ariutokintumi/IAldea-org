@@ -36,7 +36,7 @@
 - [x] [`docs/civic-safety.md`](../civic-safety.md) — ⚠️ placeholder mínimo (remite a `policy_config.yaml`)
 - [x] [`docs/privacy.md`](../privacy.md) — ⚠️ placeholder mínimo (3 modos descritos en README)
 - [x] [`docs/vision.md`](../vision.md) — ⚠️ placeholder mínimo (remite a README y SOUL.example.md)
-- [x] [`reestructura.md`](../../reestructura.md) — ✅ árbol de archivos permitidos Días 1–2
+- [x] [`repo-structure.md`](../../repo-structure.md) — ✅ árbol de archivos permitidos Días 1–2
 - [x] [`CONTEXTO-POPUP-VILLAGE.md`](../../CONTEXTO-POPUP-VILLAGE.md) — ✅ contexto completo del sprint
 
 > **Nota:** `principles.md`, `civic-safety.md`, `privacy.md` y `vision.md` son placeholders que remiten al README y al SOUL.example.md donde vive el contenido completo. Pendiente expandirlos con el texto que el equipo acuerde como canónico en estos docs.
