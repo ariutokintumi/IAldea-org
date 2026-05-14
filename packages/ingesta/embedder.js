@@ -1,16 +1,19 @@
 const { OpenAI } = require('openai');
 require('dotenv').config({ path: '../../.env' });
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai = null;
+if (process.env.OPENAI_API_KEY) {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 /**
  * Genera el vector de embedding para un texto usando OpenAI.
  * Modelo: text-embedding-3-small (1536 dimensiones)
  */
 async function generateEmbedding(text) {
-  if (!process.env.OPENAI_API_KEY) {
+  if (!openai) {
     console.warn('⚠️ No hay OPENAI_API_KEY. El vector será nulo (solo para pruebas).');
     return null;
   }

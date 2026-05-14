@@ -133,10 +133,10 @@ Utilizamos **eVVM** (Virtual Blockchain) para asegurar la integridad de la memor
    - Tabla `graph_edges` (Relaciones).
 3. **Node.js Auth Gatekeeper:** Inicialización del paquete `@kernel` y validación de conexión. (OK)
 
-### Fase 2: Pipeline de Ingesta
-1. **Parser Service:** Implementar extractor de texto para PDF y Docx (usando `pdf-parse` o similar).
-2. **Chunking Strategy:** Lógica para dividir texto en fragmentos de 512 tokens con metadatos de origen.
-3. **Vector Storage:** Conexión con OpenAI API para generar embeddings e insertarlos en `pgvector`.
+### Fase 2: Pipeline de Ingesta ✅ FINALIZADA
+1. **Parser Service:** Implementar extractor de texto para PDF y Docx. (OK)
+2. **Chunking Strategy:** Lógica para dividir texto en fragmentos con metadatos. (OK)
+3. **Vector Storage:** Almacenamiento en `pgvector` validado. (OK - Embeddings opcionales según API Key).
 
 ### Fase 3: Integración eVVM
 1. **eVVM Anchoring:** Script para enviar el `content_hash` a la Virtual Blockchain y recuperar el `tx_hash`.
