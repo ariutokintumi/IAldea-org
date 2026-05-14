@@ -133,21 +133,57 @@ Cada rol tiene su propio orquestador con un **System Prompt** derivado de la [Ma
 | `orc_financiador` | `financiador` | Métricas agregadas (L1 acotado). |
 | `orc_admin` | `admin_tecnico`, `operador_piloto` | Configuración, logs técnicos, system health. |
 
-### Flujo de entrada (canal WhatsApp)
+### Flujo de entrada (canal WhatsApp) — Detalle de Orquestación
 
 ```mermaid
 flowchart TD
-  WA([👤 WhatsApp API]) --> RL[Rate Limiter]
-  RL --> AL[Check Access Level\nNode.js]
-  AL -->|Acceso OK| ROUTER{Router de Rol\nNode.js}
-  ROUTER --> ORCS[Orquestadores por Rol\nSonnet 3.5]
-  ORCS --> SW[Conmutador\nTúnel Cifrado]
-  SW --> MEM[Subagentes\nMemoria / FAQ]
-  MEM --> KERN[(Kernel\nPostgres)]
-  KERN --> BC{eVVM\nVirtual Blockchain}
-  BC -->|Integridad OK| SW
-  SW --> AUD[Auditor\nCapa Safety]
-  AUD --> WA2([✅ Respuesta con Citas])
+    A([👤 Usuario\n+ Teléfono]) -->|WhatsApp Mensaje| B[WhatsApp API]
+    B --> C[Check User Access\nNode.js]
+
+    C -->|L0| REJ[Rechazo zero-token]
+    C -->|L1-L3| ROUTER{Router de Rol\nNode.js}
+
+    subgraph ORCS["🛡️ Orquestadores Dedicados (Sonnet 3.5)"]
+        ROUTER -->|ciudadano| ORC_C[orc_ciudadano]
+        ROUTER -->|secretaria| ORC_S[orc_secretaria]
+        ROUTER -->|coordinacion| ORC_CO[orc_coordinacion]
+        ROUTER -->|...otros| ORC_N[Orquestador N]
+    end
+
+    ORC_C -->|Msg + Key| SW
+    ORC_S -->|Msg + Key| SW
+    ORC_CO -->|Msg + Key| SW
+    ORC_N -->|Msg + Key| SW
+
+    subgraph WORKERS["⚙️ Workers (Subagentes)"]
+        SW[🔀 Conmutador\nAES-256-GCM]
+        SW -->|🔒| Sub1[Subagente 1]
+        SW -->|🔒| Sub2[Subagente 2]
+        Sub1 -->|🔒| SW
+        Sub2 -->|🔒| SW
+    end
+
+    SW -->|Respuesta en claro| ORCS
+    ORCS --> AUDIT[Auditor Safety\nSOUL.md]
+    AUDIT --> RESP([✅ Respuesta al usuario])
+```
+
+> **🛡️ Regla de Silencio (Fail-safe):** Si el Conmutador no provee una clave válida o el descifrado falla, el subagente tiene estrictamente prohibido emitir respuesta. No hay clave = No hay mensaje.
+
+---
+
+### Verificación de Confianza — eVVM Layer
+
+```mermaid
+sequenceDiagram
+    participant K as 📚 Kernel (Memory)
+    participant B as ⛓️ eVVM (Trust Layer)
+    participant S as 🛡️ Auditor (Safety)
+
+    K->>B: ¿Hash de documento verificado?
+    B-->>K: OK (Anclaje verificado on-chain)
+    K->>S: Datos verificados + Metadata
+    S-->>S: Validación SOUL.md
 ```
 
 ### Subagentes definidos (MVP)
