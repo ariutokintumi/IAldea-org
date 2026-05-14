@@ -11,7 +11,6 @@
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │  04 / SAFETY     Auditor + SOUL.md + policy_config.yaml          │
-│                  Toda respuesta pasa aquí antes de salir.        │
 │                  Filtra: acusaciones, alucinaciones, privacidad, │
 │                  out-of-scope, citas faltantes.                   │
 ├──────────────────────────────────────────────────────────────────┤
@@ -27,9 +26,11 @@
 │  02 / GRAPH      Knowledge Graph + Vector Index                  │
 │                  Entidades, relaciones, recuperación semántica.  │
 ├──────────────────────────────────────────────────────────────────┤
-│  01 / KERNEL     Memory Kernel                                   │
+│  01 / KERNEL     Memory Kernel (Postgres + pgvector)             │
 │                  Documentos, actas, acuerdos, versiones.         │
-│                  La comunidad es dueña del Kernel.               │
+├──────────────────────────────────────────────────────────────────┤
+│  00 / TRUST      Blockchain (Monad / EVM)                        │
+│                  Anclaje de Hashes, Integridad y Trazabilidad.   │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -136,18 +137,17 @@ Cada rol tiene su propio orquestador con un **System Prompt** derivado de la [Ma
 
 ```mermaid
 flowchart TD
-  WA([WhatsApp API]) --> RL[Rate Limiter\npor número]
-  RL --> AL[Check Access Level\nNode.js · L0–L3]
-  AL -->|Sin acceso L0| REJ[Rechazo\nzero-token]
+  WA([👤 WhatsApp API]) --> RL[Rate Limiter]
+  RL --> AL[Check Access Level\nNode.js]
   AL -->|Acceso OK| ROUTER{Router de Rol\nNode.js}
-  ROUTER -->|ciudadano| ORCC[orc_ciudadano]
-  ROUTER -->|secretaria| ORCS[orc_secretaria]
-  ROUTER -->|...otros roles| ORCN[Orquestador N]
-  ORCC --> SW[Conmutador\nTúnel Cifrado]
-  ORCS --> SW
-  ORCN --> SW
+  ROUTER --> ORCS[Orquestadores por Rol\nSonnet 3.5]
+  ORCS --> SW[Conmutador\nTúnel Cifrado]
+  SW --> MEM[Subagentes\nMemoria / FAQ]
+  MEM --> KERN[(Kernel\nPostgres)]
+  KERN --> BC{Blockchain\nTrust Layer}
+  BC -->|Integridad OK| SW
   SW --> AUD[Auditor\nCapa Safety]
-  AUD --> WA2([Respuesta al usuario])
+  AUD --> WA2([✅ Respuesta con Citas])
 ```
 
 ### Subagentes definidos (MVP)
@@ -252,13 +252,41 @@ flowchart LR
 
 ---
 
-## Decisiones de Día 3 aún pendientes
+## Capa 00 / Trust — Blockchain
 
-- [ ] Definir el modelo de embedding a usar (OpenAI `text-embedding-3-small` vs. local `nomic-embed-text`)
-- [ ] Elegir vector DB (pgvector en Postgres vs. Chroma local)
-- [ ] Definir graph DB (Neo4j vs. relacional con edges en Postgres)
-- [ ] System prompts completos por subagente (borrador en Day 4)
-- [ ] Tools disponibles por subagente y nivel (alineado a `policy_config`)
+Ancla la verdad del Kernel fuera del control de un solo administrador. Asegura que los documentos citados por la IA no han sido manipulados.
+
+### Modelo de datos — Anclajes Blockchain
+
+```sql
+CREATE TABLE blockchain_anchors (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  document_version_id UUID NOT NULL REFERENCES document_versions(id),
+  content_hash        TEXT NOT NULL,        -- SHA-256 del documento
+  tx_hash             TEXT NOT NULL,        -- Hash de transacción en Monad/EVM
+  chain_id            INTEGER NOT NULL,
+  anchored_at         TIMESTAMPTZ DEFAULT now(),
+  verified            BOOLEAN DEFAULT FALSE
+);
+```
+
+### Flujo de Verificación (Consulta)
+
+1.  El subagente recupera el fragmento del Kernel.
+2.  Obtiene el `content_hash` de la versión del documento.
+3.  Consulta (vía RPC o indexador) si existe el `tx_hash` para ese `content_hash`.
+4.  Si coincide, la IA puede declarar: *"Documento íntegro verificado en cadena"*.
+
+---
+
+## Decisiones de Día 3 — Finalizadas ✅
+
+- [x] **LLM:** Claude 3.5 Sonnet (Cerebro de orquestadores y subagentes).
+- [x] **Embeddings:** OpenAI `text-embedding-3-small` (Migración a local Nomic en Día 6).
+- [x] **Vector DB:** `pgvector` en Postgres (Simplicidad y robustez).
+- [x] **Graph DB:** Relacional con Edges en Postgres (Eficiencia para <500 personas).
+- [ ] System prompts completos por subagente (Borrador en Day 4).
+- [ ] Tools disponibles por subagente y nivel (Alineado a `policy_config`).
 
 ---
 

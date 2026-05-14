@@ -31,7 +31,8 @@ El sistema se divide en 4 capas verticales, cada una con responsabilidad acotada
 |---|---|---|
 | **01** | Kernel — Memory | Almacén persistente de documentos comunitarios. Versionado, exportable. |
 | **02** | Graph + Vectors | Grafo de entidades/relaciones + índice semántico para recuperación. |
-| **03** | Agents | Orquestadores dedicados por ROL (ciudadano, secretaria, etc.), subagentes, Conmutador. |
+| **01** | Kernel — Memory | Almacén persistente de documentos comunitarios. Postgres + pgvector. |
+| **00** | Trust — Blockchain | Anclaje de hashes y firmas (Monad/EVM) para integridad documental. |
 | **04** | Safety | Auditor que valida toda respuesta contra `SOUL.md` + `policy_config.yaml` antes de salir. |
 
 **Principio de diseño:** cada capa solo expone lo que la capa superior necesita. El Kernel no sabe de agentes; el Auditor no sabe de vectores.
@@ -203,26 +204,44 @@ CREATE TABLE memberships (
 
 ---
 
-## 9. Decisiones pendientes al cierre del Día 3
+## 10. Capa 00 / Trust — Blockchain
 
-- [ ] Embedding model: `text-embedding-3-small` (OpenAI) vs. `nomic-embed-text` (local)
-- [ ] Vector DB: `pgvector` en Postgres vs. Chroma local
-- [ ] Graph DB: Neo4j vs. relacional con edges en Postgres
-- [ ] System prompts completos por subagente (borrador en Día 4)
-- [ ] Tools disponibles por subagente y nivel (alineado a `policy_config`)
-- [ ] Definir umbral de chunking óptimo según tipo de documento comunitario
+Ancla la verdad del Kernel fuera del control de un solo administrador.
+
+### Modelo de datos — Anclajes Blockchain
+
+```sql
+CREATE TABLE blockchain_anchors (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  document_version_id UUID NOT NULL REFERENCES document_versions(id),
+  content_hash        TEXT NOT NULL,        -- SHA-256 del documento
+  tx_hash             TEXT NOT NULL,        -- Hash de transacción en Monad/EVM
+  chain_id            INTEGER NOT NULL,
+  anchored_at         TIMESTAMPTZ DEFAULT now(),
+  verified            BOOLEAN DEFAULT FALSE
+);
+```
 
 ---
 
-## 10. Salidas del taller (marcar al cerrar)
+## 11. Decisiones de Día 3 — Finalizadas ✅
 
-- [x] Stack de 4 capas definido y documentado en `docs/architecture.md`.
+- [x] **LLM:** Claude 3.5 Sonnet.
+- [x] **Embeddings:** OpenAI `text-embedding-3-small`.
+- [x] **Vector DB:** `pgvector` en Postgres.
+- [x] **Graph DB:** Relacional con Edges en Postgres.
+
+---
+
+## 12. Salidas del taller (marcar al cerrar)
+
+- [x] Stack de 5 capas definido (incluyendo Capa 00 Blockchain).
 - [x] Entidades del grafo (13 tipos) con reglas de acceso por nivel.
 - [x] Pipeline de ingesta end-to-end con jerarquía de fuentes.
-- [x] DB schema de usuarios con `channel_ref_hash` (no teléfono en claro).
-- [x] Subagentes del MVP definidos (5) con asignación de orquestador y llave.
-- [x] Auditor definido con categorías de bloqueo y escudo anti-injection.
-- [ ] Decisiones de stack técnico (vector DB, graph DB, embedding model) → Día 4.
+- [x] DB schema de usuarios con `channel_ref_hash`.
+- [x] Subagentes del MVP definidos con orquestadores por rol.
+- [x] Auditor definido con escudo anti-injection.
+- [x] Decisiones de stack técnico cerradas.
 
 ---
 
