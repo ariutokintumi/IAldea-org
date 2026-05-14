@@ -1,0 +1,22 @@
+services:
+  db:
+    image: ankane/pgvector:v0.5.1
+    container_name: ialdea-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ialdea_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-ialdea2026}
+    volumes:
+      - ./infra/db/data:/var/lib/postgresql/data
+      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d ialdea_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  default:
+    name: ialdea-network
