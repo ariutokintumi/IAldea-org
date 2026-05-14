@@ -31,7 +31,7 @@ El sistema se divide en 4 capas verticales, cada una con responsabilidad acotada
 |---|---|---|
 | **01** | Kernel — Memory | Almacén persistente de documentos comunitarios. Versionado, exportable. |
 | **02** | Graph + Vectors | Grafo de entidades/relaciones + índice semántico para recuperación. |
-| **03** | Agents | Orquestadores, subagentes, Conmutador (ver `dia_03_whatsapp_subagentes_orquestacion.md`). |
+| **03** | Agents | Orquestadores dedicados por ROL (ciudadano, secretaria, etc.), subagentes, Conmutador. |
 | **04** | Safety | Auditor que valida toda respuesta contra `SOUL.md` + `policy_config.yaml` antes de salir. |
 
 **Principio de diseño:** cada capa solo expone lo que la capa superior necesita. El Kernel no sabe de agentes; el Auditor no sabe de vectores.
@@ -111,22 +111,19 @@ El sistema se divide en 4 capas verticales, cada una con responsabilidad acotada
 
 Ver documento completo: [`dia_03_whatsapp_subagentes_orquestacion.md`](dia_03_whatsapp_subagentes_orquestacion.md).
 
-**Resumen:**
-
-- **Orquestador 1 (No-AI):** flujos básicos sin LLM — FAQs predefinidas, menús, trámites simples.
-- **Orquestador 2 (IA):** flujos complejos con LLM — recuperación semántica, comparación de escenarios, memoria.
+- **Orquestadores dedicados:** un orquestador por cada rol oficial (`orc_ciudadano`, `orc_secretaria`, etc.).
 - **Conmutador:** túnel cifrado AES-256-GCM entre orquestadores y subagentes.
 - **Rate limiter:** antes del check de acceso, por número de teléfono.
 
 ### Subagentes del MVP
 
-| ID | Orquestador | Responsabilidad |
+| ID | Acceso por Orquestador | Responsabilidad |
 |---|---|---|
-| `sub-faq` | ORC1 + ORC2 (compartido) | FAQs de documentos públicos con citas |
-| `sub-memoria` | ORC2 (exclusivo) | Acuerdos y actas del Kernel con trazabilidad |
-| `sub-tramites` | ORC1 + ORC2 (compartido) | Guía paso a paso de procedimientos |
-| `sub-agenda` | ORC2 (exclusivo) | Eventos, plazos y estado de proyectos |
-| `sub-agregados` | ORC2 (exclusivo, L2+) | Métricas agregadas de retroalimentación (k ≥ 3) |
+| `sub-faq` | Todos | FAQs de documentos públicos con citas |
+| `sub-memoria` | L2+ (`orc_secretaria`, `orc_coordinacion`, etc.) | Acuerdos y actas del Kernel con trazabilidad |
+| `sub-tramites` | Todos | Guía paso a paso de procedimientos |
+| `sub-agenda` | L2+ | Eventos, plazos y estado de proyectos |
+| `sub-agregados` | L2+ (`k ≥ 3`) | Métricas agregadas de retroalimentación |
 
 ---
 

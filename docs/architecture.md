@@ -15,8 +15,12 @@
 │                  Filtra: acusaciones, alucinaciones, privacidad, │
 │                  out-of-scope, citas faltantes.                   │
 ├──────────────────────────────────────────────────────────────────┤
-│  03 / AGENTS     Orquestador 1 (No-AI) · Orquestador 2 (IA)     │
-│                  Citizen agent · Authority/Committee agent        │
+│  03 / AGENTS     Orquestadores dedicados por ROL:                │
+│                  - orc_ciudadano      - orc_secretaria           │
+│                  - orc_coordinacion   - orc_comite               │
+│                  - orc_tesoreria      - orc_validador            │
+│                  - orc_financiador    - orc_admin                │
+│                                                                  │
 │                  Conmutador (túnel cifrado ↔ subagentes)         │
 │                  Role-aware. Cited. Refuses out-of-scope.        │
 ├──────────────────────────────────────────────────────────────────┤
@@ -113,6 +117,21 @@ Cada fragmento de documento (chunk) se embeds y almacena en el índice vectorial
 
 Detalle completo en [`docs/planning/dia_03_whatsapp_subagentes_orquestacion.md`](planning/dia_03_whatsapp_subagentes_orquestacion.md).
 
+### Orquestadores dedicados (uno por rol)
+
+Cada rol tiene su propio orquestador con un **System Prompt** derivado de la [Matriz de comportamiento](docs/roles/matriz-comportamiento-por-rol.md).
+
+| Orquestador | Roles asociados | Acceso Típico |
+|---|---|---|
+| `orc_ciudadano` | `ciudadano` | Fuentes públicas, feedback ciudadano. |
+| `orc_secretaria` | `secretaria` | Registro formal, minutas, Kernel completo. |
+| `orc_coordinacion` | `coordinacion` | Ciclo completo, estados de avance. |
+| `orc_comite` | `comite_miembro` | Propuestas, comparativas, agregados. |
+| `orc_tesoreria` | `tesoreria` | Viabilidad financiera, presupuestos. |
+| `orc_validador` | `validador` | Evidencias, estados de verificación. |
+| `orc_financiador` | `financiador` | Métricas agregadas (L1 acotado). |
+| `orc_admin` | `admin_tecnico`, `operador_piloto` | Configuración, logs técnicos, system health. |
+
 ### Flujo de entrada (canal WhatsApp)
 
 ```mermaid
@@ -120,10 +139,14 @@ flowchart TD
   WA([WhatsApp API]) --> RL[Rate Limiter\npor número]
   RL --> AL[Check Access Level\nNode.js · L0–L3]
   AL -->|Sin acceso L0| REJ[Rechazo\nzero-token]
-  AL -->|L1 · básico| ORC1[Orquestador 1\nNo-AI]
-  AL -->|L2–L3 · IA| ORC2[Orquestador 2\nIA + Conmutador]
-  ORC1 --> AUD[Auditor\nCapa Safety]
-  ORC2 --> AUD
+  AL -->|Acceso OK| ROUTER{Router de Rol\nNode.js}
+  ROUTER -->|ciudadano| ORCC[orc_ciudadano]
+  ROUTER -->|secretaria| ORCS[orc_secretaria]
+  ROUTER -->|...otros roles| ORCN[Orquestador N]
+  ORCC --> SW[Conmutador\nTúnel Cifrado]
+  ORCS --> SW
+  ORCN --> SW
+  SW --> AUD[Auditor\nCapa Safety]
   AUD --> WA2([Respuesta al usuario])
 ```
 

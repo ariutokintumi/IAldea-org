@@ -8,7 +8,7 @@
 
 ## Resumen
 
-Chatbot de WhatsApp con dos capas bien diferenciadas: una **capa No-AI** para flujos básicos y una **capa IA** para flujos complejos con subagentes. El acceso se valida **antes** de tocar cualquier LLM. Los mensajes entre orquestadores y subagentes viajan encriptados a través del **Conmutador**, que actúa como túnel bidireccional seguro. Cada orquestador posee las llaves de sus subagentes, y ciertos subagentes pueden ser compartidos entre orquestadores.
+Chatbot de WhatsApp orquestado por **ROLES**. El sistema identifica al usuario, valida su nivel de acceso y lo deriva a un **Orquestador dedicado** (ej: `orc_ciudadano`, `orc_secretaria`). El acceso se valida **antes** de tocar cualquier LLM. Los mensajes entre orquestadores y subagentes viajan encriptados a través del **Conmutador**, que actúa como túnel bidireccional seguro. Cada orquestador posee las llaves de sus propios subagentes.
 
 ---
 
@@ -17,8 +17,8 @@ Chatbot de WhatsApp con dos capas bien diferenciadas: una **capa No-AI** para fl
 | Principio | Descripción |
 |-----------|-------------|
 | **Auth primero** | El nivel de acceso se resuelve en Node.js, nunca por el LLM |
-| **Dos capas separadas** | Capa No-AI para rechazos/flujos simples, Capa IA para subagentes |
-| **Llaves en el orquestador** | Cada orquestador posee las llaves de sus propios subagentes |
+| **Orquestadores por Rol** | Cada rol oficial tiene su propio orquestador con prompt y contexto aislado |
+| **Llaves por Orquestador** | Cada orquestador posee las llaves de sus propios subagentes |
 | **Conmutador como túnel** | Encripta y desencripta mensajes en ambas direcciones — el mensaje no circula en claro *en el segmento* orquestador ↔ subagente (ver nota de amenazas abajo) |
 | **Subagentes compartibles** | Algunos subagentes pueden ser accedidos por más de un orquestador si comparten llave |
 | **Zero-token en rechazo** | Usuarios sin acceso no consumen tokens de LLM |
@@ -32,34 +32,33 @@ Chatbot de WhatsApp con dos capas bien diferenciadas: una **capa No-AI** para fl
 ```mermaid
 flowchart TD
     A([👤 Usuario\n+ Teléfono]) -->|WhatsApp Mensaje| B[WhatsApp API]
-    B --> C[Check User\nAccess Level]
+    B --> C[Check User Access\nNode.js]
 
-    C -->|Camino 1\nNo AI| ORC1
+    C -->|L0| REJ[Rechazo zero-token]
+    C -->|L1-L3| ROUTER{Router de Rol\nNode.js}
 
-    C -->|Camino 2\nNode.js Router\nAccess Level| ORC2
-
-    subgraph NOAI["⬜ Capa No-AI"]
-        ORC1[Orquestador 1\nKey 1...Key N\nContext]
+    subgraph ORCS["🛡️ Orquestadores Dedicados"]
+        ROUTER -->|ciudadano| ORC_C[orc_ciudadano]
+        ROUTER -->|secretaria| ORC_S[orc_secretaria]
+        ROUTER -->|coordinacion| ORC_CO[orc_coordinacion]
+        ROUTER -->|...otros| ORC_N[Orquestador N]
     end
 
-    subgraph IA["🟦 Capa IA"]
-        ORC2[Orquestador 2\nKey 1, Key 2, Key 3\nContext]
-        ORC2 -->|Sub + Key + Prompt| SW
+    ORC_C -->|Msg + Key| SW
+    ORC_S -->|Msg + Key| SW
+    ORC_CO -->|Msg + Key| SW
+    ORC_N -->|Msg + Key| SW
 
-        SW[🔀 Conmutador\nScript / Lógica\nEncrypt ↕ Decrypt]
-
-        SW -->|ENCRYPT OK ↓| Sub1[Sub 1]
-        SW -->|ENCRYPT OK ↓| Sub2[Sub 2]
-        SW -->|ENCRYPT OK ↓| Sub3[Sub 3]
-        Sub1 -->|Respuesta DECRYPT ↑| SW
-        Sub2 -->|Respuesta DECRYPT ↑| SW
-        Sub3 -->|Respuesta DECRYPT ↑| SW
-        Sub1 --- SubN[Sub N...]
+    subgraph WORKERS["⚙️ Workers"]
+        SW[🔀 Conmutador\nEncrypt ↕ Decrypt]
+        SW -->|🔒| Sub1[Subagente 1]
+        SW -->|🔒| Sub2[Subagente 2]
+        Sub1 -->|🔒| SW
+        Sub2 -->|🔒| SW
     end
 
-    ORC1 --> RESP
-    SW -->|Respuesta desencriptada| ORC2
-    ORC2 --> RESP([✅ Respuesta al usuario])
+    SW -->|Respuesta en claro| ORCS
+    ORCS --> RESP([✅ Respuesta al usuario])
 ```
 
 ---
@@ -78,38 +77,18 @@ flowchart LR
     E -->|Nivel con IA| G[→ Orquestador 2\nCapa IA]
 ```
 
-Mapeo sugerido con Día 2: **L0/L1** → más tráfico a capa No-AI + respuestas acotadas; **L2/L3** o intenciones que requieren modelo → Orquestador 2 (siempre tras policy).
+Mapeo sugerido: **L0** → Rechazo inmediato; **L1-L3** → Router de Rol identifica el `slug` del usuario y lo deriva al orquestador correspondiente (ej. `ciudadano` → `orc_ciudadano`).
 
 ---
 
-## Detalle: los dos orquestadores
+## Detalle: los orquestadores por rol
 
-### Orquestador 1 — Capa No-AI
+Cada orquestador es una instancia aislada con un **System Prompt** que define su comportamiento según la [Matriz de comportamiento](docs/roles/matriz-comportamiento-por-rol.md).
 
-Maneja flujos que no requieren LLM: respuestas predefinidas, menús, consultas simples. Tiene sus propias llaves para los subagentes básicos que le corresponden.
-
-```mermaid
-flowchart TD
-    ORC1[Orquestador 1]
-    ORC1 --> K1[Key 1\nSubagente básico A]
-    ORC1 --> KN[Key N\nSubagente básico N]
-    ORC1 --> CTX1[Context\npropio]
-```
-
-### Orquestador 2 — Capa IA
-
-Maneja flujos complejos con LLM. Tiene llaves para sus subagentes de IA. Algunos de esos subagentes pueden ser compartidos con el Orquestador 1 si ambos tienen la llave correspondiente.
-
-```mermaid
-flowchart TD
-    ORC2[Orquestador 2]
-    ORC2 --> K1[Key 1\nSubagente IA - exclusivo]
-    ORC2 --> K2[Key 2\nSubagente IA - exclusivo]
-    ORC2 --> K3[Key 3\nSubagente compartido\ncon Orquestador 1]
-    ORC2 --> CTX2[Context\npropio]
-```
-
-**Subagentes compartidos:** si un subagente tiene sentido en ambas capas (ej. un consultor de FAQ), ambos orquestadores pueden tener su llave. El subagente no cambia — solo quién puede invocarlo.
+- **orc_ciudadano:** Tono cercano, limitado a info pública.
+- **orc_secretaria:** Tono formal, acceso a Kernel de actas y minutas.
+- **orc_tesoreria:** Foco en viabilidad y registro financiero.
+- **...etc.**
 
 ---
 
