@@ -48,7 +48,7 @@ class Orchestrator {
   }
 
   /**
-   * Procesa un mensaje del usuario usando Claude 3.5 Sonnet.
+   * Procesa un mensaje del usuario usando Claude 4.6 Sonnet.
    */
   async processMessage(userMessage) {
     const context = await this.searchMemory(userMessage);
@@ -63,7 +63,7 @@ ${context}
 
     try {
       const response = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-20240620",
+        model: "claude-sonnet-4-6",
         max_tokens: 1024,
         system: systemPrompt,
         messages: [{ role: "user", content: userMessage }],

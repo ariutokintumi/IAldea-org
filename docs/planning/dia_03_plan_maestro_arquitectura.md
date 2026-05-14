@@ -145,7 +145,7 @@ Utilizamos **eVVM** (Virtual Blockchain) para asegurar la integridad de la memor
 ### Fase 4: Orquestadores y RAG ✅ FINALIZADA
 1. **Conmutador Service:** Implementado cifrado AES-256-GCM. (OK)
 2. **Router de Rol:** Lógica de instanciación de orquestadores. (OK)
-3. **RAG Tool:** Herramienta de búsqueda semántica integrada con Claude 3.5. (OK)
+3. **RAG Tool:** Herramienta de búsqueda semántica integrada con **Claude 4.6 Sonnet** (`claude-sonnet-4-6`). (OK)
 
 ---
 
