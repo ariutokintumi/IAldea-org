@@ -17,6 +17,8 @@ This repository is **pre-build**. The build sprint starts at the Pop-Up City in 
 
 If you are arriving for the build sprint, jump to [Getting involved](#getting-involved). If you are not, watch this repo and follow [ialdea.org](https://ialdea.org); the first commits land May 11.
 
+**This fork (Pop-Up week):** tracked files follow **[`repo-structure.md`](repo-structure.md)** — **Días 1–2** según [`CONTEXTO-POPUP-VILLAGE.md`](CONTEXTO-POPUP-VILLAGE.md) §10 (visión, SOUL, roles, matriz, YAML, `community-schema.json`, minutas). Calendario del equipo: [`guia-diaria.md`](guia-diaria.md). Arquitectura detallada, web chat y agentes: **Día 3+**.
+
 ---
 
 ## What IAldea is
@@ -171,56 +173,26 @@ Detailed week schedule for the Pop-Up City: <https://ialdea.org#popup>.
 
 ---
 
-## Repository structure
+## Repository structure — cierre **Día 2**
 
-The repo will fill in across May. Day labels indicate which day of the Pop-Up City sprint lands each artifact.
+El árbol permitido está en **[`repo-structure.md`](repo-structure.md)**. Resumen:
 
 ```
 ialdea-org/
-├── README.md                         you are here
-├── LICENSE                           MIT
-├── CONTRIBUTING.md                   Day 1
-├── CODE_OF_CONDUCT.md                Day 1
-├── SECURITY.md                       Day 6
+├── CONTEXTO-POPUP-VILLAGE.md, guia-diaria.md, repo-structure.md
+├── README.md, LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md
 ├── docs/
-│   ├── vision.md                     Day 1
-│   ├── principles.md                 Day 1
-│   ├── civic-safety.md               Day 1
-│   ├── privacy.md                    Day 1
-│   ├── architecture.md               Day 3
-│   ├── deployment.md                 Day 6
-│   ├── implementation-playbook.md    Day 7
-│   ├── pilot-guide.md                Day 7
-│   └── sponsor-report-template.md    Day 7
+│   ├── vision.md, principles.md, civic-safety.md, privacy.md, positioning-v1.md
+│   ├── README.md
+│   ├── pop-up-2026/day-1.md, day-2.md
+│   ├── planning/                dia_02 + README
+│   └── roles/                   CSV, role-model, user-stories
+├── examples/fictional-community/community-schema.json
 ├── soul/
-│   ├── SOUL.example.md               Day 1
-│   └── SOUL.community-template.md    Day 1
-├── config/
-│   ├── policy_config.example.yaml    Day 2
-│   ├── roles.example.yaml            Day 2
-│   └── sources.example.yaml          Day 3
-├── apps/
-│   ├── web/                          Day 4
-│   └── api/                          Day 4
-├── packages/
-│   ├── memory-kernel/                Day 3
-│   ├── civic-safety/                 Day 6
-│   ├── graph/                        Day 3
-│   ├── retrieval/                    Day 3
-│   ├── agents/                       Day 4
-│   ├── connectors/                   Day 3
-│   └── audit-log/                    Day 1
-├── examples/
-│   └── fictional-community/          Day 5 demo dataset
-├── tests/
-│   ├── red-team/                     Day 6
-│   ├── privacy/                      Day 6
-│   ├── retrieval/                    Day 3
-│   └── safety/                       Day 6
-└── scripts/
-    ├── ingest-docs.py                Day 3
-    └── run-demo.sh                   Day 7
+└── config/                      policy_config.example + roles.example
 ```
+
+**Día 3+** (arquitectura, Kernel, `apps/web`, agentes, ingesta): ver §10 del CONTEXTO; ampliar `repo-structure.md` al abrir cada día.
 
 ---
 

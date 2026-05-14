@@ -1,0 +1,115 @@
+# Ejemplo machine-enforceable — copiar a policy_config.yaml y ajustar por comunidad.
+# Las reglas en _protected_rules no deben eliminarse.
+
+community:
+  id: "comunidad_ejemplo"
+  name: "Comunidad Ejemplo"
+  municipality: ""
+  state: "Oaxaca"
+  size: 0
+  governance: "usos_y_costumbres"
+
+# Medio ciudadano acordado (Día 2): WhatsApp — ver docs/planning/dia_02_gobernanza_roles_y_accesos.md §2
+channels:
+  citizen_primary: "whatsapp"
+  whatsapp:
+    opt_in_required: true
+    privacy_policy_url: ""
+
+language:
+  primary: "es"
+  secondary: ""
+  display_mode: "monolingual"
+
+tone: "cercano"
+
+topics:
+  allowed:
+    - "tramites_gubernamentales"
+    - "comparacion_proyectos"
+    - "informacion_publica"
+    - "historia_comunitaria"
+  blocked:
+    - "electoral"
+    - "legal_advice"
+    - "medical_advice"
+    - "accusations"
+
+privacy:
+  default_mode: "confidential_community"
+  aggregation_threshold: 3
+  aggregate_visibility: "authorities_only"
+  data_retention_days: 365
+
+feedback:
+  enabled: true
+  mode: "confidential"
+
+# Roles canónicos: docs/roles/permission-matrix.csv
+# `authorities` agrupa núcleo de gobernanza; tesorería y validación como listas explícitas.
+roles:
+  authorities:
+    - "secretaria"
+    - "coordinacion"
+  committees: []
+  treasury:
+    - "tesoreria"
+  validation:
+    - "validador"
+  admin:
+    - "admin_plataforma"
+
+role_permissions:
+  citizen:
+    can_query: true
+    can_submit_feedback: true
+    can_view_aggregates: false
+    can_view_documents: true
+  authority:
+    can_query: true
+    can_submit_feedback: true
+    can_view_aggregates: true
+    can_view_documents: true
+    can_compare_scenarios: true
+    can_export_reports: true
+  admin:
+    can_modify_config: true
+    can_ingest_documents: true
+    can_manage_roles: true
+
+sources:
+  types:
+    - "acta_asamblea"
+    - "reglamento_interno"
+    - "minuta_comite"
+    - "oficio_gobierno"
+  external_sources:
+    enabled: true
+    allowed:
+      - "gobierno_federal"
+      - "gobierno_estatal"
+      - "inegi_publico"
+  trust_hierarchy:
+    - "acta_asamblea"
+    - "reglamento_interno"
+    - "oficio_gobierno"
+    - "inegi_publico"
+    - "minuta_comite"
+
+citations:
+  required: true
+  format: "inline"
+
+audit:
+  log_all_queries: true
+  log_config_changes: true
+  log_retention_days: 730
+
+_protected_rules:
+  - "no_legal_advice"
+  - "no_medical_advice"
+  - "no_electoral_recommendations"
+  - "no_accusations"
+  - "no_individual_identification_in_aggregates"
+  - "always_cite_sources"
+  - "log_config_changes"

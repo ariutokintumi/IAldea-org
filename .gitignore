@@ -1,0 +1,56 @@
+# ──────────────────────────────────────────────
+# IAldea — .gitignore
+# ──────────────────────────────────────────────
+
+# Datos geoespaciales / experimentos (no versionar; Día 3+)
+conjunto_de_datos/
+metadatos/
+derivados/
+derivados/*.tif
+derivados/*.tfw
+derivados/*.ovr
+derivados/*.aux.xml
+
+# PDFs de anuario / experimentos (no versionar)
+resumen_Oaxaca.pdf
+resumen_20.pdf
+
+# Scripts temporales de análisis
+oaxaca_scan.py
+
+# Kernel local (generado)
+data/*.sqlite
+
+# Entornos locales de desarrollo
+.venv-pdf/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Guía local del árbol D1–2 (no versionar)
+reestructura.md
