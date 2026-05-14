@@ -51,7 +51,7 @@ Raíz: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `README.md`, `LIC
 | Ruta | Estado |
 |---|---|
 | [`docs/architecture.md`](docs/architecture.md) | ✅ Día 3 — 4 capas, data model, grafo, ingesta, subagentes |
-| [`docs/planning/dia_03_whatsapp_subagentes_orquestacion.md`](docs/planning/dia_03_whatsapp_subagentes_orquestacion.md) | ✅ Arquitectura WhatsApp bot + Conmutador |
+| [`docs/planning/dia_03_plan_maestro_arquitectura.md`](docs/planning/dia_03_plan_maestro_arquitectura.md) | ✅ Plan Maestro: Memoria, Orquestación, eVVM y Fases Técnicas |
 | [`docs/pop-up-2026/day-3.md`](docs/pop-up-2026/day-3.md) | ✅ Minuta Día 3 |
 
 ---
@@ -83,8 +83,7 @@ Raíz: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `README.md`, `LIC
 │   ├── planning/
 │   │   ├── README.md
 │   │   ├── dia_02_gobernanza_roles_y_accesos.md
-│   │   ├── dia_03_arquitectura_memoria.md
-│   │   └── dia_03_whatsapp_subagentes_orquestacion.md ← NUEVO Día 3
+│   │   └── dia_03_plan_maestro_arquitectura.md      ← CONSOLIDADO Día 3
 │   └── roles/ (README.md, excel-sheets.md, *.md — CSVs eliminados)
 ├── examples/fictional-community/community-schema.json
 └── config/policy_config.example.yaml, roles.example.yaml

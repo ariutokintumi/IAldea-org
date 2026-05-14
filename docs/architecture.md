@@ -2,7 +2,7 @@
 
 > Documento de arquitectura del sistema. Cubre las 4 capas del stack, el modelo de datos, el modelo de grafo, la jerarquía de fuentes y el pipeline de ingesta.
 >
-> **Referencia del bot WhatsApp + subagentes:** [`docs/planning/dia_03_whatsapp_subagentes_orquestacion.md`](planning/dia_03_whatsapp_subagentes_orquestacion.md).
+> **Referencia del bot WhatsApp + subagentes:** [`docs/planning/dia_03_plan_maestro_arquitectura.md`](planning/dia_03_plan_maestro_arquitectura.md).
 
 ---
 
@@ -116,7 +116,7 @@ Cada fragmento de documento (chunk) se embeds y almacena en el índice vectorial
 
 ## 03 / Agents — Orquestadores y Subagentes
 
-Detalle completo en [`docs/planning/dia_03_whatsapp_subagentes_orquestacion.md`](planning/dia_03_whatsapp_subagentes_orquestacion.md).
+Detalle completo en [`docs/planning/dia_03_plan_maestro_arquitectura.md`](planning/dia_03_plan_maestro_arquitectura.md).
 
 ### Orquestadores dedicados (uno por rol)
 
