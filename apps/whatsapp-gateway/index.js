@@ -65,22 +65,28 @@ async function handleWhatsAppMessage(phone, text) {
   console.log(`📱 Mensaje de ${phone} (Hash: ${phoneHash})`);
 
   try {
-    // 1. Validar acceso en el Kernel
-    const userRes = await pool.query(
+    // 1. Validar acceso o auto-registrar
+    let userRes = await pool.query(
       'SELECT role_slug, access_level FROM memberships WHERE channel_ref_hash = $1',
       [phoneHash]
     );
 
     let role = 'ciudadano';
-    let level = 0;
+    let level = 1; // Default para nuevos usuarios
 
-    if (userRes.rows.length > 0) {
+    if (userRes.rows.length === 0) {
+      console.log(`✨ Nuevo vecino detectado. Auto-registrando como L1...`);
+      await pool.query(
+        'INSERT INTO memberships (contributor_handle, channel_ref_hash, role_slug, access_level, community_id) VALUES ($1, $2, $3, $4, $5)',
+        [phone, phoneHash, role, level, 'ia_01']
+      );
+    } else {
       role = userRes.rows[0].role_slug;
       level = userRes.rows[0].access_level;
     }
 
     if (level === 0) {
-      await sendWhatsAppResponse(phone, "Lo siento, no tienes acceso al sistema IAldea. Por favor, contacta a un administrador.");
+      await sendWhatsAppResponse(phone, "Lo siento, tu acceso ha sido restringido por la administración de IAldea.");
       return;
     }
 
