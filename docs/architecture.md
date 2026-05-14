@@ -143,7 +143,7 @@ flowchart TD
     C -->|L0| REJ[Rechazo zero-token]
     C -->|L1-L3| ROUTER{Router de Rol\nNode.js}
 
-    subgraph ORCS["🛡️ Orquestadores Dedicados (Sonnet 3.5)"]
+    subgraph ORCS["🛡️ Orquestadores Dedicados\n(Anthropic Claude 3.5 Sonnet)"]
         ROUTER -->|ciudadano| ORC_C[orc_ciudadano]
         ROUTER -->|secretaria| ORC_S[orc_secretaria]
         ROUTER -->|coordinacion| ORC_CO[orc_coordinacion]
@@ -157,10 +157,15 @@ flowchart TD
 
     subgraph WORKERS["⚙️ Workers (Subagentes)"]
         SW[🔀 Conmutador\nAES-256-GCM]
-        SW -->|🔒| Sub1[Subagente 1]
-        SW -->|🔒| Sub2[Subagente 2]
+        SW -->|🔒| Sub1[Subagente 1\n(OpenAI Embeddings)]
+        SW -->|🔒| Sub2[Subagente 2\n(OpenAI Embeddings)]
         Sub1 -->|🔒| SW
         Sub2 -->|🔒| SW
+    end
+
+    subgraph KERNEL["📚 Memoria (Kernel)"]
+        Sub1 --- DB[(Postgres\n+ pgvector)]
+        Sub2 --- DB
     end
 
     SW -->|Respuesta en claro| ORCS
