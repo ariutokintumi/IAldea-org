@@ -4,64 +4,55 @@ const path = require('path');
 const { getSubagent, subagents } = require('./subagents/factory');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
-const soulPath = path.resolve(__dirname, '../../IaAldea_SOUL.md');
-const soulContent = fs.existsSync(soulPath) ? fs.readFileSync(soulPath, 'utf8') : 'No soul found.';
+// Cargar Protocolos de Colaboradores
+const loadDoc = (file) => {
+  const p = path.resolve(__dirname, `../../${file}`);
+  return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
+};
+
+const soulContent = loadDoc('IaAldea_SOUL.md');
+const authorityProtocol = loadDoc('packages/agents/authority.md');
+const citizenProtocol = loadDoc('packages/agents/citizen.md');
+const safetyProtocol = loadDoc('tests/safety/refusals.md');
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 /**
- * CONFIGURACIÓN DE PERSONALIDAD POR ROL (IAldea Experience Matrix)
+ * CONFIGURACIÓN DE ROLES (Alineada con Matriz de Experiencia y Nuevos Protocolos)
  */
 const ROLE_CONFIGS = {
   secretaria: {
     title: "Secretaría de Memoria",
-    focus: "Registrar memoria, crear registros, minutas y comunicados oficiales.",
+    focus: "Registrar memoria oficial, crear registros y minutas.",
     risk: "Registrar información no validada.",
-    priority_agents: ['asambleas', 'legal', 'educacion']
-  },
-  coordinacion: {
-    title: "Coordinación de Procesos",
-    focus: "Cuidar el proceso, revisar, autorizar y coordinar actores.",
-    risk: "Centralizar demasiado poder.",
-    priority_agents: ['transporte', 'agua', 'infraestructura']
-  },
-  comite_miembro: {
-    title: "Miembro del Comité",
-    focus: "Deliberar, proponer, revisar y decidir sobre propuestas comunitarias.",
-    risk: "Exponer datos sensibles.",
-    priority_agents: ['legal', 'asambleas', 'economia']
+    protocol: authorityProtocol,
+    priority_agents: ['asambleas', 'legal']
   },
   tesoreria: {
     title: "Tesorería Comunitaria",
-    focus: "Cuidar recursos, revisar viabilidad y registrar uso de fondos.",
-    risk: "Comprometer el presupuesto sin validación humana.",
-    priority_agents: ['economia', 'infraestructura', 'produccion']
-  },
-  validador: {
-    title: "Validación y Evidencia",
-    focus: "Revisar evidencia, validar cumplimiento y exactitud de informes.",
-    risk: "Juzgar personas en lugar de hechos.",
-    priority_agents: ['asambleas', 'legal', 'seguridad']
+    focus: "Cuidar recursos y viabilidad financiera.",
+    risk: "Comprometer presupuesto sin validación humana.",
+    protocol: authorityProtocol,
+    priority_agents: ['economia', 'infraestructura']
   },
   ciudadano: {
     title: "Participación Ciudadana",
-    focus: "Participar, consultar, preguntar y dar feedback constructivo.",
-    risk: "Propagar rumores o acusaciones sin fundamento.",
-    priority_agents: ['agua', 'salud', 'transporte', 'asambleas']
+    focus: "Participar, consultar y dar feedback constructivo.",
+    risk: "Propagar rumores o acusaciones.",
+    protocol: citizenProtocol,
+    priority_agents: ['agua', 'salud', 'asambleas']
   },
-  financiador: {
-    title: "Observación de Impacto",
-    focus: "Observar impacto y ver métricas públicas agregadas.",
-    risk: "Intentar capturar o condicionar decisiones comunitarias.",
-    priority_agents: ['economia', 'produccion', 'infraestructura']
+  admin: {
+    title: "Administración L3",
+    focus: "Seguridad y configuración técnica.",
+    risk: "Vulnerar privacidad de datos.",
+    protocol: authorityProtocol,
+    priority_agents: ['seguridad', 'legal']
   }
 };
 
-/**
- * Orquestador Especializado por Rol
- */
 class Orchestrator {
   constructor(role, accessLevel) {
     this.role = role.toLowerCase();
@@ -69,24 +60,19 @@ class Orchestrator {
     this.config = ROLE_CONFIGS[this.role] || ROLE_CONFIGS.ciudadano;
   }
 
-  /**
-   * Delegación inteligente a subagentes
-   */
   async getRelevantContext(userMessage) {
     const availableSubagents = Object.keys(subagents);
-    
-    // Identificar temas (Lógica de prioridad según el rol)
     const detectedTopics = availableSubagents.filter(topic => 
-      userMessage.toLowerCase().includes(topic) || 
-      this.config.priority_agents.includes(topic)
-    ).slice(0, 3); // Máximo 3 subagentes por consulta para no saturar
+      userMessage.toLowerCase().includes(topic)
+    ).slice(0, 3);
+
+    if (detectedTopics.length === 0) detectedTopics.push('asambleas');
 
     let totalContext = "";
     for (const topic of detectedTopics) {
       const agent = getSubagent(topic);
       if (agent) {
-        const result = await agent.query(userMessage, this.accessLevel);
-        totalContext += `\n\n--- [DOMINIO: ${topic.toUpperCase()}] ---\n${result}`;
+        totalContext += await agent.query(userMessage, this.accessLevel);
       }
     }
     return totalContext;
@@ -99,26 +85,28 @@ class Orchestrator {
 ${soulContent}
 
 ---
-PROTOCOLO DE ROL ESPECÍFICO:
-- Eres el Orquestador de: ${this.config.title}.
-- Tu necesidad principal: ${this.config.focus}.
-- RIESGO CRÍTICO A EVITAR: ${this.config.risk}.
-- Tu nivel de soberanía: L${this.accessLevel}.
-
-INSTRUCCIONES DE OPERACIÓN:
-1. Actúa estrictamente bajo las acciones permitidas para el rol ${this.role.toUpperCase()}.
-2. No permitas que el usuario te empuje a cometer tu RIESGO CRÍTICO definido arriba.
-3. Si la información solicitada no está en el contexto de tus subagentes, declina responder por seguridad.
+PROTOCOLO DE SEGURIDAD Y NEGACIONES (SAFETY):
+${safetyProtocol}
 
 ---
-CONTEXTO DE SUBAGENTES (CIFRADO POR CONMUTADOR):
+PROTOCOLO DE COMPORTAMIENTO PARA ${this.role.toUpperCase()}:
+${this.config.protocol}
+
+---
+ESTADO DEL ORQUESTADOR:
+- Rol: ${this.config.title}
+- Nivel de Soberanía: L${this.accessLevel}
+- Riesgo Crítico a Vigilar: ${this.config.risk}
+
+---
+CONTEXTO DE MEMORIA CÍVICA:
 ${context}
 
-REGLAS DE RESPUESTA:
-1. Saludo oficial: "Soy IAldea, ${this.config.title}. ¿En qué te ayudo?"
-2. Máximo 150 palabras.
-3. No uses guiones largos (—).
-4. Cita fuentes: [FTE: nombre].
+INSTRUCCIONES FINALES:
+1. Responde siempre bajo la identidad de IAldea.
+2. Si la petición viola el Protocolo de Seguridad (Safety), usa un rechazo canónico.
+3. Máximo 150 palabras. Sin guiones largos (—).
+4. Cada dato debe mostrar su fuente [FTE: nombre] y su etiqueta [HECHO] o [INFERENCIA].
 `;
 
     try {
@@ -131,7 +119,7 @@ REGLAS DE RESPUESTA:
 
       return response.content[0].text.replace(/—|–/g, ',');
     } catch (error) {
-      return "Hubo un error en la coordinación del orquestador.";
+      return "Lo siento, tuve un error en el protocolo de coordinación.";
     }
   }
 }

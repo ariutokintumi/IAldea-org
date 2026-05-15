@@ -35,6 +35,16 @@ El Orquestador delega consultas a subagentes que dominan áreas específicas:
 
 ---
 
+## 📱 Canales de Acceso (Gateways)
+
+IAldea es accesible a través de múltiples puertas, todas protegidas por el mismo núcleo de seguridad:
+
+1. **WhatsApp Comunitario (Recomendado):** Usa la versión web para despliegues rápidos sin aprobación de Meta. (Ver `apps/whatsapp-web-gateway`).
+2. **Telegram:** Integración completa con bots de Telegram. (Ver `apps/telegram-gateway`).
+3. **WhatsApp Business:** Para despliegues a gran escala usando la API oficial de Meta.
+
+---
+
 ## 📜 Jerarquía de Confianza (Trust Levels)
 
 Implementamos el protocolo de **Source Hierarchy** para validar la verdad:
@@ -68,10 +78,13 @@ docker-compose up -d
 
 ### 3. Encender los Servicios
 ```bash
-# 1. Iniciar el Búnker de Seguridad
+# Iniciar el Búnker de Seguridad (Obligatorio)
 cd apps/conmutador-service && node index.js
 
-# 2. Iniciar el Portal (Telegram)
+# OPCIÓN A: Iniciar Portal de WhatsApp Comunitario (Escanear QR)
+cd apps/whatsapp-web-gateway && node index.js
+
+# OPCIÓN B: Iniciar Portal de Telegram
 cd apps/telegram-gateway && node index.js
 ```
 
