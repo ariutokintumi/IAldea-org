@@ -2,7 +2,7 @@
 
 > Documento de arquitectura del sistema. Cubre las 4 capas del stack, el modelo de datos, el modelo de grafo, la jerarquía de fuentes y el pipeline de ingesta.
 >
-> **Referencia del bot WhatsApp + subagentes:** [`docs/planning/dia_03_whatsapp_subagentes_orquestacion.md`](planning/dia_03_whatsapp_subagentes_orquestacion.md).
+> **Referencia del bot WhatsApp + subagentes:** [`docs/planning/dia_03_plan_maestro_arquitectura.md`](planning/dia_03_plan_maestro_arquitectura.md).
 
 ---
 
@@ -11,7 +11,6 @@
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │  04 / SAFETY     Auditor + SOUL.md + policy_config.yaml          │
-│                  Toda respuesta pasa aquí antes de salir.        │
 │                  Filtra: acusaciones, alucinaciones, privacidad, │
 │                  out-of-scope, citas faltantes.                   │
 ├──────────────────────────────────────────────────────────────────┤
@@ -27,9 +26,11 @@
 │  02 / GRAPH      Knowledge Graph + Vector Index                  │
 │                  Entidades, relaciones, recuperación semántica.  │
 ├──────────────────────────────────────────────────────────────────┤
-│  01 / KERNEL     Memory Kernel                                   │
+│  01 / KERNEL     Memory Kernel (Postgres + pgvector)             │
 │                  Documentos, actas, acuerdos, versiones.         │
-│                  La comunidad es dueña del Kernel.               │
+├──────────────────────────────────────────────────────────────────┤
+│  00 / TRUST      eVVM (Virtual Blockchain)                       │
+│                  Anclaje de Hashes, IDs (Teléfono) y Trazabilidad.│
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -115,7 +116,7 @@ Cada fragmento de documento (chunk) se embeds y almacena en el índice vectorial
 
 ## 03 / Agents — Orquestadores y Subagentes
 
-Detalle completo en [`docs/planning/dia_03_whatsapp_subagentes_orquestacion.md`](planning/dia_03_whatsapp_subagentes_orquestacion.md).
+Detalle completo en [`docs/planning/dia_03_plan_maestro_arquitectura.md`](planning/dia_03_plan_maestro_arquitectura.md).
 
 ### Orquestadores dedicados (uno por rol)
 
@@ -132,22 +133,62 @@ Cada rol tiene su propio orquestador con un **System Prompt** derivado de la [Ma
 | `orc_financiador` | `financiador` | Métricas agregadas (L1 acotado). |
 | `orc_admin` | `admin_tecnico`, `operador_piloto` | Configuración, logs técnicos, system health. |
 
-### Flujo de entrada (canal WhatsApp)
+### Flujo de entrada (canal WhatsApp) — Detalle de Orquestación
 
 ```mermaid
 flowchart TD
-  WA([WhatsApp API]) --> RL[Rate Limiter\npor número]
-  RL --> AL[Check Access Level\nNode.js · L0–L3]
-  AL -->|Sin acceso L0| REJ[Rechazo\nzero-token]
-  AL -->|Acceso OK| ROUTER{Router de Rol\nNode.js}
-  ROUTER -->|ciudadano| ORCC[orc_ciudadano]
-  ROUTER -->|secretaria| ORCS[orc_secretaria]
-  ROUTER -->|...otros roles| ORCN[Orquestador N]
-  ORCC --> SW[Conmutador\nTúnel Cifrado]
-  ORCS --> SW
-  ORCN --> SW
-  SW --> AUD[Auditor\nCapa Safety]
-  AUD --> WA2([Respuesta al usuario])
+    A([👤 Usuario\n+ Teléfono]) -->|WhatsApp Mensaje| B[WhatsApp API]
+    B --> C[Check User Access\nNode.js]
+
+    C -->|L0| REJ[Rechazo zero-token]
+    C -->|L1-L3| ROUTER{Router de Rol\nNode.js}
+
+    subgraph ORCS["🛡️ Orquestadores Dedicados\n(Anthropic Claude 3.5 Sonnet)"]
+        ROUTER -->|ciudadano| ORC_C[orc_ciudadano]
+        ROUTER -->|secretaria| ORC_S[orc_secretaria]
+        ROUTER -->|coordinacion| ORC_CO[orc_coordinacion]
+        ROUTER -->|...otros| ORC_N[Orquestador N]
+    end
+
+    ORC_C -->|Msg + Key| SW
+    ORC_S -->|Msg + Key| SW
+    ORC_CO -->|Msg + Key| SW
+    ORC_N -->|Msg + Key| SW
+
+    subgraph WORKERS["⚙️ Workers (Subagentes)"]
+        SW[🔀 Conmutador\nAES-256-GCM]
+        SW -->|🔒| Sub1[Subagente 1\n(OpenAI Embeddings)]
+        SW -->|🔒| Sub2[Subagente 2\n(OpenAI Embeddings)]
+        Sub1 -->|🔒| SW
+        Sub2 -->|🔒| SW
+    end
+
+    subgraph KERNEL["📚 Memoria (Kernel)"]
+        Sub1 --- DB[(Postgres\n+ pgvector)]
+        Sub2 --- DB
+    end
+
+    SW -->|Respuesta en claro| ORCS
+    ORCS --> AUDIT[Auditor Safety\nSOUL.md]
+    AUDIT --> RESP([✅ Respuesta al usuario])
+```
+
+> **🛡️ Regla de Silencio (Fail-safe):** Si el Conmutador no provee una clave válida o el descifrado falla, el subagente tiene estrictamente prohibido emitir respuesta. No hay clave = No hay mensaje.
+
+---
+
+### Verificación de Confianza — eVVM Layer
+
+```mermaid
+sequenceDiagram
+    participant K as 📚 Kernel (Memory)
+    participant B as ⛓️ eVVM (Trust Layer)
+    participant S as 🛡️ Auditor (Safety)
+
+    K->>B: ¿Hash de documento verificado?
+    B-->>K: OK (Anclaje verificado on-chain)
+    K->>S: Datos verificados + Metadata
+    S-->>S: Validación SOUL.md
 ```
 
 ### Subagentes definidos (MVP)
@@ -252,13 +293,39 @@ flowchart LR
 
 ---
 
-## Decisiones de Día 3 aún pendientes
+## Capa 00 / Trust — eVVM
 
-- [ ] Definir el modelo de embedding a usar (OpenAI `text-embedding-3-small` vs. local `nomic-embed-text`)
-- [ ] Elegir vector DB (pgvector en Postgres vs. Chroma local)
-- [ ] Definir graph DB (Neo4j vs. relacional con edges en Postgres)
-- [ ] System prompts completos por subagente (borrador en Day 4)
-- [ ] Tools disponibles por subagente y nivel (alineado a `policy_config`)
+Utiliza **eVVM** (Virtual Blockchain) para anclar la verdad del Kernel. eVVM permite desplegar una infraestructura de confianza soberana sobre cualquier cadena, facilitando el uso de identificadores como teléfonos o correos electrónicos.
+
+### Modelo de datos — Anclajes eVVM
+
+```sql
+CREATE TABLE blockchain_anchors (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  document_version_id UUID NOT NULL REFERENCES document_versions(id),
+  content_hash        TEXT NOT NULL,        -- SHA-256 del documento
+  tx_hash             TEXT NOT NULL,        -- Hash de transacción en eVVM
+  anchored_at         TIMESTAMPTZ DEFAULT now(),
+  verified            BOOLEAN DEFAULT FALSE
+);
+```
+
+### Por qué eVVM:
+- **Identidad:** Soporte nativo para usar números de teléfono como IDs (alineado con WhatsApp).
+- **Soberanía:** Permite un entorno permisionado ("Your environment = Your rules") ideal para la gobernanza comunitaria.
+- **Eficiencia:** Despliegue de una "Virtual Blockchain" optimizada para las necesidades de la comunidad.
+
+---
+
+## Decisiones de Día 3 — Finalizadas ✅
+
+- [x] **LLM:** Claude 3.5 Sonnet.
+- [x] **Embeddings:** OpenAI `text-embedding-3-small`.
+- [x] **Vector DB:** `pgvector` en Postgres.
+- [x] **Graph DB:** Relacional con Edges en Postgres.
+- [x] **Blockchain:** eVVM (Virtual Blockchain).
+- [ ] System prompts completos por subagente (Borrador en Day 4).
+- [ ] Tools disponibles por subagente y nivel (Alineado a `policy_config`).
 
 ---
 

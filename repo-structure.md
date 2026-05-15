@@ -12,7 +12,7 @@ Este archivo lista **únicamente** lo que debe estar versionado al **cierre del 
 | Ruta obligatoria (CONTEXTO)                              | Estado                             |
 | -------------------------------------------------------- | ---------------------------------- |
 | `[docs/principles.md](docs/principles.md)`               | ✓                                  |
-| `[soul/SOUL.example.md](soul/SOUL.example.md)`           | ✓                                  |
+| `[IaAldea_SOUL.md](IaAldea_SOUL.md)`                 | ✓ SOUL del colaborador en la raíz |
 | `[docs/civic-safety.md](docs/civic-safety.md)`           | ✓                                  |
 | `[docs/positioning-v1.md](docs/positioning-v1.md)`       | Posicionamiento público (borrador) |
 | `[docs/pop-up-2026/day-1.md](docs/pop-up-2026/day-1.md)` | Minuta Día 1                       |
@@ -20,7 +20,7 @@ Este archivo lista **únicamente** lo que debe estar versionado al **cierre del 
 | `[docs/vision.md](docs/vision.md)`                       | Visión                             |
 
 
-Raíz: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `README.md`, `LICENSE`, `CONTEXTO-POPUP-VILLAGE.md`.
+Raíz: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `README.md`, `LICENSE`, `CONTEXTO-POPUP-VILLAGE.md`, `IaAldea_SOUL.md`.
 
 ---
 
@@ -51,7 +51,7 @@ Raíz: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `README.md`, `LIC
 | Ruta | Estado |
 |---|---|
 | [`docs/architecture.md`](docs/architecture.md) | ✅ Día 3 — 4 capas, data model, grafo, ingesta, subagentes |
-| [`docs/planning/dia_03_whatsapp_subagentes_orquestacion.md`](docs/planning/dia_03_whatsapp_subagentes_orquestacion.md) | ✅ Arquitectura WhatsApp bot + Conmutador |
+| [`docs/planning/dia_03_plan_maestro_arquitectura.md`](docs/planning/dia_03_plan_maestro_arquitectura.md) | ✅ Plan Maestro: Memoria, Orquestación, eVVM y Fases Técnicas |
 | [`docs/pop-up-2026/day-3.md`](docs/pop-up-2026/day-3.md) | ✅ Minuta Día 3 |
 
 ---
@@ -70,6 +70,7 @@ Raíz: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `README.md`, `LIC
 ```
 /
 ├── CONTEXTO-POPUP-VILLAGE.md
+├── IaAldea_SOUL.md                              ← SOUL en la raíz
 ├── guia-diaria.md
 ├── repo-structure.md
 ├── README.md, LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md
@@ -82,10 +83,9 @@ Raíz: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `README.md`, `LIC
 │   ├── planning/
 │   │   ├── README.md
 │   │   ├── dia_02_gobernanza_roles_y_accesos.md
-│   │   └── dia_03_whatsapp_subagentes_orquestacion.md ← NUEVO Día 3
+│   │   └── dia_03_plan_maestro_arquitectura.md      ← CONSOLIDADO Día 3
 │   └── roles/ (README.md, excel-sheets.md, *.md — CSVs eliminados)
 ├── examples/fictional-community/community-schema.json
-├── soul/SOUL.example.md, SOUL.community-template.md
 └── config/policy_config.example.yaml, roles.example.yaml
 ```
 

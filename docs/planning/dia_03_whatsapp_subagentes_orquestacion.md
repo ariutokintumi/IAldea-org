@@ -37,7 +37,7 @@ flowchart TD
     C -->|L0| REJ[Rechazo zero-token]
     C -->|L1-L3| ROUTER{Router de Rol\nNode.js}
 
-    subgraph ORCS["🛡️ Orquestadores Dedicados"]
+    subgraph ORCS["🛡️ Orquestadores Dedicados\n(Anthropic Claude 3.5 Sonnet)"]
         ROUTER -->|ciudadano| ORC_C[orc_ciudadano]
         ROUTER -->|secretaria| ORC_S[orc_secretaria]
         ROUTER -->|coordinacion| ORC_CO[orc_coordinacion]
@@ -49,46 +49,22 @@ flowchart TD
     ORC_CO -->|Msg + Key| SW
     ORC_N -->|Msg + Key| SW
 
-    subgraph WORKERS["⚙️ Workers"]
-        SW[🔀 Conmutador\nEncrypt ↕ Decrypt]
-        SW -->|🔒| Sub1[Subagente 1]
-        SW -->|🔒| Sub2[Subagente 2]
+    subgraph WORKERS["⚙️ Workers (Subagentes)"]
+        SW[🔀 Conmutador\nAES-256-GCM]
+        SW -->|🔒| Sub1[Subagente 1\n(OpenAI Embeddings)]
+        SW -->|🔒| Sub2[Subagente 2\n(OpenAI Embeddings)]
         Sub1 -->|🔒| SW
         Sub2 -->|🔒| SW
+    end
+
+    subgraph KERNEL["📚 Memoria (Kernel)"]
+        Sub1 --- DB[(Postgres\n+ pgvector)]
+        Sub2 --- DB
     end
 
     SW -->|Respuesta en claro| ORCS
     ORCS --> RESP([✅ Respuesta al usuario])
 ```
-
----
-
-## Detalle: Check User Access Level (Node.js)
-
-Primer filtro — decide a qué capa va el mensaje sin tocar ningún LLM.
-
-```mermaid
-flowchart LR
-    A[Mensaje\n+ número de teléfono] --> B[(Base de datos\nde usuarios)]
-    B --> C{¿Usuario existe\ny tiene acceso?}
-    C -->|No| D[Rechazo\nsin LLM]
-    C -->|Sí| E{¿Qué nivel?}
-    E -->|Nivel básico| F[→ Orquestador 1\nCapa No-AI]
-    E -->|Nivel con IA| G[→ Orquestador 2\nCapa IA]
-```
-
-Mapeo sugerido: **L0** → Rechazo inmediato; **L1-L3** → Router de Rol identifica el `slug` del usuario y lo deriva al orquestador correspondiente (ej. `ciudadano` → `orc_ciudadano`).
-
----
-
-## Detalle: los orquestadores por rol
-
-Cada orquestador es una instancia aislada con un **System Prompt** que define su comportamiento según la [Matriz de comportamiento](docs/roles/matriz-comportamiento-por-rol.md).
-
-- **orc_ciudadano:** Tono cercano, limitado a info pública.
-- **orc_secretaria:** Tono formal, acceso a Kernel de actas y minutas.
-- **orc_tesoreria:** Foco en viabilidad y registro financiero.
-- **...etc.**
 
 ---
 
@@ -113,86 +89,6 @@ sequenceDiagram
     SW->>ORC2: Respuesta en claro
 ```
 
-### Lo que el Conmutador hace en cada dirección
-
-| Dirección | Acción |
-|-----------|--------|
-| Orquestador → Subagente | Encripta el mensaje con la key del subagente destino |
-| Subagente → Orquestador | Desencripta la respuesta y la devuelve en claro al orquestador |
-
-### Lo que el Conmutador NO hace
-
-- No decide a qué subagente ir
-- No almacena mensajes ni llaves (por diseño; si persiste algo, debe ser acotado y auditado)
-- No tiene lógica de negocio
-- No puede ser interrogado sobre otros subagentes
-
----
-
-## Detalle: llaves — quién tiene qué
-
-```mermaid
-flowchart LR
-    subgraph ORC1["Orquestador 1"]
-        K1A[Key Sub-básico A]
-        K1B[Key Sub-básico B]
-        K1S[Key Sub-compartido]
-    end
-
-    subgraph ORC2["Orquestador 2"]
-        K2A[Key Sub-IA exclusivo 1]
-        K2B[Key Sub-IA exclusivo 2]
-        K2S[Key Sub-compartido]
-    end
-
-    K1A --> SBA[Sub básico A]
-    K1B --> SBB[Sub básico B]
-    K1S --> SBC[Sub compartido]
-    K2A --> SIA[Sub IA exclusivo 1]
-    K2B --> SIB[Sub IA exclusivo 2]
-    K2S --> SBC
-```
-
-El sub compartido puede ser invocado por ambos orquestadores porque ambos tienen su llave. Ningún orquestador puede invocar los subagentes exclusivos del otro — no tiene la llave.
-
----
-
-## Flujo completo de una sesión (Capa IA)
-
-```mermaid
-sequenceDiagram
-    actor Usuario
-    participant WA as WhatsApp API
-    participant Node as Node.js\nCheck Access Level
-    participant ORC2 as Orquestador 2\nCapa IA
-    participant SW as 🔀 Conmutador
-    participant SUB as Subagente
-
-    Usuario->>WA: Mensaje + teléfono
-    WA->>Node: Webhook
-    Node->>Node: Valida usuario y nivel
-
-    alt Sin acceso
-        Node-->>WA: Rechazo sin LLM
-        WA-->>Usuario: "Sin acceso"
-    else Capa No-AI
-        Node->>Node: Orquestador 1 responde
-        Node-->>Usuario: Respuesta básica
-    else Capa IA
-        Node->>ORC2: Mensaje + nivel de acceso
-        ORC2->>ORC2: Selecciona subagente\ny recupera su key
-        ORC2->>SW: Mensaje en claro + key + prompt
-        SW->>SW: Encripta mensaje
-        SW->>SUB: 🔒 Mensaje encriptado
-        SUB->>SUB: Procesa con contexto\ny tools propias
-        SUB->>SW: 🔒 Respuesta encriptada
-        SW->>SW: Desencripta respuesta
-        SW->>ORC2: Respuesta en claro
-        ORC2->>WA: Respuesta formateada
-        WA->>Usuario: ✅ Respuesta final
-    end
-```
-
 ---
 
 ## Reglas de oro
@@ -204,21 +100,18 @@ sequenceDiagram
 5. **Orquestador 1 no puede invocar subagentes de IA** — no tiene sus llaves.
 6. **Orquestador 2 no puede invocar subagentes básicos exclusivos** — no tiene sus llaves.
 7. **Subagentes compartidos** son posibles si ambos orquestadores tienen la llave del subagente.
-8. **Cada subagente es ciego** — no sabe quién lo invocó ni que existen otros subagentes (ajustar si necesitas auditoría: entonces un **claim** mínimo firmado puede viajar cifrado).
+8. **Cada subagente es ciego** — no sabe quién lo invocó ni que existen otros subagentes.
+9. **Silencio ante error de clave:** Si el Conmutador no provee una clave válida o el descifrado falla, el subagente tiene prohibido emitir cualquier respuesta al orquestador (Fail-safe).
 
 ---
 
 ## Próximos pasos sugeridos
 
 - [ ] Definir qué subagentes son exclusivos de cada orquestador y cuáles se comparten
-- [ ] Elegir algoritmo de encriptación para el Conmutador (recomendado: **AES-256-GCM** con nonces únicos por mensaje)
-- [ ] Definir el system prompt base de cada subagente
-- [ ] Decidir qué tools tiene disponible cada subagente por nivel (alineado a `policy_config`)
+- [ ] Elegir algoritmo de encriptación para el Conmutador (recomendado: **AES-256-GCM**)
 - [ ] Configurar DB de usuarios con campo `nivel_acceso` (y vínculo a rol / L0–L3)
 - [ ] Implementar el Conmutador como servicio independiente con cifrado bidireccional
-- [ ] Implementar los dos orquestadores con sus respectivos keystores
-- [ ] Testear flujos por nivel antes de producción
 
 ---
 
-*Documento aportado por el equipo; integrado al planning del repo para revisión en Día 3.*
+*Documento restaurado y actualizado con la Regla de Silencio (Día 3).*
