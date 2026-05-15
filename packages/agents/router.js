@@ -1,64 +1,78 @@
 const Anthropic = require('@anthropic-ai/sdk');
+const fs = require('fs');
 const path = require('path');
 const conmutador = require('./conmutador');
-const { pool } = require('../kernel/db');
-const { generateEmbedding } = require('../ingesta/embedder');
+const { getSubagent, subagents } = require('./subagents/factory');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+
+const soulPath = path.resolve(__dirname, '../../IaAldea_SOUL.md');
+const soulContent = fs.existsSync(soulPath) ? fs.readFileSync(soulPath, 'utf8') : 'No soul found.';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 /**
- * El Router de Rol: Instancia orquestadores según el acceso del usuario.
+ * Orquestador Dinámico por Rol
  */
 class Orchestrator {
   constructor(role, accessLevel) {
-    this.role = role;
-    this.accessLevel = accessLevel;
+    this.role = role; // 'secretaria', 'ciudadano', 'tesoreria', etc.
+    this.accessLevel = accessLevel; // 1, 2, 3
   }
 
   /**
-   * Herramienta RAG que usa el Conmutador para buscar en el Kernel.
+   * Decide qué subagentes consultar según el mensaje del usuario
    */
-  async searchMemory(query) {
-    console.log(`🔍 Orquestador (${this.role}) buscando: "${query}"`);
+  async getRelevantContext(userMessage) {
+    console.log(`[ORCHESTRATOR:${this.role}] Analizando temas para: "${userMessage}"`);
     
-    // 1. Generar vector para la consulta
-    const embedding = await generateEmbedding(query);
-    if (!embedding) return "No puedo realizar búsquedas sin API Key de OpenAI.";
+    // Lista de subagentes disponibles para este rol
+    const availableSubagents = Object.keys(subagents);
+    
+    // Identificar temas (Lógica simple por palabras clave por ahora, puede ser una llamada a IA)
+    const detectedTopics = availableSubagents.filter(topic => 
+      userMessage.toLowerCase().includes(topic) || 
+      (topic === 'economia' && userMessage.toLowerCase().includes('dinero')) ||
+      (topic === 'asambleas' && userMessage.toLowerCase().includes('acuerdo'))
+    );
 
-    // 2. Consultar Kernel (pgvector) con filtro de acceso
-    const res = await pool.query(`
-      SELECT c.content, v.sensitivity 
-      FROM document_chunks c
-      JOIN document_versions v ON c.version_id = v.id
-      ORDER BY c.embedding <=> $1
-      LIMIT 3
-    `, [`[${embedding.join(',')}]`]);
+    // Si no detecta nada específico, usa 'asambleas' o 'produccion' por defecto (memoria general)
+    if (detectedTopics.length === 0) detectedTopics.push('asambleas');
 
-    // 3. Simular el paso por el Conmutador
-    const results = res.rows.map(row => {
-      const encrypted = conmutador.encrypt(row.content);
-      const decrypted = conmutador.decrypt(encrypted); // El orquestador tiene la llave
-      return `[FTE: ${row.sensitivity}] ${decrypted}`;
-    });
+    let totalContext = "";
+    for (const topic of detectedTopics) {
+      const agent = getSubagent(topic);
+      if (agent) {
+        const result = await agent.query(userMessage, this.accessLevel);
+        totalContext += `\n\n--- INFORME DE AGENTE ${topic.toUpperCase()} ---\n${result}`;
+      }
+    }
 
-    return results.join('\n\n');
+    return totalContext;
   }
 
-  /**
-   * Procesa un mensaje del usuario usando Claude 4.6 Sonnet.
-   */
   async processMessage(userMessage) {
-    const context = await this.searchMemory(userMessage);
+    const context = await this.getRelevantContext(userMessage);
 
-    const systemPrompt = `Eres un orquestador de IAldea con el rol: ${this.role}.
-Tu nivel de acceso es L${this.accessLevel}.
-Responde siguiendo las reglas de SOUL.md: con veracidad, civismo y citando tus fuentes.
+    const systemPrompt = `
+${soulContent}
 
-CONTEXTO RECUPERADO DE LA MEMORIA:
+---
+ESTADO DEL ORQUESTADOR:
+- Rol: ${this.role}
+- Nivel de Acceso: L${this.accessLevel}
+- Subagentes Consultados: ${context.includes('ACCESO DENEGADO') ? 'Restringidos' : 'Autorizados'}
+
+---
+CONTEXTO DE SUBAGENTES (CIFRADO/DESCIFRADO POR CONMUTADOR):
 ${context}
+
+REGLAS DE RESPUESTA:
+1. Saludo oficial: "Soy IAldea, herramienta de memoria cívica de IAldea. ¿En qué te ayudo?"
+2. Máximo 150 palabras.
+3. No uses guiones largos (—).
+4. Cita fuentes usando [FTE: nombre].
 `;
 
     try {
@@ -69,10 +83,10 @@ ${context}
         messages: [{ role: "user", content: userMessage }],
       });
 
-      return response.content[0].text;
+      return response.content[0].text.replace(/—|–/g, ',');
     } catch (error) {
       console.error('❌ Error en el orquestador:', error.message);
-      return "Lo siento, tuve un problema procesando tu mensaje.";
+      return "Lo siento, tuve un problema de coordinación entre mis subagentes.";
     }
   }
 }
