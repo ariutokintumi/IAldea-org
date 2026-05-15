@@ -35,10 +35,17 @@ graph TD
         OA[Orquestador Admin L3]
     end
 
-    subgraph "Subagentes Especialistas (Dominios)"
-        SA[Agua / Salud / Educación / Transporte]
-        SE[Economía / Legal]
-        SS[Seguridad / Emergencias]
+    subgraph "Subagentes Especialistas (10 Dominios)"
+        S1[Economía L2]
+        S2[Producción L1]
+        S3[Agua L1]
+        S4[Infraestructura L1]
+        S5[Asambleas L1]
+        S6[Legal L2]
+        S7[Seguridad L3]
+        S8[Transporte L1]
+        S9[Salud L1]
+        S10[Educación L1]
     end
 
     subgraph "Búnker de Seguridad"
@@ -50,37 +57,49 @@ graph TD
     TG --> OT
     TG --> OA
 
-    %% Permisos L1
-    OC --> SA
-    OS --> SA
-    OT --> SA
-    OA --> SA
-
-    %% Permisos L2
-    OS --> SE
-    OT --> SE
-    OA --> SE
-
-    %% Permisos L3
-    OA --> SS
+    %% Enlaces a Subagentes (Lógica de niveles)
+    OC --> S2 & S3 & S4 & S5 & S8 & S9 & S10
+    OS --> S1 & S5 & S6
+    OT --> S1 & S2 & S4
+    OA --> S7
 
     %% Flujo de Descifrado
-    SA <--> CB
-    SE <--> CB
-    SS <--> CB
+    S1 & S2 & S3 & S4 & S5 & S6 & S7 & S8 & S9 & S10 <--> CB
 ```
 
 ---
 
-## 4. Matriz de Gobernanza de Inteligencia
+## 4. Directorio de los 10 Subagentes (Expertos de IAldea)
 
-| Subagente (Experto) | Dominio de Info | Acceso Mínimo | Roles Autorizados |
+Estos subagentes son los únicos autorizados para interactuar con el **Conmutador Service** para descifrar memoria según su dominio.
+
+| Subagente | Dominio de Info | Nivel | Responsabilidad |
 | :--- | :--- | :--- | :--- |
-| **Agua** | Reglamento, cortes, pozos | L1 | Todos los vecinos |
-| **Salud** | Brigadas, clínica, turnos | L1 | Todos los vecinos |
-| **Economía** | Cuotas, deudas, presupuesto | L2 | Tesorería, Secretaría, Comité |
-| **Legal** | Reglamentos, mediación formal | L2 | Secretaría, Comité, Coordinación |
-| **Seguridad** | Reportes críticos, vigilancia | L3 | Admin Técnico, Seguridad |
+| **Agente_Economia** | Finanzas / Presupuesto | L2 | Control de cuotas, gastos y viabilidad. |
+| **Agente_Produccion** | Huertos / Manufactura | L1 | Seguimiento a la producción local. |
+| **Agente_Agua** | Pozos / Distribución | L1 | Gestión del recurso vital y reglamentos. |
+| **Agente_Infra** | Energía / Caminos | L1 | Mantenimiento de infraestructura común. |
+| **Agente_Asambleas** | Actas / Acuerdos | L1 | Memoria histórica de decisiones. |
+| **Agente_Legal** | Reglamentos / Mediación | L2 | Marco normativo y resolución de conflictos. |
+| **Agente_Seguridad** | Vigilancia / Emergencia | L3 | Protección y alertas comunitarias. |
+| **Agente_Transporte** | Logística / Rutas | L1 | Coordinación de movilidad comunitaria. |
+| **Agente_Salud** | Bienestar / Brigadas | L1 | Atención primaria y salud colectiva. |
+| **Agente_Educacion** | Talleres / Escuela | L1 | Formación y transferencia de saberes. |
+
+---
+
+## 5. Orquestadores por Rol (The Experience Layer)
+
+Cada orquestador es una instancia única de IA que utiliza el **SOUL.md** para dar voz a la comunidad, filtrando información según el rol del usuario.
+
+| Orquestador | Enfoque Principal | Riesgo que Vigila |
+| :--- | :--- | :--- |
+| **Secretaría** | Registrar memoria oficial | Información no validada |
+| **Coordinación** | Cuidar el proceso | Centralización de poder |
+| **Tesorería** | Viabilidad de recursos | Comprometer presupuesto |
+| **Comité** | Deliberación y decisión | Fuga de datos sensibles |
+| **Validador** | Revisar evidencia | Juicios personales |
+| **Ciudadano** | Consulta y participación | Rumores y acusaciones |
 
 ---
 

@@ -1,7 +1,6 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs');
 const path = require('path');
-const conmutador = require('./conmutador');
 const { getSubagent, subagents } = require('./subagents/factory');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
@@ -13,42 +12,83 @@ const anthropic = new Anthropic({
 });
 
 /**
- * Orquestador Dinámico por Rol
+ * CONFIGURACIÓN DE PERSONALIDAD POR ROL (IAldea Experience Matrix)
+ */
+const ROLE_CONFIGS = {
+  secretaria: {
+    title: "Secretaría de Memoria",
+    focus: "Registrar memoria, crear registros, minutas y comunicados oficiales.",
+    risk: "Registrar información no validada.",
+    priority_agents: ['asambleas', 'legal', 'educacion']
+  },
+  coordinacion: {
+    title: "Coordinación de Procesos",
+    focus: "Cuidar el proceso, revisar, autorizar y coordinar actores.",
+    risk: "Centralizar demasiado poder.",
+    priority_agents: ['transporte', 'agua', 'infraestructura']
+  },
+  comite_miembro: {
+    title: "Miembro del Comité",
+    focus: "Deliberar, proponer, revisar y decidir sobre propuestas comunitarias.",
+    risk: "Exponer datos sensibles.",
+    priority_agents: ['legal', 'asambleas', 'economia']
+  },
+  tesoreria: {
+    title: "Tesorería Comunitaria",
+    focus: "Cuidar recursos, revisar viabilidad y registrar uso de fondos.",
+    risk: "Comprometer el presupuesto sin validación humana.",
+    priority_agents: ['economia', 'infraestructura', 'produccion']
+  },
+  validador: {
+    title: "Validación y Evidencia",
+    focus: "Revisar evidencia, validar cumplimiento y exactitud de informes.",
+    risk: "Juzgar personas en lugar de hechos.",
+    priority_agents: ['asambleas', 'legal', 'seguridad']
+  },
+  ciudadano: {
+    title: "Participación Ciudadana",
+    focus: "Participar, consultar, preguntar y dar feedback constructivo.",
+    risk: "Propagar rumores o acusaciones sin fundamento.",
+    priority_agents: ['agua', 'salud', 'transporte', 'asambleas']
+  },
+  financiador: {
+    title: "Observación de Impacto",
+    focus: "Observar impacto y ver métricas públicas agregadas.",
+    risk: "Intentar capturar o condicionar decisiones comunitarias.",
+    priority_agents: ['economia', 'produccion', 'infraestructura']
+  }
+};
+
+/**
+ * Orquestador Especializado por Rol
  */
 class Orchestrator {
   constructor(role, accessLevel) {
-    this.role = role; // 'secretaria', 'ciudadano', 'tesoreria', etc.
-    this.accessLevel = accessLevel; // 1, 2, 3
+    this.role = role.toLowerCase();
+    this.accessLevel = accessLevel;
+    this.config = ROLE_CONFIGS[this.role] || ROLE_CONFIGS.ciudadano;
   }
 
   /**
-   * Decide qué subagentes consultar según el mensaje del usuario
+   * Delegación inteligente a subagentes
    */
   async getRelevantContext(userMessage) {
-    console.log(`[ORCHESTRATOR:${this.role}] Analizando temas para: "${userMessage}"`);
-    
-    // Lista de subagentes disponibles para este rol
     const availableSubagents = Object.keys(subagents);
     
-    // Identificar temas (Lógica simple por palabras clave por ahora, puede ser una llamada a IA)
+    // Identificar temas (Lógica de prioridad según el rol)
     const detectedTopics = availableSubagents.filter(topic => 
       userMessage.toLowerCase().includes(topic) || 
-      (topic === 'economia' && userMessage.toLowerCase().includes('dinero')) ||
-      (topic === 'asambleas' && userMessage.toLowerCase().includes('acuerdo'))
-    );
-
-    // Si no detecta nada específico, usa 'asambleas' o 'produccion' por defecto (memoria general)
-    if (detectedTopics.length === 0) detectedTopics.push('asambleas');
+      this.config.priority_agents.includes(topic)
+    ).slice(0, 3); // Máximo 3 subagentes por consulta para no saturar
 
     let totalContext = "";
     for (const topic of detectedTopics) {
       const agent = getSubagent(topic);
       if (agent) {
         const result = await agent.query(userMessage, this.accessLevel);
-        totalContext += `\n\n--- INFORME DE AGENTE ${topic.toUpperCase()} ---\n${result}`;
+        totalContext += `\n\n--- [DOMINIO: ${topic.toUpperCase()}] ---\n${result}`;
       }
     }
-
     return totalContext;
   }
 
@@ -59,20 +99,26 @@ class Orchestrator {
 ${soulContent}
 
 ---
-ESTADO DEL ORQUESTADOR:
-- Rol: ${this.role}
-- Nivel de Acceso: L${this.accessLevel}
-- Subagentes Consultados: ${context.includes('ACCESO DENEGADO') ? 'Restringidos' : 'Autorizados'}
+PROTOCOLO DE ROL ESPECÍFICO:
+- Eres el Orquestador de: ${this.config.title}.
+- Tu necesidad principal: ${this.config.focus}.
+- RIESGO CRÍTICO A EVITAR: ${this.config.risk}.
+- Tu nivel de soberanía: L${this.accessLevel}.
+
+INSTRUCCIONES DE OPERACIÓN:
+1. Actúa estrictamente bajo las acciones permitidas para el rol ${this.role.toUpperCase()}.
+2. No permitas que el usuario te empuje a cometer tu RIESGO CRÍTICO definido arriba.
+3. Si la información solicitada no está en el contexto de tus subagentes, declina responder por seguridad.
 
 ---
-CONTEXTO DE SUBAGENTES (CIFRADO/DESCIFRADO POR CONMUTADOR):
+CONTEXTO DE SUBAGENTES (CIFRADO POR CONMUTADOR):
 ${context}
 
 REGLAS DE RESPUESTA:
-1. Saludo oficial: "Soy IAldea, herramienta de memoria cívica de IAldea. ¿En qué te ayudo?"
+1. Saludo oficial: "Soy IAldea, ${this.config.title}. ¿En qué te ayudo?"
 2. Máximo 150 palabras.
 3. No uses guiones largos (—).
-4. Cita fuentes usando [FTE: nombre].
+4. Cita fuentes: [FTE: nombre].
 `;
 
     try {
@@ -85,8 +131,7 @@ REGLAS DE RESPUESTA:
 
       return response.content[0].text.replace(/—|–/g, ',');
     } catch (error) {
-      console.error('❌ Error en el orquestador:', error.message);
-      return "Lo siento, tuve un problema de coordinación entre mis subagentes.";
+      return "Hubo un error en la coordinación del orquestador.";
     }
   }
 }

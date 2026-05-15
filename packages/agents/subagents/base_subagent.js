@@ -8,30 +8,36 @@ class BaseSubagent {
   }
 
   /**
-   * Pide al Conmutador (Black Box) que descifre la info
+   * Llama al Búnker especificando el nivel de la llave necesaria
    */
-  async callConmutador(ciphertext) {
+  async callConmutador(ciphertext, level) {
     try {
       const response = await fetch('http://127.0.0.1:3005/decrypt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ciphertext })
+        body: JSON.stringify({ 
+          ciphertext, 
+          level: `L${level}` // Envía 'L1', 'L2' o 'L3'
+        })
       });
       const data = await response.json();
-      return data.plaintext || "[ERROR DE DESCIFRADO]";
+      if (data.error) return `[RESTRINGIDO: ${data.error}]`;
+      return data.plaintext || "[ERROR DE INTEGRIDAD]";
     } catch (err) {
-      return "[CONMUTADOR OFFLINE]";
+      return "[BÚNKER DE SEGURIDAD OFFLINE]";
     }
   }
 
   async query(userQuery, requesterAccessLevel) {
+    // 1. Filtro de Rol (Software)
     if (requesterAccessLevel < this.minAccessLevel) {
-      return `ACCESO DENEGADO: No tienes permiso para consultar el dominio de ${this.domain}.`;
+      return `ACCESO DENEGADO: Tu rol no permite consultar el dominio ${this.domain}.`;
     }
 
     const embedding = await generateEmbedding(userQuery);
     if (!embedding) return "Error de conexión con el Kernel.";
 
+    // 2. Consulta al Kernel
     const res = await pool.query(`
       SELECT c.content, v.source_name, v.sensitivity
       FROM document_chunks c
@@ -44,8 +50,9 @@ class BaseSubagent {
 
     const results = [];
     for (const row of res.rows) {
-      // LLAMADA AL BÚNKER: El subagente no descifra solo, pide permiso al Conmutador
-      const decrypted = await this.callConmutador(row.content);
+      // 3. Filtro Matemático (Cifrado por Nivel)
+      // Se le pide al búnker descifrar con la llave del nivel específico del documento
+      const decrypted = await this.callConmutador(row.content, row.sensitivity);
       results.push(`[FTE: ${row.source_name}] [CONFIDENCIALIDAD: L${row.sensitivity}] ${decrypted}`);
     }
 
