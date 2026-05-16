@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 1. El Kernel (Base de Datos Vectorial)
   db:
@@ -20,7 +18,9 @@ services:
 
   # 2. El Búnker (Conmutador - Black Box)
   conmutador:
-    build: ./apps/conmutador-service
+    build:
+      context: .
+      dockerfile: apps/conmutador-service/Dockerfile
     container_name: ialdea-conmutador
     ports:
       - "3005:3005"
