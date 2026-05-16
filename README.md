@@ -6,6 +6,12 @@ IAldea does not replace assemblies, legitimate authorities, or professional advi
 
 ---
 
+## Canonical architecture
+
+The **authoritative** description of the four-layer stack (Trust / Kernel / Graph / Agents / Safety), the data model, graph entities, source hierarchy, ingestion, eVVM, and Día 4+ implementation notes is in **[`docs/architecture/system-architecture.md`](docs/architecture/system-architecture.md)**. Start there for system diagrams and ER-style views. Folder index: [`docs/architecture/README.md`](docs/architecture/README.md).
+
+---
+
 ## Vision and boundaries
 
 | Principle | Meaning |
@@ -86,6 +92,52 @@ Specialized experts cover areas including water, economy, health, education, ass
 | WhatsApp Business API | `apps/whatsapp-gateway` | Meta-approved scalability. |
 
 All channels are intended to share the same security core (Conmutador, same orchestration contract) rather than bespoke stacks per channel.
+
+---
+
+## Memberships table and user curation
+
+Roles and access tiers are **not** inferred by the LLM. They come from the PostgreSQL table **`memberships`** (the “Auth Gatekeeper” in `infra/db/init.sql`). Gateways resolve the current user with `packages/security/identity.js`: they hash the channel identifier (e.g. WhatsApp id), look up `channel_ref_hash`, and pass `role_slug` and `access_level` into the orchestrator.
+
+### Columns (schema)
+
+| Column | Purpose |
+|--------|---------|
+| `id` | UUID primary key. |
+| `contributor_handle` | Stable human-facing handle; **unique**; used as `contributor_handle` on document versions when that person ingests content. |
+| `channel_ref_hash` | **Unique** blind reference derived from the channel id (e.g. WhatsApp/Telegram); used for lookup on every message. |
+| `role_slug` | Governance role: `ciudadano`, `secretaria`, `tesoreria`, `coordinacion`, `validador`, `comite`, `admin`, etc. Must match a key in `ROLE_CONFIGS` in `packages/agents/router.js` or the orchestrator falls back to the **ciudadano** profile. |
+| `access_level` | Numeric tier for memory and Conmutador policy: **0** (none / blocked for messaging paths that enforce it), **1** public-tier citizen, **2** confidential-tier, **3** private-tier. Document `sensitivity` filters in subagents align with these tiers. |
+| `community_id` | Deployment or community instance id. |
+| `active` | Soft enable flag (defaults to true). |
+| `enrolled_at` / `last_seen_at` | Enrollment and optional activity timestamps. |
+
+### First contact (auto-enrollment)
+
+If no row exists for `channel_ref_hash`, identity code **inserts** a new membership with `role_slug = 'ciudadano'` and `access_level = 1` (see `packages/security/identity.js`). That is how “first WhatsApp/Telegram contact” becomes a citizen in the database without an LLM.
+
+### Curating users (operators)
+
+Promote, demote, or revoke access by editing **`memberships`** with SQL or your own admin UI connected to the same database. Inspect existing rows first (`SELECT contributor_handle, channel_ref_hash, role_slug, access_level FROM memberships;`).
+
+```sql
+-- Example: promote a member to secretariat with L2 access (replace handle with real value)
+UPDATE memberships
+SET role_slug = 'secretaria', access_level = 2
+WHERE contributor_handle = '<contributor_handle>';
+
+-- Example: block messaging tier (e.g. WhatsApp Web gateway skips users with access_level = 0)
+UPDATE memberships
+SET access_level = 0
+WHERE channel_ref_hash = '<sha256_hex_from_identity>';
+
+-- Example: soft-disable without deleting history
+UPDATE memberships
+SET active = false
+WHERE contributor_handle = '<contributor_handle>';
+```
+
+Always coordinate `role_slug` with the orchestrator configs under `packages/agents/orchestrators/configs/`. For schema migrations and fresh installs, see `infra/db/init.sql` and `make db-init` in this README.
 
 ---
 
