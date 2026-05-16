@@ -41,10 +41,21 @@ client.on('message', async (msg) => {
 
       if (user.access_level === 0) return;
 
-      // 2. Procesamiento con Orquestador Maestro
-      const orchestrator = new Orchestrator(user.role_slug, user.access_level);
-      const response = await orchestrator.processMessage(msg.body);
-      
+      const { invokeLangGraph } = require('../../packages/agents/langgraph_invoker');
+      let response;
+
+      const viaGraph = await invokeLangGraph(msg.body, user.role_slug, user.access_level).catch((e) => {
+        console.error('LangGraph:', e.message);
+        return null;
+      });
+
+      if (viaGraph != null) {
+        response = viaGraph;
+      } else {
+        const orchestrator = new Orchestrator(user.role_slug, user.access_level);
+        response = await orchestrator.processMessage(msg.body);
+      }
+
       await msg.reply(response);
       
     } catch (err) {

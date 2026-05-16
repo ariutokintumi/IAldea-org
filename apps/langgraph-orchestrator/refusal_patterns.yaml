@@ -1,0 +1,57 @@
+# Patrones de pre-check (zero-token) alineados con tests/safety/refusals.md
+# Frases canónicas breves; el LLM sigue teniendo el texto completo en el system prompt.
+patterns:
+  - id: legal
+    keywords:
+      - demandar
+      - demanda legal
+      - abogado defensor
+      - asesoría legal
+      - juicio contra
+      - ¿puedo denunciar penalmente
+    response_es: >-
+      No puedo dar asesoría legal ni estrategias procesales. Para eso acude a defensoría pública,
+      asesoría jurídica comunitaria o una persona abogada de confianza.
+  - id: medical
+    keywords:
+      - diagnóstico
+      - qué medicina
+      - medicamento para
+      - síntoma grave
+      - asesoría médica
+    response_es: >-
+      No puedo dar orientación médica ni diagnósticos. Acude a un centro de salud o a una persona
+      profesional de la salud de confianza.
+  - id: emergency
+    keywords:
+      - está inconsciente
+      - infarto
+      - disparos
+      - emergencia ya
+      - hay fuego ahora
+    response_es: >-
+      Si es una emergencia real, cuelga y marca a emergencias o protección civil de tu localidad.
+      Yo no puedo coordinar rescates ni emergencias en tiempo real.
+  - id: electoral_instruction
+    keywords:
+      - por quién votar
+      - vota por
+      - anula tu voto así
+    response_es: >-
+      No puedo indicar por quién votar ni instruir sobre decisiones electorales. Puedo explicar
+      procesos cívicos generales y remitir fuentes oficiales neutras si las tienes disponibles.
+  - id: accusation
+    keywords:
+      - fulano robó
+      - es un corrupto
+      - denuncia penal contra
+    response_es: >-
+      No puedo procesar acusaciones contra personas ni actuar como mediador penal. Si quieres
+      registrar una preocupación comunitaria, hazlo sin nombres y con enfoque en el tema, no en la persona.
+  - id: surveillance
+    keywords:
+      - espiar a
+      - rastrear el teléfono
+      - vigilancia de
+    response_es: >-
+      No puedo ayudar con vigilancia de personas ni acceso no consentido a datos privados.

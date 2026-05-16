@@ -62,8 +62,8 @@ Implementamos el protocolo de **Source Hierarchy** para validar la verdad:
 - **IA de Recuperación:** OpenAI Embeddings. Los "Bibliotecarios" que permiten a los subagentes realizar búsquedas vectoriales ultra-rápidas en el Kernel.
 - **Kernel:** PostgreSQL + pgvector (Memoria Vectorial).
 - **Seguridad:** AES-256-GCM (Túnel Conmutador). Protección física de los datos.
-- **Gateways:** Telegram Bot API & WhatsApp Business API.
-- **Infraestructura:** Docker & Node.js (Fastify).
+- **Orquestación:** **LangGraph** (Python + FastAPI) cuando defines `LANGGRAPH_ORCHESTRATOR_URL`; si no, el **Orquestador** clásico en Node (`packages/agents/router.js`).
+- **Puente memoria:** `apps/orchestrator-bridge` expone `POST /bundle` (subagentes + Postgres en Node) para que LangGraph no duplique la ingesta.
 
 ---
 
@@ -74,15 +74,29 @@ Copia el archivo `.env.example` a `.env` y configura tus API Keys y las llaves m
 
 ### 2. Modo Desarrollo (Manual)
 Ideal para pruebas rápidas en tu laptop:
+
 ```bash
-# Iniciar el Búnker (Obligatorio)
+# Terminal 1 — Búnker (obligatorio para memoria cifrada)
 cd apps/conmutador-service && node index.js
 
-# En otra terminal, iniciar el Gateway elegido:
-cd apps/whatsapp-web-gateway && node index.js  # (Escanear QR)
-# O
-cd apps/telegram-gateway && node index.js
+# Terminal 2 — Puente Node (subagentes + DB; obligatorio para LangGraph)
+cd apps/orchestrator-bridge && npm install && node index.js
+
+# Terminal 3 — LangGraph + FastAPI (opcional; si no corre, los gateways usan solo Node)
+cd apps/langgraph-orchestrator && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+export REPO_ROOT="$(cd ../.. && pwd)"
+export ORCHESTRATOR_BRIDGE_URL=http://127.0.0.1:3011
+export LANGGRAPH_ORCHESTRATOR_URL=http://127.0.0.1:8000   # también en .env de los gateways
+.venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+
+# Terminal 4 — Gateway
+cd apps/whatsapp-web-gateway && npm install && node index.js   # Escanear QR
+# o: cd apps/telegram-gateway && npm install && node index.js
 ```
+
+En `.env`: `LANGGRAPH_ORCHESTRATOR_URL=http://127.0.0.1:8000` activa el grafo (pre-check de rechazos + misma recogida de contexto). Sin esa variable, el comportamiento es el **router Node** anterior.
+
+**Docker:** `docker-compose up` incluye `orchestrator-bridge`, `langgraph-orchestrator` y configura el webhook de WhatsApp hacia LangGraph por defecto.
 
 ### 3. Modo Soberano (Servidor Físico / VPS)
 Para que IAldea funcione **24/7 de forma permanente** en un servidor:

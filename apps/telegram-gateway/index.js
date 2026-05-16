@@ -39,9 +39,19 @@ bot.on('text', async (ctx) => {
   await ctx.sendChatAction('typing');
 
   try {
-    const orchestrator = new Orchestrator(ctx.state.role, ctx.state.level);
-    const response = await orchestrator.processMessage(userMessage);
-    
+    const { invokeLangGraph } = require('../../packages/agents/langgraph_invoker');
+    let response;
+    const viaGraph = await invokeLangGraph(userMessage, ctx.state.role, ctx.state.level).catch((e) => {
+      console.error('LangGraph:', e.message);
+      return null;
+    });
+    if (viaGraph != null) {
+      response = viaGraph;
+    } else {
+      const orchestrator = new Orchestrator(ctx.state.role, ctx.state.level);
+      response = await orchestrator.processMessage(userMessage);
+    }
+
     await ctx.reply(response, { parse_mode: 'Markdown' });
   } catch (err) {
     console.error('❌ Error procesando mensaje en Telegram:', err.message);

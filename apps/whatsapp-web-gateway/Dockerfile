@@ -14,18 +14,16 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copiar el núcleo de IAldea (necesario para el Orquestador y Subagentes)
-COPY package.json .
+# Núcleo IAldea (subagentes, seguridad, SOUL, refusals para fallback del router)
 COPY packages ./packages
+COPY tests/safety ./tests/safety
 COPY IaAldea_SOUL.md .
 
-# Copiar el código del gateway
 COPY apps/whatsapp-web-gateway ./apps/whatsapp-web-gateway
 
 WORKDIR /app/apps/whatsapp-web-gateway
 RUN npm install
 
-# Usar el Chromium instalado por el sistema
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 CMD ["node", "index.js"]

@@ -12,7 +12,8 @@ class BaseSubagent {
 
   async callConmutador(ciphertext, level) {
     try {
-      const response = await fetch('http://127.0.0.1:3005/decrypt', {
+      const base = process.env.CONMUTADOR_URL || 'http://127.0.0.1:3005';
+      const response = await fetch(`${base.replace(/\/$/, '')}/decrypt`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ciphertext, level: `L${level}` })

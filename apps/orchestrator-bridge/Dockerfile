@@ -1,12 +1,16 @@
 FROM node:18-slim
+
 WORKDIR /app
 
 COPY packages ./packages
 COPY tests/safety ./tests/safety
 COPY IaAldea_SOUL.md .
 
-COPY apps/telegram-gateway ./apps/telegram-gateway
-WORKDIR /app/apps/telegram-gateway
+COPY apps/orchestrator-bridge ./apps/orchestrator-bridge
+
+WORKDIR /app/apps/orchestrator-bridge
 RUN npm install
+
+EXPOSE 3011
 
 CMD ["node", "index.js"]
