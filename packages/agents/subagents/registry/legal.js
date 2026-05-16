@@ -2,7 +2,7 @@ const BaseSubagent = require('../core/base_subagent');
 
 class AgenteLegal extends BaseSubagent {
   constructor() {
-    super('legal', 2); // Nivel L2
+    super('legal', 3); // Nivel L3 (Autoridad / Secretaría / Coordinación)
   }
 
   /**

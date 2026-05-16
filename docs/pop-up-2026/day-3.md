@@ -46,17 +46,17 @@
 | Config roles ejemplo | `config/roles.example.yaml` |
 | Config política ejemplo | `config/policy_config.example.yaml` |
 | Comunidad ficticia (schema) | `examples/fictional-community/community-schema.json` |
-| SOUL templates | `soul/SOUL.example.md`, `soul/SOUL.community-template.md` |
+| SOUL / identidad | `docs/governance/IaAldea_SOUL.md`, `docs/governance/SOUL-outline.md` |
 | Minuta Día 1 (esqueleto) | `docs/pop-up-2026/day-1.md` — ⚠️ pendiente completar con asistentes y decisiones reales |
 | Minuta Día 2 (actualizada) | `docs/pop-up-2026/day-2.md` |
-| Principios, civic-safety, privacidad, visión | `docs/principles.md`, `docs/civic-safety.md`, `docs/privacy.md`, `docs/vision.md` |
-| Contexto completo pop-up | `CONTEXTO-POPUP-VILLAGE.md` |
+| Principios, civic-safety, privacidad, visión | `docs/foundation/principles.md`, `docs/foundation/civic-safety.md`, `docs/foundation/privacy.md`, `docs/foundation/vision.md` |
+| Contexto completo pop-up | `CONTEXTO-POPUP-VILLAGE.md` (raíz del repo) |
 
 ### ❌ Lo que falta (pendiente)
 
 | Entregable | Referencia | Día objetivo |
 |---|---|---|
-| `docs/architecture.md` (modelo Kernel, pipeline de ingestión) | CONTEXTO §11, `dia_02` §13 | Día 3 / 4 |
+| `docs/architecture/system-architecture.md` (modelo Kernel, pipeline de ingestión) | CONTEXTO §11, `dia_02` §13 | Día 3 / 4 |
 | Implementación Conmutador (servicio cifrado bidireccional) | `dia_03` §Próximos pasos | Día 4+ |
 | Implementación Orquestador 1 y 2 con keystores | `dia_03` §Próximos pasos | Día 4+ |
 | DB de usuarios con campo `nivel_acceso` | `dia_03` §Próximos pasos | Día 4+ |
@@ -76,7 +76,7 @@
 
 ## Próximos pasos — Día 4
 
-- [ ] Crear `docs/architecture.md` con modelo Kernel y pipeline de ingestión.
+- [ ] Revisar [`docs/architecture/system-architecture.md`](../architecture/system-architecture.md) frente al modelo Kernel y pipeline de ingestión en código.
 - [ ] Definir subagentes: exclusivos por orquestador y compartidos.
 - [ ] Definir system prompts base por subagente.
 - [ ] Elegir e implementar algoritmo Conmutador (AES-256-GCM recomendado).

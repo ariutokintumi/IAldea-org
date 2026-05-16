@@ -18,7 +18,7 @@ const subagents = {
   produccion: new AgenteProduccion(),
   infraestructura: new AgenteInfraestructura(),
   asambleas: new AgenteAsambleas(),
-  seguridad: new AgenteSeguridad(), // L4 para Comité/Admin
+  seguridad: new AgenteSeguridad(), // L3 Comité/Admin
   transporte: new AgenteTransporte(),
   salud: new AgenteSalud(),
   educacion: new AgenteEducacion()

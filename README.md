@@ -1,124 +1,287 @@
-# 🏛️ IAldea: Herramienta de Memoria Cívica Soberana
+# IAldea
 
-IAldea es una infraestructura de inteligencia colectiva diseñada para proteger, organizar y consultar la memoria de comunidades autónomas. Utiliza una arquitectura blindada para garantizar que la información sensible solo sea accesible por los roles autorizados, manteniendo la soberanía de datos en todo momento.
+IAldea is collective intelligence infrastructure for protecting, organizing, and querying the memory of autonomous communities. The architecture isolates cryptographic secrets from the language model and enforces access by role and governance tier so sensitive material is only exposed when policy allows.
 
----
-
-## 🛡️ El Conmutador: Guardián de la Soberanía
-
-La pieza central de IAldea es el **Conmutador**, un servicio aislado (Black Box) que actúa como el árbitro supremo entre la inteligencia artificial y los datos de la comunidad.
-
-- **Rol de Árbitro:** Es el único componente con acceso a las llaves maestras de cifrado. Su función es recibir peticiones de los subagentes, validar el nivel de acceso (L1-L3) y entregar la información descifrada solo si se cumplen las reglas de gobernanza.
-- **Blindaje de la IA:** El Orquestador (IA) **nunca** ve las llaves de cifrado. Esto previene que una alucinación del modelo o un ataque de inyección de prompts pueda comprometer la privacidad de la asamblea.
-- **Llavero Multi-Nivel (Keychain):**
-  - **L1 (Comunitario):** Información pública y transparente.
-  - **L2 (Estratégico):** Reservado para Secretaría, Tesorería y Comités.
-  - **L3 (Privado):** Datos sensibles de seguridad y administración.
+IAldea does not replace assemblies, legitimate authorities, or professional advice; it is tooling for civic memory under community-defined rules.
 
 ---
 
-## 🧠 Red de Inteligencia Multi-Agente
+## Vision and boundaries
 
-IAldea no es un chat monolítico, es una asamblea de expertos especializados.
+| Principle | Meaning |
+|-----------|---------|
+| Sovereignty | Data and policy belong to the community; deployment can stay self-hosted. |
+| Separation of duties | The model orchestrates language; the **Conmutador** arbitrates decryption and access; gateways do not hold master keys. |
+| Verifiability | Answers should align with a **source hierarchy**; contradictions trigger canonical warnings and human review. |
+| Modularity | Gateways, orchestration (Node router vs LangGraph), retrieval, and crypto are separate services and packages. |
 
-### 1. Orquestadores Especializados (Capa de Experiencia)
-Cada usuario interactúa con un Orquestador configurado según su rol en la comunidad:
-- **Secretaría:** Enfoque en registro y veracidad histórica.
-- **Tesorería:** Enfoque en recursos y viabilidad financiera.
-- **Coordinación:** Enfoque en procesos y unión de actores.
-- **Ciudadano:** Enfoque en participación, ayuda y transparencia.
-- **Validador:** Enfoque en auditoría y evidencia.
-
-### 2. Los 10 Subagentes (Expertos de Dominio)
-El Orquestador delega consultas a subagentes que dominan áreas específicas:
-- **Agua**, **Economía**, **Salud**, **Educación**, **Asambleas**, **Legal**, **Seguridad**, **Transporte**, **Producción**, **Infraestructura**.
+Governance of tone, refusals, and identity is defined in `docs/governance/IaAldea_SOUL.md`. Safety refusals used by orchestrators live under `tests/safety/refusals.md`.
 
 ---
 
-## 📱 Canales de Acceso (Gateways)
+## The Conmutador (cryptographic arbiter)
 
-IAldea es accesible a través de múltiples puertas, todas protegidas por el mismo núcleo de seguridad:
+The **Conmutador** is an isolated service (intended as a hard boundary, “black box”) between AI components and encrypted community data.
 
-1. **WhatsApp Comunitario (Recomendado):** Usa la versión web para despliegues rápidos sin aprobación de Meta. (Ver `apps/whatsapp-web-gateway`).
-2. **Telegram:** Integración completa con bots de Telegram. (Ver `apps/telegram-gateway`).
-3. **WhatsApp Business:** Para despliegues a gran escala usando la API oficial de Meta.
+| Responsibility | Description |
+|----------------|-------------|
+| Key custody | It is the component entrusted with encryption keys appropriate to the deployment. The LLM and generic app code do not receive those secrets. |
+| Access arbitration | It validates requests (including access tier) before releasing decrypted material to authorized subagent flows. |
+| Blast-radius reduction | Compromise of a gateway or prompt path is not equivalent to bulk exfiltration of ciphertext keys. |
 
----
+**Access tiers (keychain model)** are used to classify how strictly material is guarded:
 
-## 📜 Jerarquía de Confianza (Trust Levels)
+| Tier | Typical content |
+|------|-----------------|
+| L1 | Community-facing, public or low-sensitivity material. |
+| L2 | Strategic or operational material (e.g. secretariat, treasury, committee). |
+| L3 | High-sensitivity administrative or safety-related material. |
 
-Implementamos el protocolo de **Source Hierarchy** para validar la verdad:
-- **Trust 1-2 (Hechos):** Documentos oficiales y actas de asamblea aprobadas.
-- **Trust 3 (Referencial):** Documentos de trabajo o borradores.
-- **Trust 4-5 (Señales):** Feedback ciudadano o inferencias de IA (etiquetadas siempre como `[INFERENCIA]`).
-
-*Si hay contradicción entre fuentes, IAldea utiliza mensajes canónicos para alertar sobre la inconsistencia y solicitar revisión humana.*
-
----
-
-## 🛠️ Stack Tecnológico
-
-- **IA de Razonamiento:** Claude 4.6 Sonnet (Anthropic). El "Cerebro" que maneja la ética, la personalidad y la síntesis final bajo el protocolo SOUL.md.
-- **IA de Recuperación:** OpenAI Embeddings. Los "Bibliotecarios" que permiten a los subagentes realizar búsquedas vectoriales ultra-rápidas en el Kernel.
-- **Kernel:** PostgreSQL + pgvector (Memoria Vectorial).
-- **Seguridad:** AES-256-GCM (Túnel Conmutador). Protección física de los datos.
-- **Orquestación:** **LangGraph** (Python + FastAPI) cuando defines `LANGGRAPH_ORCHESTRATOR_URL`; si no, el **Orquestador** clásico en Node (`packages/agents/router.js`).
-- **Puente memoria:** `apps/orchestrator-bridge` expone `POST /bundle` (subagentes + Postgres en Node) para que LangGraph no duplique la ingesta.
+Exact key naming and environment variables for your deployment are listed in `.env.example`.
 
 ---
 
-## 🚀 Inicio Rápido
+## The Node router (classic orchestrator)
 
-### 1. Configuración Inicial
-Copia el archivo `.env.example` a `.env` y configura tus API Keys y las llaves maestras del Búnker (`CONMUTADOR_KEY_LX`).
+`packages/agents/router.js` implements the **legacy Node orchestrator**: role-specific configuration, retrieval via **subagents**, assembly of context, and a single Anthropic call with SOUL and safety text loaded from disk.
 
-### 2. Modo Desarrollo (Manual)
-Ideal para pruebas rápidas en tu laptop:
+| When it runs | Gateways and tools point to Node-only flows, or `LANGGRAPH_ORCHESTRATOR_URL` is unset / empty so they do not call the Python service. |
+| Role configs | Modular files under `packages/agents/orchestrators/configs/` (e.g. ciudadano, secretaria, tesoreria). |
+| Subagents | Domain experts (`packages/agents/subagents`) query memory through the Conmutador / kernel stack as implemented in code. |
 
-```bash
-# Terminal 1 — Búnker (obligatorio para memoria cifrada)
-cd apps/conmutador-service && node index.js
+This path keeps ingestion and subagent logic in one ecosystem (Node) and is the default when LangGraph is not wired in.
 
-# Terminal 2 — Puente Node (subagentes + DB; obligatorio para LangGraph)
-cd apps/orchestrator-bridge && npm install && node index.js
+---
 
-# Terminal 3 — LangGraph + FastAPI (opcional; si no corre, los gateways usan solo Node)
-cd apps/langgraph-orchestrator && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-export REPO_ROOT="$(cd ../.. && pwd)"
-export ORCHESTRATOR_BRIDGE_URL=http://127.0.0.1:3011
-export LANGGRAPH_ORCHESTRATOR_URL=http://127.0.0.1:8000   # también en .env de los gateways
-.venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+## LangGraph orchestrator (optional)
 
-# Terminal 4 — Gateway
-cd apps/whatsapp-web-gateway && npm install && node index.js   # Escanear QR
-# o: cd apps/telegram-gateway && npm install && node index.js
+When `LANGGRAPH_ORCHESTRATOR_URL` is set (e.g. `http://127.0.0.1:8000` locally), gateways can call **FastAPI + LangGraph** (`apps/langgraph-orchestrator`):
+
+1. **Precheck** against YAML refusal patterns.
+2. **Gather** context via the **orchestrator bridge** (`POST /bundle` on `apps/orchestrator-bridge`), reusing the same Node subagents and Postgres-backed memory instead of duplicating ingestion.
+3. **LLM** step with Anthropic using SOUL, refusals, role protocol, and bundled context.
+
+If the bridge fails, the graph can still respond under degraded context (no documentary memory) while respecting SOUL and safety instructions; diagnostics can be enabled with `IALDEA_EXPOSE_GATHER_ERRORS=1` (see `.env.example`).
+
+---
+
+## Multi-agent model
+
+IAldea is not a single generic chatbot. Two layers matter:
+
+**Experience layer (by stakeholder role)**  
+Orchestrator behavior is tuned for roles such as secretariat, treasury, coordination, citizen, validator, committee, aligning prompts and policy emphasis.
+
+**Domain layer (subagents)**  
+Specialized experts cover areas including water, economy, health, education, assemblies, legal, safety, transport, production, and infrastructure. The router or bridge invokes them as needed.
+
+---
+
+## Access channels (gateways)
+
+| Channel | Path | Notes |
+|---------|------|-------|
+| WhatsApp Web | `apps/whatsapp-web-gateway` | Rapid local pilots; session data under app directory. |
+| Telegram | `apps/telegram-gateway` | Bot token-driven. |
+| WhatsApp Business API | `apps/whatsapp-gateway` | Meta-approved scalability. |
+
+All channels are intended to share the same security core (Conmutador, same orchestration contract) rather than bespoke stacks per channel.
+
+---
+
+## Source hierarchy (trust levels)
+
+| Trust band | Interpretation |
+|------------|----------------|
+| 1–2 | Strongly grounded: official documents, approved minutes. |
+| 3 | Referential: working drafts or preparatory material. |
+| 4–5 | Signals: citizen feedback or model inference, explicitly labeled (e.g. `[INFERENCIA]`). |
+
+Conflicts across sources should surface canonical inconsistency messaging and invite human resolution.
+
+---
+
+## Technology stack
+
+| Layer | Technology |
+|-------|------------|
+| Reasoning model | Anthropic Claude (see `ANTHROPIC_MODEL` / app defaults). |
+| Embeddings / retrieval helpers | OpenAI embeddings where configured (`OPENAI_API_KEY`). |
+| Memory kernel | PostgreSQL with pgvector. |
+| Encryption transit | AES-256-GCM framing around Conmutador-mediated access (see `apps/conmutador-service`, `packages/security`). |
+| Classic orchestration | Node.js, `packages/agents/router.js`. |
+| Graph orchestration | Python, LangGraph, FastAPI, `langchain-anthropic`. |
+| Container orchestration | Docker Compose, optional `Makefile` wrappers. |
+
+---
+
+## Modularity and repository layout
+
+Applications are thin deployable entrypoints; shared logic lives under `packages/`.
+
+```text
+IAldea-org-26/
+├── apps/
+│   ├── conmutador-service/      # Conmutador HTTP service
+│   ├── orchestrator-bridge/     # Node bridge: POST /bundle (subagents + DB)
+│   ├── langgraph-orchestrator/ # FastAPI + LangGraph graph
+│   ├── whatsapp-web-gateway/
+│   ├── telegram-gateway/
+│   ├── whatsapp-gateway/
+│   ├── whatsapp-gateway-free/
+│   └── web/
+├── packages/
+│   ├── agents/                  # Router, subagents, orchestrator configs
+│   ├── kernel/                  # DB and data-access patterns
+│   ├── ingesta/                 # Embedding / ingestion utilities
+│   ├── security/                # Crypto helpers
+│   └── trust/                   # Trust / provenance helpers
+├── tests/                       # Including safety corpora (e.g. refusals)
+├── CONTEXTO-POPUP-VILLAGE.md    # Pop-up sprint bible (raíz)
+├── docs/                        # Documentation root index: docs/README.md
+│   ├── project/                 # repo-structure.md, guia-diaria.md
+│   ├── foundation/              # vision, principles, civic-safety, privacy, positioning
+│   ├── governance/
+│   │   └── IaAldea_SOUL.md     # Identity protocol (loaded at runtime)
+│   ├── memory/                  # Episodic, sources, source hierarchy drafts
+│   ├── architecture/            # system-architecture.md (canonical), README index
+│   └── …                        # roles, planning, pop-up-2026, etc.
+├── config/
+├── infra/
+├── docker-compose.yml
+├── Makefile                     # compose shortcuts (up, down, logs)
+└── .env.example
+
+---
+
+## Architecture (high level)
+
+```mermaid
+flowchart LR
+  subgraph channels [Gateways]
+    WA[WhatsApp Web]
+    TG[Telegram]
+  end
+
+  subgraph orch [Orchestration choice]
+    LG[LangGraph FastAPI]
+    RT[Node router]
+  end
+
+  subgraph bridge [Memory bridge]
+    OB[orchestrator-bridge POST /bundle]
+  end
+
+  subgraph core [Policy and data]
+    CM[Conmutador]
+    DB[(Postgres pgvector)]
+    SA[Subagents]
+  end
+
+  WA --> LG
+  TG --> LG
+  WA --> RT
+  TG --> RT
+  LG --> OB
+  OB --> SA
+  RT --> SA
+  SA --> CM
+  SA --> DB
 ```
 
-En `.env`: `LANGGRAPH_ORCHESTRATOR_URL=http://127.0.0.1:8000` activa el grafo (pre-check de rechazos + misma recogida de contexto). Sin esa variable, el comportamiento es el **router Node** anterior.
+**With LangGraph enabled**, a simplified request sequence:
 
-**Docker:** `docker-compose up` incluye `orchestrator-bridge`, `langgraph-orchestrator` y configura el webhook de WhatsApp hacia LangGraph por defecto.
+```mermaid
+sequenceDiagram
+  participant G as Gateway
+  participant L as LangGraph /invoke
+  participant B as orchestrator-bridge /bundle
+  participant S as Subagents
+  participant C as Conmutador
+  participant D as Postgres
 
-### 3. Modo Soberano (Servidor Físico / VPS)
-Para que IAldea funcione **24/7 de forma permanente** en un servidor:
+  G->>L: message role access_level
+  L->>L: refusal precheck
+  L->>B: bundle request
+  B->>S: delegate domain retrieval
+  S->>C: decrypt / policy where applicable
+  S->>D: vector / structured queries
+  B-->>L: context protocol title risk
+  L->>L: Anthropic completion with SOUL + safety
+  L-->>G: response
+```
+
+---
+
+## Configuration
+
+Copy `.env.example` to `.env` and set database credentials, `CONMUTADOR_KEY` (or deployment-specific key variables), `ANTHROPIC_API_KEY`, and `OPENAI_API_KEY` as required by your bridge and ingestion paths.
+
+| Variable | Role |
+|----------|------|
+| `LANGGRAPH_ORCHESTRATOR_URL` | If set, gateways target the Python orchestrator; if empty, Node router path. |
+| `ORCHESTRATOR_BRIDGE_URL` | Base URL for `POST /bundle` (LangGraph gather step). |
+| `CONMUTADOR_URL` | URL subagents and bridge use to reach the Conmutador. |
+| `DB_*` | PostgreSQL connectivity. |
+| `IALDEA_EXPOSE_GATHER_ERRORS` | When `1`, `/invoke` may include `gather_error` for debugging. |
+
+---
+
+## Local development
+
+### First-time setup (per component)
+
+| Step | Command | Re-run when |
+|------|---------|-------------|
+| Node deps (bridge / gateway) | `npm install` in that `apps/...` directory | First clone, after dependency changes, or after removing `node_modules`. |
+| Python venv (LangGraph) | `python3 -m venv .venv` in `apps/langgraph-orchestrator` | Only once unless `.venv` is deleted. |
+| Python deps | `.venv/bin/pip install -r requirements.txt` | First time, or when `requirements.txt` changes. |
+
+Day-to-day you only start processes; you do not reinstall unless dependencies change.
+
+### Manual multi-process run (typical ports)
+
+Use separate terminals or a process manager. Ensure PostgreSQL matches `DB_*` in `.env` (local install or `docker compose up -d db` from repo root; use `DB_HOST=localhost` for host-run services when the DB container publishes port 5432).
+
+| Order | Service | Command |
+|-------|---------|---------|
+| 0 | Database | e.g. `docker compose up -d db` or your local Postgres |
+| 1 | Conmutador | `cd apps/conmutador-service && node index.js` |
+| 2 | Orchestrator bridge | `cd apps/orchestrator-bridge && node index.js` |
+| 3 | LangGraph | `cd apps/langgraph-orchestrator && export REPO_ROOT="$(cd ../.. && pwd)" && export ORCHESTRATOR_BRIDGE_URL=http://127.0.0.1:3011 && .venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000` |
+| 4 | Gateway (pick one) | e.g. `cd apps/whatsapp-web-gateway && node index.js` |
+
+For host-run bridge and Conmutador against Dockerized Postgres, set `CONMUTADOR_URL=http://127.0.0.1:3005` and `DB_HOST=localhost` (and correct `DB_PORT`) in `.env`.
+
+**Smoke checks**
+
+- LangGraph: `curl -s http://127.0.0.1:8000/health`
+- Bridge: exercise `POST http://127.0.0.1:3011/bundle` with `message`, `role`, `accessLevel` JSON fields.
+
+### Docker Compose (single command)
+
+From repository root:
+
 ```bash
-# 1. Levantar toda la infraestructura en segundo plano
-docker-compose up -d --build
-
-# Equivalente (un solo comando desde la raíz del repo)
+docker compose up -d --build
+# or
 make up
-
-# 2. Vincular WhatsApp (si aplica) viendo el QR remoto
-docker logs -f ialdea-whatsapp
-# o: make logs-whatsapp
-
-# 3. Monitorear logs de la IA
-docker logs -f ialdea-telegram
 ```
 
----
-
-## 🏛️ Gobernanza Digital (SOUL.md)
-IAldea actúa bajo el protocolo de identidad definido en `IaAldea_SOUL.md`. Sus respuestas son breves (máx 150 palabras), formales, cívicas y siempre citan fuentes verificables.
+View logs, e.g. `docker logs -f ialdea-whatsapp` or `make logs-whatsapp`. Compose wires service hostnames (`db`, `conmutador`, `orchestrator-bridge`, `langgraph-orchestrator`) inside the default bridge network; these differ from the `127.0.0.1` values used in purely host-based runs.
 
 ---
-*IAldea — Fortaleciendo la soberanía comunitaria a través de la memoria.*
+
+## Response governance
+
+Public-facing replies follow `docs/governance/IaAldea_SOUL.md`: concise (on the order of 150 words), formal civic tone, source labeling (e.g. `[HECHO]` / `[INFERENCIA]`, `[FTE: ...]`) as configured, and alignment with the refusal corpus.
+
+---
+
+## License and positioning
+
+This project is released under the **MIT License** (see `LICENSE`). For public positioning and pop-up messaging aligned with the original vision, see `docs/foundation/positioning-v1.md` and `CONTEXTO-POPUP-VILLAGE.md` (repository root).
+
+---
+
+IAldea: community sovereignty through structured civic memory.

@@ -33,4 +33,4 @@ Ver columnas **Etapa** y roles en [permission-matrix.csv](permission-matrix.csv)
 
 ## Runtime (Día 4+)
 
-Comportamiento conversacional por rol y capas Kernel/Graph/Safety: `[CONTEXTO-POPUP-VILLAGE.md](../../CONTEXTO-POPUP-VILLAGE.md)` §11 y entregables del **Día 4** (agente ciudadano / comité, auditor).
+Comportamiento conversacional por rol y capas Kernel/Graph/Safety: [`CONTEXTO-POPUP-VILLAGE.md`](../../CONTEXTO-POPUP-VILLAGE.md) §11 y entregables del **Día 4** (agente ciudadano / comité, auditor).

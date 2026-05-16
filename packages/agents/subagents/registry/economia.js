@@ -2,7 +2,7 @@ const BaseSubagent = require('../core/base_subagent');
 
 class AgenteEconomia extends BaseSubagent {
   constructor() {
-    super('economia', 2); // Nivel L2
+    super('economia', 4); // Nivel L4 (Tesorería / Finanzas / Comité)
   }
 
   /**

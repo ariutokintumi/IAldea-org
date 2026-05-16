@@ -3,6 +3,7 @@ Grafo LangGraph: pre-check de rechazos → contexto (bridge Node) → respuesta 
 """
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 from typing import Any, Literal, Optional, TypedDict
@@ -97,13 +98,18 @@ def node_gather(state: OrchestratorState) -> OrchestratorState:
 
 
 def node_llm(state: OrchestratorState) -> OrchestratorState:
-    if state.get("gather_error"):
-        return {
-            **state,
-            "response": "No pude consultar la memoria cívica en este momento. Intenta más tarde.",
-        }
+    gather_err = state.get("gather_error")
+    context = state.get("context") or ""
 
-    soul = _load_text("IaAldea_SOUL.md")
+    # Memoria documental no disponible: no bloquear respuesta; el modelo usa solo SOUL/refusals (sin citar archivos)
+    if gather_err:
+        logging.warning("gather_failed: %s", gather_err)
+        context = (
+            "(No se pudo consultar la base de memoria documental. Responde con lo que permiten el SOUL y los "
+            "protocolos de seguridad; no cites actas ni documentos del repositorio; no inventes fuentes.)"
+        )
+
+    soul = _load_text("docs/governance/IaAldea_SOUL.md")
     refusals = _load_text("tests/safety/refusals.md")
 
     system_parts = [
@@ -117,7 +123,7 @@ def node_llm(state: OrchestratorState) -> OrchestratorState:
         f"- Nivel de Soberanía: L{state.get('access_level', 1)}\n",
         f"- Riesgo crítico a vigilar: {state.get('risk')}\n",
         "\n---\nCONTEXTO DE MEMORIA CÍVICA:\n",
-        state.get("context") or "(sin fragmentos recuperados)",
+        context,
         """
 ---
 INSTRUCCIONES FINALES:

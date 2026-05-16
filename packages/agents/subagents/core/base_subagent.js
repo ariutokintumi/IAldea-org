@@ -26,7 +26,7 @@ class BaseSubagent {
   }
 
   /**
-   * Genera el mensaje según la jerarquía de Trust (Sección 8 de Source-hierarchy.md)
+   * Genera el mensaje según la jerarquía de Trust (Sección 8 de docs/memory/Source-hierarchy.md)
    */
   formatResult(decrypted, trust, source) {
     let tag = "[HECHO]";

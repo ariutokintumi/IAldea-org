@@ -1,23 +1,28 @@
 # Documentación
 
-## Guías
+## Guías de proyecto
 
-- **[`repo-structure.md`](../repo-structure.md)** — árbol permitido **solo Día 1–2** (CONTEXTO §10).
-- **[`guia-diaria.md`](../guia-diaria.md)** — recordatorio diario del equipo (incluye Día 3+ como referencia).
+- **[`project/repo-structure.md`](project/repo-structure.md)** — árbol permitido **solo Día 1–2** (CONTEXTO §10).
+- **[`project/guia-diaria.md`](project/guia-diaria.md)** — recordatorio diario del equipo (incluye Día 3+ como referencia).
+- **[`CONTEXTO-POPUP-VILLAGE.md`](../CONTEXTO-POPUP-VILLAGE.md)** — contexto completo del pop-up y calendario (raíz del repo).
 
-## Día 1
+## Fundamentos (Día 1)
 
-- `vision.md`, `principles.md`, `civic-safety.md`, `privacy.md`, `positioning-v1.md`
+- [`foundation/vision.md`](foundation/vision.md), [`foundation/principles.md`](foundation/principles.md), [`foundation/civic-safety.md`](foundation/civic-safety.md), [`foundation/privacy.md`](foundation/privacy.md), [`foundation/positioning-v1.md`](foundation/positioning-v1.md)
 - `pop-up-2026/day-1.md`
-- `../soul/SOUL.example.md`, `../soul/SOUL.community-template.md`
+- Gobernanza de identidad: [`governance/IaAldea_SOUL.md`](governance/IaAldea_SOUL.md) (canónico en runtime), [`governance/SOUL-outline.md`](governance/SOUL-outline.md) (resumen corto)
 
 ## Día 2
 
 - [`planning/dia_02_gobernanza_roles_y_accesos.md`](planning/dia_02_gobernanza_roles_y_accesos.md)
 - [`roles/`](roles/) — matrices, user stories, **[excel-sheets.md](roles/excel-sheets.md)** (índice Excel ↔ CSV)
-- [`Role Model + Permission Matrix - IAldea.xlsx`](Role%20Model%20+%20Permission%20Matrix%20-%20IAldea.xlsx) — libro con todas las hojas; `scripts/export_role_model_excel.py` vuelca pestañas a CSV en `roles/`
+- [`roles/Role Model + Permission Matrix - IAldea.xlsx`](roles/Role%20Model%20+%20Permission%20Matrix%20-%20IAldea.xlsx) — libro con todas las hojas
 - `../config/policy_config.example.yaml`, `../config/roles.example.yaml`
 - `../examples/fictional-community/community-schema.json`
 - `pop-up-2026/day-2.md`
 
-Arquitectura técnica (cuatro capas): **[`CONTEXTO-POPUP-VILLAGE.md`](../CONTEXTO-POPUP-VILLAGE.md) §11**; el archivo `docs/architecture.md` se añade en **Día 3**.
+## Arquitectura (Día 3+)
+
+- **[`architecture/`](architecture/)** — índice; documento canónico: [`architecture/system-architecture.md`](architecture/system-architecture.md) (cuatro capas, kernel, grafo, agentes, ingesta, eVVM, notas Día 4+).
+
+Arquitectura técnica (cuatro capas) también en **[`CONTEXTO-POPUP-VILLAGE.md`](../CONTEXTO-POPUP-VILLAGE.md) §11**.

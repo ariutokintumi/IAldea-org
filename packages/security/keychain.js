@@ -12,7 +12,9 @@ class Keychain {
     this.keys = {
       L1: process.env.CONMUTADOR_KEY_L1,
       L2: process.env.CONMUTADOR_KEY_L2,
-      L3: process.env.CONMUTADOR_KEY_L3
+      L3: process.env.CONMUTADOR_KEY_L3,
+      L4: process.env.CONMUTADOR_KEY_L4,
+      L5: process.env.CONMUTADOR_KEY_L5
     };
   }
 

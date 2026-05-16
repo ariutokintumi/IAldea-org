@@ -38,7 +38,7 @@
 ## Pendientes para Día 3
 
 - Arquitectura de subagentes WhatsApp → en `docs/planning/dia_03_whatsapp_subagentes_orquestacion.md`.
-- `docs/architecture.md` (modelo Kernel, pipeline de ingestión) → **pendiente**.
+- `docs/architecture/system-architecture.md` (modelo Kernel, pipeline de ingestión) → mantener alineado al código.
 - Implementación del Conmutador y orquestadores → **pendiente (Día 4+)**.
 
 ## Enlaces

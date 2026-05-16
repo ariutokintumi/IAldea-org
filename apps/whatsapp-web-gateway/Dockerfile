@@ -17,7 +17,7 @@ WORKDIR /app
 # Núcleo IAldea (subagentes, seguridad, SOUL, refusals para fallback del router)
 COPY packages ./packages
 COPY tests/safety ./tests/safety
-COPY IaAldea_SOUL.md .
+COPY docs/governance/IaAldea_SOUL.md ./docs/governance/IaAldea_SOUL.md
 
 COPY apps/whatsapp-web-gateway ./apps/whatsapp-web-gateway
 

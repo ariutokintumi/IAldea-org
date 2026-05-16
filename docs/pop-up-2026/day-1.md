@@ -30,16 +30,16 @@
 ## Salidas repo (estado real)
 
 - [x] [`README.md`](../../README.md) — ✅ completo con visión, arquitectura, will-do/will-not-do, privacidad
-- [x] [`soul/SOUL.example.md`](../../soul/SOUL.example.md) — ✅ SOUL de comunidad ejemplo completo (20 secciones)
-- [x] [`soul/SOUL.community-template.md`](../../soul/SOUL.community-template.md) — ✅ template en blanco para nuevas comunidades
-- [x] [`docs/principles.md`](../principles.md) — ⚠️ placeholder mínimo (civic safety como producto, remite al README)
-- [x] [`docs/civic-safety.md`](../civic-safety.md) — ⚠️ placeholder mínimo (remite a `policy_config.yaml`)
-- [x] [`docs/privacy.md`](../privacy.md) — ⚠️ placeholder mínimo (3 modos descritos en README)
-- [x] [`docs/vision.md`](../vision.md) — ⚠️ placeholder mínimo (remite a README y SOUL.example.md)
-- [x] [`repo-structure.md`](../../repo-structure.md) — ✅ árbol de archivos permitidos Días 1–2
+- [x] [`docs/governance/IaAldea_SOUL.md`](../governance/IaAldea_SOUL.md) — ✅ SOUL operativo del proyecto (identidad y tono; runtime)
+- [x] [`docs/governance/SOUL-outline.md`](../governance/SOUL-outline.md) — resumen corto de valores (histórico / didáctico)
+- [x] [`docs/foundation/principles.md`](../foundation/principles.md) — ⚠️ placeholder mínimo (civic safety como producto, remite al README)
+- [x] [`docs/foundation/civic-safety.md`](../foundation/civic-safety.md) — ⚠️ placeholder mínimo (remite a `policy_config.yaml`)
+- [x] [`docs/foundation/privacy.md`](../foundation/privacy.md) — ⚠️ placeholder mínimo (3 modos descritos en README)
+- [x] [`docs/foundation/vision.md`](../foundation/vision.md) — ⚠️ placeholder mínimo (remite a README e IaAldea_SOUL)
+- [x] [`docs/project/repo-structure.md`](../project/repo-structure.md) — ✅ árbol de archivos permitidos Días 1–2
 - [x] [`CONTEXTO-POPUP-VILLAGE.md`](../../CONTEXTO-POPUP-VILLAGE.md) — ✅ contexto completo del sprint
 
-> **Nota:** `principles.md`, `civic-safety.md`, `privacy.md` y `vision.md` son placeholders que remiten al README y al SOUL.example.md donde vive el contenido completo. Pendiente expandirlos con el texto que el equipo acuerde como canónico en estos docs.
+> **Nota:** `foundation/principles.md`, `civic-safety.md`, `privacy.md` y `vision.md` son placeholders que remiten al README y a `governance/IaAldea_SOUL.md`. Pendiente expandirlos con el texto canónico del equipo.
 
 ## Pendientes para Día 2
 
@@ -53,4 +53,4 @@
 ## Enlaces
 
 - [`CONTEXTO-POPUP-VILLAGE.md`](../../CONTEXTO-POPUP-VILLAGE.md) §10 Día 1
-- [`docs/principles.md`](../principles.md), [`docs/civic-safety.md`](../civic-safety.md), [`docs/privacy.md`](../privacy.md), [`soul/SOUL.example.md`](../../soul/SOUL.example.md)
+- [`docs/foundation/principles.md`](../foundation/principles.md), [`docs/foundation/civic-safety.md`](../foundation/civic-safety.md), [`docs/foundation/privacy.md`](../foundation/privacy.md), [`docs/governance/IaAldea_SOUL.md`](../governance/IaAldea_SOUL.md)

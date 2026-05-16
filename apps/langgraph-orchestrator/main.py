@@ -30,6 +30,8 @@ class InvokeIn(BaseModel):
 class InvokeOut(BaseModel):
     response: str
     blocked_precheck: bool = False
+    gather_failed: bool = False
+    gather_error: str | None = None
 
 
 @app.get("/health")
@@ -48,4 +50,12 @@ def invoke(body: InvokeIn):
     out = compiled_graph.invoke(initial)
     blocked = bool(out.get("blocked"))
     response = out.get("response") or ""
-    return InvokeOut(response=response, blocked_precheck=blocked)
+    ge = out.get("gather_error")
+    return InvokeOut(
+        response=response,
+        blocked_precheck=blocked,
+        gather_failed=bool(ge),
+        gather_error=str(ge)
+        if ge and os.environ.get("IALDEA_EXPOSE_GATHER_ERRORS") == "1"
+        else None,
+    )

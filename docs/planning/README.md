@@ -1,6 +1,6 @@
 # Planning — Fase Pop-Up (Día 1 en adelante)
 
-Planes por día de entrega. Calendario: [`CONTEXTO-POPUP-VILLAGE.md`](../../CONTEXTO-POPUP-VILLAGE.md) §10. Índice de docs: [`docs/README.md`](../README.md).
+Planes por día de entrega. Calendario: [`CONTEXTO-POPUP-VILLAGE.md`](../../CONTEXTO-POPUP-VILLAGE.md) §10. Índice de docs: [`README.md`](../README.md).
 
 
 | Archivo | Día | Tema |

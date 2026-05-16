@@ -10,7 +10,7 @@ Servicio **FastAPI** que ejecuta un grafo [LangGraph](https://langchain-ai.githu
 
 | Variable | Descripción |
 |----------|-------------|
-| `REPO_ROOT` | Raíz del repo (para leer `IaAldea_SOUL.md` y `tests/safety/refusals.md`). |
+| `REPO_ROOT` | Repository root (for `docs/governance/IaAldea_SOUL.md` and `tests/safety/refusals.md`). |
 | `ORCHESTRATOR_BRIDGE_URL` | Base URL del bridge (ej. `http://127.0.0.1:3011`). |
 | `ANTHROPIC_API_KEY` | Clave Anthropic. |
 | `ANTHROPIC_MODEL` | Opcional; default `claude-sonnet-4-6`. |

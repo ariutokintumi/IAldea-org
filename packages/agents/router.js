@@ -10,7 +10,7 @@ const loadDoc = (file) => {
   return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
 };
 
-const soulContent = loadDoc('IaAldea_SOUL.md');
+const soulContent = loadDoc('docs/governance/IaAldea_SOUL.md');
 const safetyProtocol = loadDoc('tests/safety/refusals.md');
 
 // Cargador de Configuraciones Modulares de Roles
@@ -89,7 +89,7 @@ INSTRUCCIONES FINALES:
 
     try {
       const response = await anthropic.messages.create({
-        model: "claude-4-6-sonnet-latest",
+        model: "claude-sonnet-4-6",
         max_tokens: 1024,
         system: systemPrompt,
         messages: [{ role: "user", content: userMessage }],

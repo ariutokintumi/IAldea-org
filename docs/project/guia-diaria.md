@@ -1,6 +1,6 @@
 # Guía diaria del equipo (referencia)
 
-**Qué va en el repo** al cierre del Día 2: solo paths de [`repo-structure.md`](repo-structure.md) (derivado de [`CONTEXTO-POPUP-VILLAGE.md`](CONTEXTO-POPUP-VILLAGE.md) §10). Los días 3–8 abajo son recordatorio; **no** implican subir código ni docs de esos días hasta su fecha.
+**Qué va en el repo** al cierre del Día 2: solo paths de [`repo-structure.md`](repo-structure.md) (derivado de [`CONTEXTO-POPUP-VILLAGE.md`](../../CONTEXTO-POPUP-VILLAGE.md) §10). Los días 3–8 abajo son recordatorio; **no** implican subir código ni docs de esos días hasta su fecha.
 
 ---
 
