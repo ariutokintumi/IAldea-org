@@ -104,8 +104,12 @@ Para que IAldea funcione **24/7 de forma permanente** en un servidor:
 # 1. Levantar toda la infraestructura en segundo plano
 docker-compose up -d --build
 
+# Equivalente (un solo comando desde la raíz del repo)
+make up
+
 # 2. Vincular WhatsApp (si aplica) viendo el QR remoto
 docker logs -f ialdea-whatsapp
+# o: make logs-whatsapp
 
 # 3. Monitorear logs de la IA
 docker logs -f ialdea-telegram
