@@ -64,12 +64,13 @@ This path keeps ingestion and subagent logic in one ecosystem (Node) and is the 
 When `LANGGRAPH_ORCHESTRATOR_URL` is set (e.g. `http://127.0.0.1:8000` locally), gateways can call **FastAPI + LangGraph** (`apps/langgraph-orchestrator`):
 
 1. **Precheck** against YAML refusal patterns.
-2. **Gather** context via the **orchestrator bridge** (`POST /bundle` on `apps/orchestrator-bridge`), reusing the same Node subagents and Postgres-backed memory instead of duplicating ingestion.
-3. **LLM** step with Anthropic using SOUL, refusals, role protocol, and bundled context.
+2. **Orchestrator profile** (meta-orchestrator): `POST /orchestrator/profile` on the bridge loads **role** protocol / title / risk from `packages/agents/router.js` without running subagents.
+3. **Civic memory**: `POST /context` on the bridge runs **subagents + Postgres** for the same role and user message.
+4. **LLM** step with Anthropic using SOUL, refusals, role protocol, and bundled context.
 
-**Design note:** this is a **linear** LangGraph `StateGraph`: `precheck` → `gather` → `llm`, with a conditional edge only to skip the rest when precheck blocks. It is **not** the multi-turn “model binds tools → tool node → model again” loop shown in the [LangGraph quickstarts](https://docs.langchain.com/oss/python/langgraph/quickstart); retrieval is delegated in a single HTTP step to the Node bridge instead of LLM-chosen tools.
+**Design note:** this is a **linear** LangGraph `StateGraph`: `precheck` → `orchestrator_profile` → `civic_memory` → `llm`, with a conditional edge only to skip the rest when precheck blocks. It is **not** the multi-turn “model binds tools → tool node → model again” loop shown in the [LangGraph quickstarts](https://docs.langchain.com/oss/python/langgraph/quickstart); the bridge exposes **`/orchestrator/profile`** and **`/context`** so LangGraph separates **role orchestration metadata** from **subagent retrieval** (two HTTP calls, still no LLM-chosen tools). Legacy **`POST /bundle`** remains for single-round-trip clients.
 
-**Product architecture (target vs pilot):** the long-term split is **LangGraph** coordinating **all role orchestrators**, and **FastAPI** as the HTTP surface for **subagents** (one service per domain or a single app with `/agents/{domain}/…`). In the current repo, subagents remain **Node** modules invoked via the orchestrator-bridge; see [`docs/architecture/system-architecture.md`](docs/architecture/system-architecture.md) (section *LangGraph y FastAPI — visión de producto vs piloto en código*) and [`docs/planning/faltantes.md`](docs/planning/faltantes.md).
+**Product architecture (target vs pilot):** the long-term split is **LangGraph** coordinating **all role orchestrators**, and **FastAPI** as the HTTP surface for **subagents** (one service per domain or a single app with `/agents/{domain}/…`). The repo now ships **`apps/subagents-api`** (`POST /agents/{domain}/query`, proxy to the bridge) alongside the extended bridge routes (`/orchestrator/profile`, `/context`, `GET /agents`). The main WhatsApp/LangGraph path uses profile + memory on the bridge; direct per-domain queries are optional. See [`docs/architecture/system-architecture.md`](docs/architecture/system-architecture.md) (section *LangGraph y FastAPI — visión de producto vs piloto en código*) and [`apps/subagents-api/README.md`](apps/subagents-api/README.md).
 
 If the bridge fails, the graph can still respond under degraded context (no documentary memory) while respecting SOUL and safety instructions; diagnostics can be enabled with `IALDEA_EXPOSE_GATHER_ERRORS=1` (see `.env.example`).
 
@@ -181,7 +182,8 @@ Applications are thin deployable entrypoints; shared logic lives under `packages
 IAldea-org-26/
 ├── apps/
 │   ├── conmutador-service/      # Conmutador HTTP service
-│   ├── orchestrator-bridge/     # Node bridge: POST /bundle (subagents + DB)
+│   ├── orchestrator-bridge/     # Node bridge: role profile, context, bundle, /agents/*
+│   ├── subagents-api/           # FastAPI: POST /agents/{domain}/query (proxy to bridge)
 │   ├── langgraph-orchestrator/ # FastAPI + LangGraph graph
 │   ├── whatsapp-web-gateway/
 │   ├── telegram-gateway/
@@ -228,7 +230,7 @@ flowchart LR
   end
 
   subgraph bridge [Memory bridge]
-    OB[orchestrator-bridge POST /bundle]
+    OB[orchestrator-bridge profile + context]
   end
 
   subgraph core [Policy and data]
@@ -254,18 +256,20 @@ flowchart LR
 sequenceDiagram
   participant G as Gateway
   participant L as LangGraph /invoke
-  participant B as orchestrator-bridge /bundle
+  participant B as orchestrator-bridge
   participant S as Subagents
   participant C as Conmutador
   participant D as Postgres
 
   G->>L: message role access_level
   L->>L: refusal precheck
-  L->>B: bundle request
+  L->>B: POST /orchestrator/profile
+  B-->>L: protocol title risk
+  L->>B: POST /context
   B->>S: delegate domain retrieval
   S->>C: decrypt / policy where applicable
   S->>D: vector / structured queries
-  B-->>L: context protocol title risk
+  B-->>L: context
   L->>L: Anthropic completion with SOUL + safety
   L-->>G: response
 ```
@@ -324,7 +328,8 @@ Day-to-day you only start processes unless dependencies or schema change.
 |------|---------|--------|
 | 5432 | PostgreSQL (`ialdea-db`) | Published by Compose; use `DB_HOST=localhost` from processes on the host. |
 | 3005 | Conmutador | `CONMUTADOR_URL=http://127.0.0.1:3005` in `.env`. |
-| 3011 | Orchestrator bridge | `ORCHESTRATOR_BRIDGE_URL=http://127.0.0.1:3011` for LangGraph gather. |
+| 3011 | Orchestrator bridge | `ORCHESTRATOR_BRIDGE_URL=http://127.0.0.1:3011`; routes `/orchestrator/profile`, `/context`, `/bundle`, `/agents`, `/agents/:domain/query`. |
+| 3012 | Subagents API (optional) | `SUBAGENTS_API_URL=http://127.0.0.1:3012`; FastAPI proxy for single-domain queries. |
 | 8000 | LangGraph FastAPI | `LANGGRAPH_ORCHESTRATOR_URL=http://127.0.0.1:8000` for gateways using the graph. |
 | — | WhatsApp Web gateway | No HTTP port; connects outbound and shows a QR in the terminal. |
 
@@ -381,13 +386,22 @@ Scan the QR printed in this terminal to link WhatsApp Web. Ensure `.env` points 
 
 ```bash
 curl -s http://127.0.0.1:3011/health
+curl -s http://127.0.0.1:3011/agents
+curl -s -X POST http://127.0.0.1:3011/orchestrator/profile \
+  -H "Content-Type: application/json" \
+  -d '{"role":"ciudadano","accessLevel":1}'
 curl -s http://127.0.0.1:8000/health
+curl -s -X POST http://127.0.0.1:3011/context \
+  -H "Content-Type: application/json" \
+  -d '{"message":"prueba de memoria","role":"ciudadano","accessLevel":1}'
 curl -s -X POST http://127.0.0.1:3011/bundle \
   -H "Content-Type: application/json" \
   -d '{"message":"prueba de memoria","role":"ciudadano","accessLevel":1}'
 curl -s -X POST http://127.0.0.1:8000/invoke \
   -H "Content-Type: application/json" \
   -d '{"message":"hola","role":"ciudadano","access_level":1}'
+# Optional subagents API (if running on 3012):
+curl -s http://127.0.0.1:3012/health
 ```
 
 The Conmutador only exposes `POST /encrypt` and `POST /decrypt` (no HTTP health route); if terminal 2 shows the bunker banner, it is up.
@@ -411,9 +425,10 @@ Useful Makefile targets:
 | `make ps` | Show container status. |
 | `make logs-whatsapp` | Follow WhatsApp Web container logs. |
 | `make logs-langgraph` | Follow LangGraph container logs. |
+| `make logs-subagents-api` | Follow Subagents API (FastAPI :3012) logs. |
 | `make db-init` | Pipe `infra/db/init.sql` into the running `db` container (repair empty or legacy schema). |
 
-Inside Compose, services use hostnames `db`, `conmutador`, `orchestrator-bridge`, and `langgraph-orchestrator`; `.env` values that say `127.0.0.1` apply to **host** runs only.
+Inside Compose, services use hostnames `db`, `conmutador`, `orchestrator-bridge`, `subagents-api`, and `langgraph-orchestrator`; `.env` values that say `127.0.0.1` apply to **host** runs only.
 
 ---
 

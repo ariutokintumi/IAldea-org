@@ -28,7 +28,12 @@ function getSubagent(domain) {
   return subagents[domain.toLowerCase()];
 }
 
+function listSubagentSlugs() {
+  return Object.keys(subagents);
+}
+
 module.exports = {
   getSubagent,
-  subagents
+  subagents,
+  listSubagentSlugs,
 };

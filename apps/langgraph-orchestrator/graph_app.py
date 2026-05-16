@@ -1,5 +1,6 @@
 """
-Grafo LangGraph: pre-check de rechazos → contexto (bridge Node) → respuesta Anthropic.
+Grafo LangGraph: pre-check de rechazos → perfil del orquestador por rol (bridge)
+→ memoria cívica (subagentes vía bridge) → respuesta Anthropic.
 """
 from __future__ import annotations
 
@@ -74,11 +75,42 @@ def node_precheck(state: OrchestratorState) -> OrchestratorState:
     return {**state, "blocked": False}
 
 
-def _route_precheck(state: OrchestratorState) -> Literal["end", "gather"]:
-    return "end" if state.get("blocked") else "gather"
+def _route_precheck(state: OrchestratorState) -> Literal["end", "orchestrator_profile"]:
+    return "end" if state.get("blocked") else "orchestrator_profile"
 
 
-def node_gather(state: OrchestratorState) -> OrchestratorState:
+def node_orchestrator_profile(state: OrchestratorState) -> OrchestratorState:
+    """Meta-orquestador: metadatos del rol (Node) sin ejecutar subagentes."""
+    payload = {
+        "role": state.get("role", "ciudadano"),
+        "accessLevel": state.get("access_level", 1),
+    }
+    try:
+        with httpx.Client(timeout=30.0) as client:
+            r = client.post(f"{BRIDGE_URL}/orchestrator/profile", json=payload)
+            r.raise_for_status()
+            d = r.json()
+        return {
+            **state,
+            "protocol": d.get("protocol") or "",
+            "title": d.get("title") or "",
+            "risk": d.get("risk") or "",
+            "role_resolved": d.get("role") or payload["role"],
+        }
+    except Exception as e:  # noqa: BLE001
+        return {
+            **state,
+            "gather_error": f"orchestrator_profile:{e}",
+            "protocol": "",
+            "title": "",
+            "risk": "",
+        }
+
+
+def node_civic_memory(state: OrchestratorState) -> OrchestratorState:
+    """Memoria cívica: subagentes + Postgres vía bridge (Node)."""
+    if state.get("gather_error"):
+        return {**state, "context": ""}
     payload = {
         "message": state.get("message", ""),
         "role": state.get("role", "ciudadano"),
@@ -86,17 +118,10 @@ def node_gather(state: OrchestratorState) -> OrchestratorState:
     }
     try:
         with httpx.Client(timeout=90.0) as client:
-            r = client.post(f"{BRIDGE_URL}/bundle", json=payload)
+            r = client.post(f"{BRIDGE_URL}/context", json=payload)
             r.raise_for_status()
             d = r.json()
-        return {
-            **state,
-            "context": d.get("context") or "",
-            "protocol": d.get("protocol") or "",
-            "title": d.get("title") or "",
-            "risk": d.get("risk") or "",
-            "role_resolved": d.get("role") or payload["role"],
-        }
+        return {**state, "context": d.get("context") or ""}
     except Exception as e:  # noqa: BLE001
         return {
             **state,
@@ -173,12 +198,18 @@ INSTRUCCIONES FINALES:
 def build_graph():
     g = StateGraph(OrchestratorState)
     g.add_node("precheck", node_precheck)
-    g.add_node("gather", node_gather)
+    g.add_node("orchestrator_profile", node_orchestrator_profile)
+    g.add_node("civic_memory", node_civic_memory)
     g.add_node("llm", node_llm)
 
     g.set_entry_point("precheck")
-    g.add_conditional_edges("precheck", _route_precheck, {"end": END, "gather": "gather"})
-    g.add_edge("gather", "llm")
+    g.add_conditional_edges(
+        "precheck",
+        _route_precheck,
+        {"end": END, "orchestrator_profile": "orchestrator_profile"},
+    )
+    g.add_edge("orchestrator_profile", "civic_memory")
+    g.add_edge("civic_memory", "llm")
     g.add_edge("llm", END)
 
     return g.compile()

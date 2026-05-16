@@ -127,11 +127,11 @@ Detalle completo en [`dia_03_plan_maestro_arquitectura.md`](../planning/dia_03_p
 
 **Implementación actual en este repositorio (piloto incremental):**
 
-- Un único servicio **`apps/langgraph-orchestrator`**: mezcla **FastAPI** (`main.py`) y un **StateGraph** lineal en **`graph_app.py`** (`precheck` → `gather` → `llm`). No existe aún una flota de microservicios FastAPI **por subagente**.
-- El paso **gather** llama al **orchestrator-bridge** en Node (`POST /bundle`), que ejecuta los subagentes definidos en **`packages/agents/subagents`** sobre Postgres y el Conmutador. Es decir: **subagentes en Node**, no en Python/FastAPI por dominio.
-- Los **orquestadores por rol** siguen centralizados en **`packages/agents/router.js`** (`ROLE_CONFIGS` + clase `Orchestrator`). LangGraph **inyecta** en el LLM el protocolo / título / riesgo del mismo config, pero **no** lanza hoy un subgrafo Python distinto por cada rol como orquestador autónomo.
+- **`apps/langgraph-orchestrator`:** **FastAPI** (`main.py`) + **StateGraph** en **`graph_app.py`**: `precheck` → **`orchestrator_profile`** → **`civic_memory`** → `llm`. El grafo llama al bridge en **`POST /orchestrator/profile`** (metadatos del rol) y **`POST /context`** (subagentes + Postgres); **`POST /bundle`** sigue disponible como atajo de una sola ronda.
+- **`apps/subagents-api`:** FastAPI en puerto **3012** que expone **`POST /agents/{dominio}/query`** (Pydantic) y reenvía al bridge; la lógica del subagente sigue en **Node** (`packages/agents/subagents`).
+- Los **orquestadores por rol** siguen en **`packages/agents/router.js`**. Aún **no** hay un subgrafo LangGraph independiente por cada `orc_*`; la diferenciación es el config cargado según `role_slug` en el perfil.
 
-La brecha respecto a la visión está **acotada a propósito** para reducir superficie en piloto; el roadmap técnico sigue en [`faltantes.md`](../planning/faltantes.md).
+La brecha menor respecto a la visión (subagente = proceso Python autónomo) queda documentada en [`faltantes.md`](../planning/faltantes.md).
 
 ### Orquestadores dedicados (uno por rol)
 

@@ -1,7 +1,7 @@
 # Desarrollo sin tantas terminales
 # Uso: make up | make logs-whatsapp | make down
 
-.PHONY: up down logs-whatsapp logs-langgraph ps db-init
+.PHONY: up down logs-whatsapp logs-langgraph logs-subagents-api ps db-init
 
 up:
 	docker compose up -d --build
@@ -14,6 +14,9 @@ logs-whatsapp:
 
 logs-langgraph:
 	docker logs -f ialdea-langgraph
+
+logs-subagents-api:
+	docker logs -f ialdea-subagents-api
 
 ps:
 	docker compose ps

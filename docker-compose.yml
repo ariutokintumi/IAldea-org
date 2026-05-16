@@ -30,7 +30,7 @@ services:
     networks:
       - ialdea-net
 
-  # 2b. Puente: subagentes + Postgres (Node) para LangGraph
+  # 2b. Puente: perfiles de rol + subagentes + Postgres (Node) para LangGraph / FastAPI
   orchestrator-bridge:
     build:
       context: .
@@ -45,6 +45,22 @@ services:
     depends_on:
       - db
       - conmutador
+    networks:
+      - ialdea-net
+
+  # 2b2. FastAPI: contrato HTTP por subagente (proxy al bridge)
+  subagents-api:
+    build:
+      context: .
+      dockerfile: apps/subagents-api/Dockerfile
+    container_name: ialdea-subagents-api
+    ports:
+      - "3012:3012"
+    env_file: .env
+    environment:
+      ORCHESTRATOR_BRIDGE_URL: http://orchestrator-bridge:3011
+    depends_on:
+      - orchestrator-bridge
     networks:
       - ialdea-net
 

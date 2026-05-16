@@ -3,8 +3,11 @@
 Servicio **FastAPI** que ejecuta un grafo [LangGraph](https://langchain-ai.github.io/langgraph/):
 
 1. **`precheck`** — rechazos *zero-token* con patrones de `refusal_patterns.yaml` (alineado a `tests/safety/refusals.md`).
-2. **`gather`** — `POST /bundle` en el [orchestrator-bridge](../orchestrator-bridge/) (Node: subagentes, PG, Conmutador).
-3. **`llm`** — respuesta con **Claude** y el mismo armado de system prompt que `packages/agents/router.js` (SOUL + refusals + protocolo de rol).
+2. **`orchestrator_profile`** — `POST /orchestrator/profile` en el [orchestrator-bridge](../orchestrator-bridge/): metadatos del **orquestador por rol** (protocolo, título, riesgo) sin ejecutar subagentes.
+3. **`civic_memory`** — `POST /context` en el bridge: subagentes + Postgres + Conmutador (misma lógica que antes en un solo `/bundle`).
+4. **`llm`** — respuesta con **Claude** y el mismo armado de system prompt que `packages/agents/router.js` (SOUL + refusals + protocolo de rol).
+
+El client HTTP antiguo que solo llamaba `POST /bundle` sigue funcionando; LangGraph ahora separa **meta-orquestador** y **memoria** en dos llamadas al bridge.
 
 ## Variables
 
@@ -36,9 +39,13 @@ export ORCHESTRATOR_BRIDGE_URL=http://127.0.0.1:3011
 
 | Archivo | Rol |
 |---------|-----|
-| `graph_app.py` | `StateGraph`: nodos `precheck`, `gather`, `llm`; estado `OrchestratorState`; llamada HTTP al bridge. |
+| `graph_app.py` | `StateGraph`: `precheck` → `orchestrator_profile` → `civic_memory` → `llm`. |
 | `main.py` | FastAPI: `/health`, `/invoke`. |
 | `refusal_patterns.yaml` | Keywords → respuesta fija para `precheck` (sin LLM). |
+
+## Consulta por un solo subagente (FastAPI aparte)
+
+Para integraciones que quieren `POST /agents/{domain}/query` con contrato Pydantic, usar el servicio **[`apps/subagents-api`](../subagents-api/)** (puerto **3012** en Compose).
 
 ## Más documentación
 

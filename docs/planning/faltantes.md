@@ -4,10 +4,14 @@
 
 **Visión de arquitectura:** **LangGraph** como capa que **orquesta a todos los orquestadores por rol** (flujos, ramas y política entre `orc_*`). **FastAPI** como capa HTTP de **subagentes** (microservicio por dominio o un app con routers `/agents/{domain}/query`), con contratos Pydantic y paso por Conmutador para plaintext solo tras policy.
 
-**Qué hay hoy en el repo:** un **solo** servicio Python `apps/langgraph-orchestrator` (FastAPI + grafo lineal `precheck → gather → llm`) más el **bridge Node** `apps/orchestrator-bridge`, que ejecuta los subagentes ya escritos en Node. No hay todavía FastAPI por subagente ni un grafo LangGraph que enlace explícitamente un nodo por cada orquestador de rol.
+**Qué hay hoy en el repo:**
 
-- **LangGraph (Python):** servicio `apps/langgraph-orchestrator` (+ puente `apps/orchestrator-bridge`) — ver [README](../../apps/langgraph-orchestrator/README.md).
-- **FastAPI (Python) por subagente (pendiente):** un **microservicio por subagente** (o un solo app con routers `/agents/{domain}/query`) que exponga: contexto permitido, llamada al LLM interno si aplica, y delegación al Conmutador para plaintext solo tras policy. Ventaja: mismo stack que LangGraph y tipado de contratos (Pydantic).
+- **`apps/langgraph-orchestrator`:** FastAPI + grafo LangGraph (`precheck` → perfil de rol en bridge → contexto cívico en bridge → LLM). Ver [`graph_app.py`](../../apps/langgraph-orchestrator/graph_app.py).
+- **`apps/orchestrator-bridge`:** Node; rutas `POST /orchestrator/profile`, `POST /context`, `POST /bundle`, `GET /agents`, `POST /agents/:domain/query`.
+- **`apps/subagents-api`:** FastAPI en **:3012**; `POST /agents/{domain}/query` con proxy al bridge (contrato Pydantic hacia el exterior).
+
+**Pendiente (roadmap):** reescribir subagentes en Python/FastAPI autónomos o añadir subgrafos LangGraph **por rol** si hace falta ramificación más rica que el config único inyectado hoy.
+
 - **Integración con lo actual:** mantener **Node** (WhatsApp webhook / whatsapp-web.js) como borde; **validar rol y L1–L4 en Node** antes de llamar a LangGraph; LangGraph/FastAPI **no** sustituyen el control de acceso.
 
 ## Contexto y primera subida de documentos
