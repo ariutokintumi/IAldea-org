@@ -10,13 +10,15 @@ const AgenteSalud = require('./registry/salud');
 const AgenteEducacion = require('./registry/educacion');
 
 const subagents = {
-  economia: new AgenteEconomia(),
-  legal: new AgenteLegal(),
-  agua: new AgenteAgua(),
+  economia: new AgenteEconomia(), // L4
+  legal: new AgenteLegal(),     // L3
+  agua: new AgenteAgua(),       // L1
+
+  // Expertos Genéricos
   produccion: new AgenteProduccion(),
   infraestructura: new AgenteInfraestructura(),
   asambleas: new AgenteAsambleas(),
-  seguridad: new AgenteSeguridad(),
+  seguridad: new AgenteSeguridad(), // L4 para Comité/Admin
   transporte: new AgenteTransporte(),
   salud: new AgenteSalud(),
   educacion: new AgenteEducacion()
