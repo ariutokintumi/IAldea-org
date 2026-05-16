@@ -1,26 +1,29 @@
-const BaseSubagent = require('./base_subagent');
+const BaseSubagent = require('./core/base_subagent');
+const AgenteEconomia = require('./registry/economia');
+const AgenteLegal = require('./registry/legal');
+const AgenteAgua = require('./registry/agua');
 
 const subagents = {
-  economia: new BaseSubagent('Economia', 2),
-  produccion: new BaseSubagent('Produccion', 1),
-  agua: new BaseSubagent('Agua', 1),
-  infraestructura: new BaseSubagent('Infraestructura', 1),
-  asambleas: new BaseSubagent('Asambleas', 1),
-  legal: new BaseSubagent('Legal', 2),
-  seguridad: new BaseSubagent('Security', 3),
-  transporte: new BaseSubagent('Transporte', 1),
-  salud: new BaseSubagent('Salud', 1),
-  educacion: new BaseSubagent('Educacion', 1)
+  // Expertos con Personalidad Propia
+  economia: new AgenteEconomia(),
+  legal: new AgenteLegal(),
+  agua: new AgenteAgua(),
+
+  // Expertos Genéricos (por ahora)
+  produccion: new BaseSubagent('produccion', 1),
+  infraestructura: new BaseSubagent('infraestructura', 1),
+  asambleas: new BaseSubagent('asambleas', 1),
+  seguridad: new BaseSubagent('seguridad', 3),
+  transporte: new BaseSubagent('transporte', 1),
+  salud: new BaseSubagent('salud', 1),
+  educacion: new BaseSubagent('educacion', 1)
 };
 
-/**
- * Obtiene el subagente adecuado según el tema detectado
- */
-function getSubagent(topic) {
-  return subagents[topic.toLowerCase()] || null;
+function getSubagent(domain) {
+  return subagents[domain.toLowerCase()];
 }
 
 module.exports = {
-  subagents,
-  getSubagent
+  getSubagent,
+  subagents
 };

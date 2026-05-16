@@ -4,55 +4,33 @@ const path = require('path');
 const { getSubagent, subagents } = require('./subagents/factory');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
-// Cargar Protocolos de Colaboradores
+// Cargador de Protocolos Globales
 const loadDoc = (file) => {
   const p = path.resolve(__dirname, `../../${file}`);
   return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
 };
 
 const soulContent = loadDoc('IaAldea_SOUL.md');
-const authorityProtocol = loadDoc('packages/agents/authority.md');
-const citizenProtocol = loadDoc('packages/agents/citizen.md');
 const safetyProtocol = loadDoc('tests/safety/refusals.md');
+
+// Cargador de Configuraciones Modulares de Roles
+const ROLE_CONFIGS = {
+  secretaria: require('./orchestrators/configs/secretaria'),
+  tesoreria: require('./orchestrators/configs/tesoreria'),
+  ciudadano: require('./orchestrators/configs/ciudadano'),
+  coordinacion: require('./orchestrators/configs/coordinacion'),
+  validador: require('./orchestrators/configs/validador'),
+  comite: require('./orchestrators/configs/comite'),
+  admin: require('./orchestrators/configs/validador'), // Admin usa perfil de auditor
+};
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 /**
- * CONFIGURACIÓN DE ROLES (Alineada con Matriz de Experiencia y Nuevos Protocolos)
+ * ORQUESTADOR MAESTRO: El Director de la Asamblea Digital
  */
-const ROLE_CONFIGS = {
-  secretaria: {
-    title: "Secretaría de Memoria",
-    focus: "Registrar memoria oficial, crear registros y minutas.",
-    risk: "Registrar información no validada.",
-    protocol: authorityProtocol,
-    priority_agents: ['asambleas', 'legal']
-  },
-  tesoreria: {
-    title: "Tesorería Comunitaria",
-    focus: "Cuidar recursos y viabilidad financiera.",
-    risk: "Comprometer presupuesto sin validación humana.",
-    protocol: authorityProtocol,
-    priority_agents: ['economia', 'infraestructura']
-  },
-  ciudadano: {
-    title: "Participación Ciudadana",
-    focus: "Participar, consultar y dar feedback constructivo.",
-    risk: "Propagar rumores o acusaciones.",
-    protocol: citizenProtocol,
-    priority_agents: ['agua', 'salud', 'asambleas']
-  },
-  admin: {
-    title: "Administración L3",
-    focus: "Seguridad y configuración técnica.",
-    risk: "Vulnerar privacidad de datos.",
-    protocol: authorityProtocol,
-    priority_agents: ['seguridad', 'legal']
-  }
-};
-
 class Orchestrator {
   constructor(role, accessLevel) {
     this.role = role.toLowerCase();
@@ -111,7 +89,7 @@ INSTRUCCIONES FINALES:
 
     try {
       const response = await anthropic.messages.create({
-        model: "claude-sonnet-4-6",
+        model: "claude-3-5-sonnet-20240620",
         max_tokens: 1024,
         system: systemPrompt,
         messages: [{ role: "user", content: userMessage }],
@@ -119,6 +97,7 @@ INSTRUCCIONES FINALES:
 
       return response.content[0].text.replace(/—|–/g, ',');
     } catch (error) {
+      console.error('ERROR EN ORQUESTADOR:', error);
       return "Lo siento, tuve un error en el protocolo de coordinación.";
     }
   }

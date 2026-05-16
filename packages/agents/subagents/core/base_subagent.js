@@ -1,5 +1,5 @@
-const { pool } = require('../../kernel/db');
-const { generateEmbedding } = require('../../ingesta/embedder');
+const { pool } = require('../../../kernel/db');
+const { generateEmbedding } = require('../../../ingesta/embedder');
 
 /**
  * BaseSubagent V2: Auditor de Fuentes y Jerarquía de Confianza
