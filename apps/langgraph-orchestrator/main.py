@@ -10,8 +10,17 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
+
+def _resolve_repo_root() -> Path:
+    """En monorepo: main.py está en apps/langgraph-orchestrator/. En Docker: /app/main.py + REPO_ROOT=/repo."""
+    env = os.environ.get("REPO_ROOT", "").strip()
+    if env:
+        return Path(env).resolve()
+    return Path(__file__).resolve().parents[2]
+
+
 # Cargar .env desde la raíz del repo si existe
-_repo_root = Path(__file__).resolve().parents[2]
+_repo_root = _resolve_repo_root()
 _env = _repo_root / ".env"
 if _env.is_file():
     load_dotenv(_env)
