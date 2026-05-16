@@ -2,8 +2,12 @@
 
 ## LangGraph + FastAPI (orquestación)
 
+**Visión de arquitectura:** **LangGraph** como capa que **orquesta a todos los orquestadores por rol** (flujos, ramas y política entre `orc_*`). **FastAPI** como capa HTTP de **subagentes** (microservicio por dominio o un app con routers `/agents/{domain}/query`), con contratos Pydantic y paso por Conmutador para plaintext solo tras policy.
+
+**Qué hay hoy en el repo:** un **solo** servicio Python `apps/langgraph-orchestrator` (FastAPI + grafo lineal `precheck → gather → llm`) más el **bridge Node** `apps/orchestrator-bridge`, que ejecuta los subagentes ya escritos en Node. No hay todavía FastAPI por subagente ni un grafo LangGraph que enlace explícitamente un nodo por cada orquestador de rol.
+
 - **LangGraph (Python):** servicio `apps/langgraph-orchestrator` (+ puente `apps/orchestrator-bridge`) — ver [README](../../apps/langgraph-orchestrator/README.md).
-- **FastAPI (Python):** un **microservicio por subagente** (o un solo app con routers `/agents/{domain}/query`) que expone: contexto permitido, llamada al LLM interno, y delegación al Conmutador para plaintext solo tras policy. Ventaja: mismo stack que LangGraph y tipado de contratos (Pydantic).
+- **FastAPI (Python) por subagente (pendiente):** un **microservicio por subagente** (o un solo app con routers `/agents/{domain}/query`) que exponga: contexto permitido, llamada al LLM interno si aplica, y delegación al Conmutador para plaintext solo tras policy. Ventaja: mismo stack que LangGraph y tipado de contratos (Pydantic).
 - **Integración con lo actual:** mantener **Node** (WhatsApp webhook / whatsapp-web.js) como borde; **validar rol y L1–L4 en Node** antes de llamar a LangGraph; LangGraph/FastAPI **no** sustituyen el control de acceso.
 
 ## Contexto y primera subida de documentos

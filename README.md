@@ -69,6 +69,8 @@ When `LANGGRAPH_ORCHESTRATOR_URL` is set (e.g. `http://127.0.0.1:8000` locally),
 
 **Design note:** this is a **linear** LangGraph `StateGraph`: `precheck` → `gather` → `llm`, with a conditional edge only to skip the rest when precheck blocks. It is **not** the multi-turn “model binds tools → tool node → model again” loop shown in the [LangGraph quickstarts](https://docs.langchain.com/oss/python/langgraph/quickstart); retrieval is delegated in a single HTTP step to the Node bridge instead of LLM-chosen tools.
 
+**Product architecture (target vs pilot):** the long-term split is **LangGraph** coordinating **all role orchestrators**, and **FastAPI** as the HTTP surface for **subagents** (one service per domain or a single app with `/agents/{domain}/…`). In the current repo, subagents remain **Node** modules invoked via the orchestrator-bridge; see [`docs/architecture/system-architecture.md`](docs/architecture/system-architecture.md) (section *LangGraph y FastAPI — visión de producto vs piloto en código*) and [`docs/planning/faltantes.md`](docs/planning/faltantes.md).
+
 If the bridge fails, the graph can still respond under degraded context (no documentary memory) while respecting SOUL and safety instructions; diagnostics can be enabled with `IALDEA_EXPOSE_GATHER_ERRORS=1` (see `.env.example`).
 
 **Service readme:** API body, env vars, and local `uvicorn` command are summarized in [`apps/langgraph-orchestrator/README.md`](apps/langgraph-orchestrator/README.md). Implementation: `apps/langgraph-orchestrator/graph_app.py`, HTTP entry: `main.py`, patterns: `refusal_patterns.yaml`.

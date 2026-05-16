@@ -118,6 +118,21 @@ Cada fragmento de documento (chunk) se embeds y almacena en el índice vectorial
 
 Detalle completo en [`dia_03_plan_maestro_arquitectura.md`](../planning/dia_03_plan_maestro_arquitectura.md).
 
+### LangGraph y FastAPI — visión de producto vs piloto en código
+
+**Visión (arquitectura objetivo):**
+
+- **LangGraph** como **orquestación superior**: un grafo (o grafos) que coordina **todos los orquestadores por rol** (`orc_ciudadano`, `orc_secretaria`, etc.), los pasos de política y la memoria, sin reemplazar el **control de acceso en el borde** (los gateways en Node siguen resolviendo identidad y `memberships` / L0–L3 antes de llamar al orquestador).
+- **FastAPI** orientado a **subagentes**: uno o varios servicios HTTP que exponen contratos claros (Pydantic), p. ej. `/agents/{dominio}/query`, con contexto acotado por rol y delegación al **Conmutador** para texto cifrado según política.
+
+**Implementación actual en este repositorio (piloto incremental):**
+
+- Un único servicio **`apps/langgraph-orchestrator`**: mezcla **FastAPI** (`main.py`) y un **StateGraph** lineal en **`graph_app.py`** (`precheck` → `gather` → `llm`). No existe aún una flota de microservicios FastAPI **por subagente**.
+- El paso **gather** llama al **orchestrator-bridge** en Node (`POST /bundle`), que ejecuta los subagentes definidos en **`packages/agents/subagents`** sobre Postgres y el Conmutador. Es decir: **subagentes en Node**, no en Python/FastAPI por dominio.
+- Los **orquestadores por rol** siguen centralizados en **`packages/agents/router.js`** (`ROLE_CONFIGS` + clase `Orchestrator`). LangGraph **inyecta** en el LLM el protocolo / título / riesgo del mismo config, pero **no** lanza hoy un subgrafo Python distinto por cada rol como orquestador autónomo.
+
+La brecha respecto a la visión está **acotada a propósito** para reducir superficie en piloto; el roadmap técnico sigue en [`faltantes.md`](../planning/faltantes.md).
+
 ### Orquestadores dedicados (uno por rol)
 
 Cada rol tiene su propio orquestador con un **System Prompt** derivado de la [Matriz de comportamiento](../roles/matriz-comportamiento-por-rol.md).
