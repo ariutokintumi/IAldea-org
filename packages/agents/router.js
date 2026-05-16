@@ -10,7 +10,15 @@ const loadDoc = (file) => {
   return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
 };
 
-const soulContent = loadDoc('docs/governance/IaAldea_SOUL.md');
+/** Nombre que oye el usuario (WhatsApp, etc.). Sustituye el marcador del SOUL. */
+function applyCommunityDisplayName(markdown) {
+  const name = (process.env.COMMUNITY_DISPLAY_NAME || 'tu comunidad').trim() || 'tu comunidad';
+  return markdown
+    .replaceAll('\\[nombre comunidad\\]', name)
+    .replaceAll('[nombre comunidad]', name);
+}
+
+const soulContent = applyCommunityDisplayName(loadDoc('docs/governance/IaAldea_SOUL.md'));
 const safetyProtocol = loadDoc('tests/safety/refusals.md');
 
 // Cargador de Configuraciones Modulares de Roles

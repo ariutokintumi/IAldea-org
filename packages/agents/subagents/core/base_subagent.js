@@ -10,13 +10,26 @@ class BaseSubagent {
     this.minAccessLevel = minAccessLevel;
   }
 
-  async callConmutador(ciphertext, level) {
+  /** Llave Conmutador (L1–L3) alineada a sensitivity del documento */
+  sensitivityToKeyLevel(sensitivity) {
+    const s = String(sensitivity || '').toLowerCase();
+    if (s === 'confidential') return 2;
+    if (s === 'private') return 3;
+    return 1;
+  }
+
+  async callConmutador(ciphertext, keyLevelNum) {
+    const parts = String(ciphertext || '').split(':');
+    if (parts.length !== 3) {
+      return ciphertext;
+    }
     try {
       const base = process.env.CONMUTADOR_URL || 'http://127.0.0.1:3005';
+      const level = `L${keyLevelNum}`;
       const response = await fetch(`${base.replace(/\/$/, '')}/decrypt`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ciphertext, level: `L${level}` })
+        body: JSON.stringify({ ciphertext, level })
       });
       const data = await response.json();
       return data.plaintext || "[ERROR DE INTEGRIDAD]";
@@ -50,15 +63,34 @@ class BaseSubagent {
     const embedding = await generateEmbedding(userQuery);
     if (!embedding) return "Error de conexión con el Kernel.";
 
-    const res = await pool.query(`
-      SELECT c.content, v.source_name, v.sensitivity, v.trust_level
+    const vecLiteral = `[${embedding.join(',')}]`;
+    const res = await pool.query(
+      `
+      SELECT c.content,
+             COALESCE(NULLIF(TRIM(d.title), ''), NULLIF(TRIM(d.uri), ''), 'documento') AS source_name,
+             v.sensitivity,
+             CASE LOWER(v.sensitivity)
+               WHEN 'public' THEN 1
+               WHEN 'confidential' THEN 2
+               WHEN 'private' THEN 3
+               ELSE 4
+             END AS trust_level
       FROM document_chunks c
       JOIN document_versions v ON c.version_id = v.id
-      WHERE v.sensitivity <= $2 
-      AND (v.source_name ILIKE $3 OR c.content ILIKE $3)
-      ORDER BY v.trust_level ASC, c.embedding <=> $1
+      JOIN documents d ON v.document_id = d.id
+      WHERE (
+        ($2::int >= 3 AND LOWER(v.sensitivity) IN ('public', 'confidential', 'private')) OR
+        ($2::int = 2 AND LOWER(v.sensitivity) IN ('public', 'confidential')) OR
+        ($2::int = 1 AND LOWER(v.sensitivity) = 'public')
+      )
+      AND (
+        d.title ILIKE $3 OR d.category ILIKE $3 OR d.uri ILIKE $3 OR c.content ILIKE $3
+      )
+      ORDER BY trust_level ASC, (c.embedding <=> $1::vector) NULLS LAST
       LIMIT 3
-    `, [`[${embedding.join(',')}]`, requesterAccessLevel, `%${this.domain}%`]);
+    `,
+      [vecLiteral, requesterAccessLevel, `%${this.domain}%`]
+    );
 
     if (res.rows.length === 0) {
       return `No encontré una fuente suficientemente confiable para responder esto como hecho sobre ${this.domain}.`;
@@ -73,7 +105,8 @@ class BaseSubagent {
     }
 
     for (const row of res.rows) {
-      const decrypted = await this.callConmutador(row.content, row.sensitivity);
+      const keyLevel = this.sensitivityToKeyLevel(row.sensitivity);
+      const decrypted = await this.callConmutador(row.content, keyLevel);
       finalOutput += `\n${this.formatResult(decrypted, row.trust_level, row.source_name)}`;
     }
 

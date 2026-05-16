@@ -39,6 +39,14 @@ def _load_text(rel: str) -> str:
     return ""
 
 
+def _soul_text() -> str:
+    raw = _load_text("docs/governance/IaAldea_SOUL.md")
+    name = (os.environ.get("COMMUNITY_DISPLAY_NAME") or "").strip() or "tu comunidad"
+    return (
+        raw.replace("\\[nombre comunidad\\]", name).replace("[nombre comunidad]", name)
+    )
+
+
 class OrchestratorState(TypedDict, total=False):
     message: str
     role: str
@@ -109,7 +117,7 @@ def node_llm(state: OrchestratorState) -> OrchestratorState:
             "protocolos de seguridad; no cites actas ni documentos del repositorio; no inventes fuentes.)"
         )
 
-    soul = _load_text("docs/governance/IaAldea_SOUL.md")
+    soul = _soul_text()
     refusals = _load_text("tests/safety/refusals.md")
 
     system_parts = [

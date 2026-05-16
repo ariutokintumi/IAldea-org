@@ -13,6 +13,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-ialdea2026}
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+      # Primera vez / volumen vacío: Postgres ejecuta el SQL y crea memberships, documents, vector, etc.
+      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/10-ialdea.sql:ro
     networks:
       - ialdea-net
 
