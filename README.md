@@ -68,24 +68,32 @@ Implementamos el protocolo de **Source Hierarchy** para validar la verdad:
 
 ## 🚀 Inicio Rápido
 
-### 1. Configuración
-Copia el archivo `.env.example` a `.env` y configura tus API Keys y el `CONMUTADOR_KEY`.
+### 1. Configuración Inicial
+Copia el archivo `.env.example` a `.env` y configura tus API Keys y las llaves maestras del Búnker (`CONMUTADOR_KEY_LX`).
 
-### 2. Despliegue con Docker
+### 2. Modo Desarrollo (Manual)
+Ideal para pruebas rápidas en tu laptop:
 ```bash
-docker-compose up -d
-```
-
-### 3. Encender los Servicios
-```bash
-# Iniciar el Búnker de Seguridad (Obligatorio)
+# Iniciar el Búnker (Obligatorio)
 cd apps/conmutador-service && node index.js
 
-# OPCIÓN A: Iniciar Portal de WhatsApp Comunitario (Escanear QR)
-cd apps/whatsapp-web-gateway && node index.js
-
-# OPCIÓN B: Iniciar Portal de Telegram
+# En otra terminal, iniciar el Gateway elegido:
+cd apps/whatsapp-web-gateway && node index.js  # (Escanear QR)
+# O
 cd apps/telegram-gateway && node index.js
+```
+
+### 3. Modo Soberano (Servidor Físico / VPS)
+Para que IAldea funcione **24/7 de forma permanente** en un servidor:
+```bash
+# 1. Levantar toda la infraestructura en segundo plano
+docker-compose up -d --build
+
+# 2. Vincular WhatsApp (si aplica) viendo el QR remoto
+docker logs -f ialdea-whatsapp
+
+# 3. Monitorear logs de la IA
+docker logs -f ialdea-telegram
 ```
 
 ---
