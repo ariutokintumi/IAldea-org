@@ -67,7 +67,11 @@ When `LANGGRAPH_ORCHESTRATOR_URL` is set (e.g. `http://127.0.0.1:8000` locally),
 2. **Gather** context via the **orchestrator bridge** (`POST /bundle` on `apps/orchestrator-bridge`), reusing the same Node subagents and Postgres-backed memory instead of duplicating ingestion.
 3. **LLM** step with Anthropic using SOUL, refusals, role protocol, and bundled context.
 
+**Design note:** this is a **linear** LangGraph `StateGraph`: `precheck` → `gather` → `llm`, with a conditional edge only to skip the rest when precheck blocks. It is **not** the multi-turn “model binds tools → tool node → model again” loop shown in the [LangGraph quickstarts](https://docs.langchain.com/oss/python/langgraph/quickstart); retrieval is delegated in a single HTTP step to the Node bridge instead of LLM-chosen tools.
+
 If the bridge fails, the graph can still respond under degraded context (no documentary memory) while respecting SOUL and safety instructions; diagnostics can be enabled with `IALDEA_EXPOSE_GATHER_ERRORS=1` (see `.env.example`).
+
+**Service readme:** API body, env vars, and local `uvicorn` command are summarized in [`apps/langgraph-orchestrator/README.md`](apps/langgraph-orchestrator/README.md). Implementation: `apps/langgraph-orchestrator/graph_app.py`, HTTP entry: `main.py`, patterns: `refusal_patterns.yaml`.
 
 ---
 
