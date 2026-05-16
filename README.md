@@ -58,9 +58,10 @@ Implementamos el protocolo de **Source Hierarchy** para validar la verdad:
 
 ## 🛠️ Stack Tecnológico
 
-- **IA:** Claude 4.6 Sonnet (Razonamiento) + OpenAI (Embeddings).
+- **IA de Razonamiento:** Claude 4.6 Sonnet (Anthropic). El "Cerebro" que maneja la ética, la personalidad y la síntesis final bajo el protocolo SOUL.md.
+- **IA de Recuperación:** OpenAI Embeddings. Los "Bibliotecarios" que permiten a los subagentes realizar búsquedas vectoriales ultra-rápidas en el Kernel.
 - **Kernel:** PostgreSQL + pgvector (Memoria Vectorial).
-- **Seguridad:** AES-256-GCM (Túnel Conmutador).
+- **Seguridad:** AES-256-GCM (Túnel Conmutador). Protección física de los datos.
 - **Gateways:** Telegram Bot API & WhatsApp Business API.
 - **Infraestructura:** Docker & Node.js (Fastify).
 
