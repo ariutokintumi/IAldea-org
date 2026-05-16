@@ -151,6 +151,7 @@ IAldea-org-26/
 ├── docker-compose.yml
 ├── Makefile                     # compose shortcuts (up, down, logs)
 └── .env.example
+```
 
 ---
 
@@ -223,42 +224,117 @@ Copy `.env.example` to `.env` and set database credentials, `CONMUTADOR_KEY` (or
 | `ORCHESTRATOR_BRIDGE_URL` | Base URL for `POST /bundle` (LangGraph gather step). |
 | `CONMUTADOR_URL` | URL subagents and bridge use to reach the Conmutador. |
 | `DB_*` | PostgreSQL connectivity. |
+| `COMMUNITY_DISPLAY_NAME` | Community name substituted into `IaAldea_SOUL.md` greetings (bridge and LangGraph). |
 | `IALDEA_EXPOSE_GATHER_ERRORS` | When `1`, `/invoke` may include `gather_error` for debugging. |
 
 ---
 
 ## Local development
 
-### First-time setup (per component)
+### One-time setup (per machine)
 
-| Step | Command | Re-run when |
-|------|---------|-------------|
-| Node deps (bridge / gateway) | `npm install` in that `apps/...` directory | First clone, after dependency changes, or after removing `node_modules`. |
-| Python venv (LangGraph) | `python3 -m venv .venv` in `apps/langgraph-orchestrator` | Only once unless `.venv` is deleted. |
-| Python deps | `.venv/bin/pip install -r requirements.txt` | First time, or when `requirements.txt` changes. |
+1. **Environment:** copy `.env.example` to `.env` and set keys, database passwords, and `COMMUNITY_DISPLAY_NAME`.
+2. **Node** (from repository root; first clone or after dependency changes):
 
-Day-to-day you only start processes; you do not reinstall unless dependencies change.
+```bash
+(cd packages/kernel && npm install)
+(cd packages/agents && npm install)
+(cd apps/conmutador-service && npm install)
+(cd apps/orchestrator-bridge && npm install)
+(cd apps/whatsapp-web-gateway && npm install)
+```
 
-### Manual multi-process run (typical ports)
+3. **Python (LangGraph):** in `apps/langgraph-orchestrator`:
 
-Use separate terminals or a process manager. Ensure PostgreSQL matches `DB_*` in `.env` (local install or `docker compose up -d db` from repo root; use `DB_HOST=localhost` for host-run services when the DB container publishes port 5432).
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+```
 
-| Order | Service | Command |
-|-------|---------|---------|
-| 0 | Database | e.g. `docker compose up -d db` or your local Postgres |
-| 1 | Conmutador | `cd apps/conmutador-service && node index.js` |
-| 2 | Orchestrator bridge | `cd apps/orchestrator-bridge && node index.js` |
-| 3 | LangGraph | `cd apps/langgraph-orchestrator && export REPO_ROOT="$(cd ../.. && pwd)" && export ORCHESTRATOR_BRIDGE_URL=http://127.0.0.1:3011 && .venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000` |
-| 4 | Gateway (pick one) | e.g. `cd apps/whatsapp-web-gateway && node index.js` |
+4. **Database volume:** the first time you need Postgres with the IAldea schema, start the DB container and optionally apply `init.sql` if the data directory already existed without it:
 
-For host-run bridge and Conmutador against Dockerized Postgres, set `CONMUTADOR_URL=http://127.0.0.1:3005` and `DB_HOST=localhost` (and correct `DB_PORT`) in `.env`.
+```bash
+docker compose up -d db
+make db-init   # only if memberships / vector tables are missing inside an old volume
+```
 
-**Smoke checks**
+Day-to-day you only start processes unless dependencies or schema change.
 
-- LangGraph: `curl -s http://127.0.0.1:8000/health`
-- Bridge: exercise `POST http://127.0.0.1:3011/bundle` with `message`, `role`, `accessLevel` JSON fields.
+### Service ports (host-based runs)
 
-### Docker Compose (single command)
+| Port | Service | Notes |
+|------|---------|--------|
+| 5432 | PostgreSQL (`ialdea-db`) | Published by Compose; use `DB_HOST=localhost` from processes on the host. |
+| 3005 | Conmutador | `CONMUTADOR_URL=http://127.0.0.1:3005` in `.env`. |
+| 3011 | Orchestrator bridge | `ORCHESTRATOR_BRIDGE_URL=http://127.0.0.1:3011` for LangGraph gather. |
+| 8000 | LangGraph FastAPI | `LANGGRAPH_ORCHESTRATOR_URL=http://127.0.0.1:8000` for gateways using the graph. |
+| — | WhatsApp Web gateway | No HTTP port; connects outbound and shows a QR in the terminal. |
+
+### Five-terminal full stack (recommended for local debugging)
+
+In **each** terminal, change to the **repository root** (`cd` into `IAldea-org-26`) before running the commands below. Using five terminals keeps logs separate so you can restart one service without stopping the others.
+
+**Terminal 1 — PostgreSQL**
+
+Keep Postgres in the foreground so you see startup errors, or use `-d` and free this terminal for something else.
+
+```bash
+docker compose up db
+# Alternative (background): docker compose up -d db
+```
+
+**Terminal 2 — Conmutador**
+
+```bash
+cd apps/conmutador-service && node index.js
+```
+
+**Terminal 3 — Orchestrator bridge (subagents + Postgres)**
+
+```bash
+cd apps/orchestrator-bridge && node index.js
+```
+
+**Terminal 4 — LangGraph orchestrator**
+
+```bash
+cd apps/langgraph-orchestrator
+export REPO_ROOT="$(cd ../.. && pwd)"
+export ORCHESTRATOR_BRIDGE_URL="${ORCHESTRATOR_BRIDGE_URL:-http://127.0.0.1:3011}"
+.venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+**Terminal 5 — WhatsApp Web gateway**
+
+```bash
+cd apps/whatsapp-web-gateway && node index.js
+```
+
+Scan the QR printed in this terminal to link WhatsApp Web. Ensure `.env` points gateways at the graph and bridge on the host, for example:
+
+- `DB_HOST=localhost`
+- `CONMUTADOR_URL=http://127.0.0.1:3005`
+- `ORCHESTRATOR_BRIDGE_URL=http://127.0.0.1:3011`
+- `LANGGRAPH_ORCHESTRATOR_URL=http://127.0.0.1:8000`
+
+**Optional:** if `LANGGRAPH_ORCHESTRATOR_URL` is empty or LangGraph is down, the WhatsApp gateway **falls back** to the Node `Orchestrator` in `packages/agents/router.js`. You can omit terminal 4 in that mode, but you lose LangGraph precheck and the bundled gather contract. Keep terminal 3 if you still use `POST /bundle` from scripts or from LangGraph elsewhere.
+
+### Smoke checks (host ports)
+
+```bash
+curl -s http://127.0.0.1:3011/health
+curl -s http://127.0.0.1:8000/health
+curl -s -X POST http://127.0.0.1:3011/bundle \
+  -H "Content-Type: application/json" \
+  -d '{"message":"prueba de memoria","role":"ciudadano","accessLevel":1}'
+curl -s -X POST http://127.0.0.1:8000/invoke \
+  -H "Content-Type: application/json" \
+  -d '{"message":"hola","role":"ciudadano","access_level":1}'
+```
+
+The Conmutador only exposes `POST /encrypt` and `POST /decrypt` (no HTTP health route); if terminal 2 shows the bunker banner, it is up.
+
+### Docker Compose (single command, all services in containers)
 
 From repository root:
 
@@ -268,7 +344,18 @@ docker compose up -d --build
 make up
 ```
 
-View logs, e.g. `docker logs -f ialdea-whatsapp` or `make logs-whatsapp`. Compose wires service hostnames (`db`, `conmutador`, `orchestrator-bridge`, `langgraph-orchestrator`) inside the default bridge network; these differ from the `127.0.0.1` values used in purely host-based runs.
+Useful Makefile targets:
+
+| Target | Purpose |
+|--------|---------|
+| `make up` | Build and start the full stack in the background. |
+| `make down` | Stop and remove containers. |
+| `make ps` | Show container status. |
+| `make logs-whatsapp` | Follow WhatsApp Web container logs. |
+| `make logs-langgraph` | Follow LangGraph container logs. |
+| `make db-init` | Pipe `infra/db/init.sql` into the running `db` container (repair empty or legacy schema). |
+
+Inside Compose, services use hostnames `db`, `conmutador`, `orchestrator-bridge`, and `langgraph-orchestrator`; `.env` values that say `127.0.0.1` apply to **host** runs only.
 
 ---
 
