@@ -1,22 +1,55 @@
+version: '3.8'
+
 services:
+  # 1. El Kernel (Base de Datos Vectorial)
   db:
-    image: ankane/pgvector:v0.5.1
+    image: ankane/pgvector:latest
     container_name: ialdea-db
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: ialdea_db
-      POSTGRES_USER: admin
+      POSTGRES_DB: ${DB_NAME:-ialdea_db}
+      POSTGRES_USER: ${DB_USER:-admin}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-ialdea2026}
     volumes:
-      - ./infra/db/data:/var/lib/postgresql/data
-      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d ialdea_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      - ialdea-net
+
+  # 2. El Búnker (Conmutador - Black Box)
+  conmutador:
+    build: ./apps/conmutador-service
+    container_name: ialdea-conmutador
+    ports:
+      - "3005:3005"
+    env_file: .env
+    depends_on:
+      - db
+    networks:
+      - ialdea-net
+
+  # 3. Gateway de Telegram
+  telegram-bot:
+    build: ./apps/telegram-gateway
+    container_name: ialdea-telegram
+    env_file: .env
+    depends_on:
+      - conmutador
+    networks:
+      - ialdea-net
+
+  # 4. Gateway de WhatsApp Web (Comunitario)
+  whatsapp-web:
+    build: ./apps/whatsapp-web-gateway
+    container_name: ialdea-whatsapp
+    env_file: .env
+    volumes:
+      - ./apps/whatsapp-web-gateway/.wwebjs_auth:/app/.wwebjs_auth
+    depends_on:
+      - conmutador
+    networks:
+      - ialdea-net
 
 networks:
-  default:
-    name: ialdea-network
+  ialdea-net:
+    driver: bridge
