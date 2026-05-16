@@ -1,8 +1,8 @@
 # IAldea — Arquitectura (Día 3)
 
-> Documento de arquitectura del sistema. Cubre las 4 capas del stack, el modelo de datos, el modelo de grafo, la jerarquía de fuentes y el pipeline de ingesta.
+> Documento **canónico** de arquitectura del sistema (ubicación: `docs/architecture/system-architecture.md`). Índice de la carpeta: [README.md](README.md). Cubre las 4 capas del stack, el modelo de datos, el modelo de grafo, la jerarquía de fuentes y el pipeline de ingesta, más una sección de **implementación y roadmap (Día 4+)** integrada desde documentos previos del mismo directorio.
 >
-> **Referencia del bot WhatsApp + subagentes:** [`docs/planning/dia_03_plan_maestro_arquitectura.md`](planning/dia_03_plan_maestro_arquitectura.md).
+> **Referencia del bot WhatsApp + subagentes:** [`dia_03_plan_maestro_arquitectura.md`](../planning/dia_03_plan_maestro_arquitectura.md).
 
 ---
 
@@ -116,22 +116,22 @@ Cada fragmento de documento (chunk) se embeds y almacena en el índice vectorial
 
 ## 03 / Agents — Orquestadores y Subagentes
 
-Detalle completo en [`docs/planning/dia_03_plan_maestro_arquitectura.md`](planning/dia_03_plan_maestro_arquitectura.md).
+Detalle completo en [`dia_03_plan_maestro_arquitectura.md`](../planning/dia_03_plan_maestro_arquitectura.md).
 
 ### Orquestadores dedicados (uno por rol)
 
-Cada rol tiene su propio orquestador con un **System Prompt** derivado de la [Matriz de comportamiento](docs/roles/matriz-comportamiento-por-rol.md).
+Cada rol tiene su propio orquestador con un **System Prompt** derivado de la [Matriz de comportamiento](../roles/matriz-comportamiento-por-rol.md).
 
 | Orquestador | Roles asociados | Acceso Típico |
 |---|---|---|
 | `orc_ciudadano` | `ciudadano` | Fuentes públicas, feedback ciudadano. |
 | `orc_secretaria` | `secretaria` | Registro formal, minutas, Kernel completo. |
 | `orc_coordinacion` | `coordinacion` | Ciclo completo, estados de avance. |
-| `orc_comite` | `comite_miembro` | Propuestas, comparativas, agregados. |
+| `orc_comite` | `comite` | Propuestas, comparativas, agregados. Slug canónico en `packages/agents/router.js`. |
 | `orc_tesoreria` | `tesoreria` | Viabilidad financiera, presupuestos. |
 | `orc_validador` | `validador` | Evidencias, estados de verificación. |
 | `orc_financiador` | `financiador` | Métricas agregadas (L1 acotado). |
-| `orc_admin` | `admin_tecnico`, `operador_piloto` | Configuración, logs técnicos, system health. |
+| `orc_admin` | `admin` | Configuración, logs técnicos, salud del sistema. En despliegue el rol humano puede documentarse como *admin técnico* / *operador piloto*; el slug técnico del router es `admin`. |
 
 ### Flujo de entrada (canal WhatsApp) — Detalle de Orquestación
 
@@ -314,6 +314,112 @@ CREATE TABLE blockchain_anchors (
 - **Identidad:** Soporte nativo para usar números de teléfono como IDs (alineado con WhatsApp).
 - **Soberanía:** Permite un entorno permisionado ("Your environment = Your rules") ideal para la gobernanza comunitaria.
 - **Eficiencia:** Despliegue de una "Virtual Blockchain" optimizada para las necesidades de la comunidad.
+
+---
+
+## Implementación real y roadmap (Día 4+)
+
+Esta sección **consolida** instantáneas de implementación, roadmap de ingesta y handover de auditoría que antes vivían en archivos separados bajo `docs/architecture/`. Si el código o el despliegue difieren de lo descrito aquí, **prevalece el repositorio**. Las tablas pueden reflejar un momento del sprint, no un inventario línea a línea del código actual.
+
+### Estado de componentes (instantánea)
+
+| Componente | Estado (referencia) | Notas |
+| :--- | :--- | :--- |
+| **Kernel (Postgres + pgvector)** | Operativo | Tablas y búsqueda semántica; niveles de acceso L1–L3. |
+| **Conmutador (AES-256-GCM)** | En evolución | La lógica de cifrado puede coexistir con un servicio dedicado (`apps/conmutador-service`); objetivo: llaves fuera del proceso del modelo. |
+| **Orquestador (Claude / Anthropic)** | Operativo | Router en `packages/agents/router.js`; orquestación opcional LangGraph en `apps/langgraph-orchestrator`. Identidad en `docs/governance/IaAldea_SOUL.md`. |
+| **Subagentes** | En evolución | Dominios especializados bajo `packages/agents/subagents`; el grado de delegación respecto al orquestador puede variar por versión. |
+| **Gateways (WhatsApp / Telegram)** | Operativo | Acceso por canal con políticas de identidad y acceso. |
+
+### Flujo de datos (objetivo de blindaje)
+
+Flujo de referencia: **Kernel → subagente (ciphertext) → Conmutador → subagente (plaintext) → orquestador → respuesta**, de modo que el modelo **no** accede directamente a llaves ni a la base en claro cuando el modo estricto está completo.
+
+### Gobernanza: orquestadores y diez dominios
+
+```mermaid
+graph TD
+    subgraph acceso [Capa de acceso]
+        TG[Telegram / WhatsApp]
+    end
+    subgraph orcs [Orquestadores por rol]
+        OC[Orquestador ciudadano L1]
+        OS[Orquestador secretaría L2]
+        OT[Orquestador tesorería L2]
+        OA[Orquestador admin L3]
+    end
+    subgraph subs [Subagentes por dominio]
+        S1[Economía L2]
+        S2[Producción L1]
+        S3[Agua L1]
+        S4[Infraestructura L1]
+        S5[Asambleas L1]
+        S6[Legal L2]
+        S7[Seguridad L3]
+        S8[Transporte L1]
+        S9[Salud L1]
+        S10[Educación L1]
+    end
+    subgraph bunker [Conmutador]
+        CB[Black box cifrado]
+    end
+    TG --> OC
+    TG --> OS
+    TG --> OT
+    TG --> OA
+    OC --> S2 & S3 & S4 & S5 & S8 & S9 & S10
+    OS --> S1 & S5 & S6
+    OT --> S1 & S2 & S4
+    OA --> S7
+    S1 & S2 & S3 & S4 & S5 & S6 & S7 & S8 & S9 & S10 <--> CB
+```
+
+### Directorio de dominios (MVP de referencia)
+
+| Subagente | Dominio | Nivel | Responsabilidad |
+| :--- | :--- | :--- | :--- |
+| Economía | Finanzas / presupuesto | L2 | Cuotas, gastos, viabilidad. |
+| Producción | Huertos / manufactura | L1 | Seguimiento productivo local. |
+| Agua | Pozos / distribución | L1 | Reglamentos y recurso. |
+| Infraestructura | Energía / caminos | L1 | Infra comunitaria. |
+| Asambleas | Actas / acuerdos | L1 | Memoria de decisiones. |
+| Legal | Reglamentos / mediación | L2 | Marco normativo. |
+| Seguridad | Vigilancia / emergencia | L3 | Alertas y protección. |
+| Transporte | Logística / rutas | L1 | Movilidad. |
+| Salud | Bienestar / brigadas | L1 | Salud colectiva (no sustituye asistencia profesional). |
+| Educación | Talleres / escuela | L1 | Formación. |
+
+### Capa de experiencia por rol
+
+| Orquestador | Enfoque | Riesgo a vigilar |
+| :--- | :--- | :--- |
+| Secretaría | Registro oficial | Información no validada |
+| Coordinación | Proceso | Centralización |
+| Tesorería | Recursos | Comprometer presupuesto |
+| Comité | Deliberación | Fuga de datos sensibles |
+| Validador | Evidencia | Juicios personales |
+| Ciudadano | Consulta | Rumores y acusaciones |
+
+### Brechas hacia blindaje completo (checklist)
+
+1. **Aislamiento del Conmutador:** proceso o servicio cuyas llaves no son legibles por el runtime del LLM.
+2. **Delegación clara en subagentes:** contratos de búsqueda y nivel por tema.
+3. **Ingesta cifrada:** contenido sensible persistido cifrado en Kernel cuando la política lo exija.
+
+### Roadmap: ingesta blindada (protocolo previsto)
+
+Registro de memoria desde canales solo para roles autorizados (p. ej. secretaría, comité, tesorería), con comando tipo `/registrar` y metadatos (`#dominio`, `#nivel`, `#fuente`).
+
+Flujo objetivo: **recepción en gateway → extracción de texto → Conmutador (sin persistir en claro donde aplique) → trust_level según rol → opcional anclaje por hash** para auditabilidad.
+
+Beneficios buscados: trazabilidad de cambios, coherencia con la jerarquía de fuentes y soberanía sobre el almacenamiento.
+
+### Auditoría y canales (resumen)
+
+- **Conmutador como caja negra:** orquestador sin llaves en mano; capas L1/L2/L3 de sensibilidad.
+- **Multiagente:** orquestadores por rol más subagentes de dominio; confianza alineada a jerarquía de fuentes (véase también [`docs/memory/Source-hierarchy.md`](../memory/Source-hierarchy.md)).
+- **Protocolos:** refusals y políticas en `tests/safety/refusals.md` y configuración de comunidad.
+- **Canales:** WhatsApp Web y Telegram como entradas soberanas; identificadores tratados con hashing u HMAC según diseño de `memberships`.
 
 ---
 

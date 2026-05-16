@@ -6,7 +6,7 @@
 
 - Matriz **Etapa × Rol** (CSV): `[docs/roles/permission-matrix.csv](../roles/permission-matrix.csv)`.
 - Resumen de roles: `[docs/roles/role-model.md](../roles/role-model.md)`.
-- **Árbol permitido en el repo (Día 1–2):** `[repo-structure.md](../../repo-structure.md)`. El árbol completo del sprint sigue en `CONTEXTO-POPUP-VILLAGE.md` §18; la tabla §13 de este documento contrasta con el CONTEXTO.
+- **Árbol permitido en el repo (Día 1–2):** [`repo-structure.md`](../project/repo-structure.md). El árbol completo del sprint sigue en `CONTEXTO-POPUP-VILLAGE.md` §18; la tabla §13 de este documento contrasta con el CONTEXTO.
 
 ---
 
@@ -39,7 +39,7 @@
 
 **Implementación en repo (roadmap)**
 
-- Conector WhatsApp (p. ej. Cloud API / proveedor): **código en Día 4** según CONTEXTO; hasta entonces el contrato está en esta sección; ver `[CONTEXTO-POPUP-VILLAGE.md](../../CONTEXTO-POPUP-VILLAGE.md)` §11.
+- Conector WhatsApp (p. ej. Cloud API / proveedor): **código en Día 4** según CONTEXTO; hasta entonces el contrato está en esta sección; ver [`CONTEXTO-POPUP-VILLAGE.md`](../../CONTEXTO-POPUP-VILLAGE.md) §11.
 - Identidad técnica: enlazar mensajes a `**contributor_handle`** (§8.1), no exponer teléfono en agregados ni en tableros públicos.
 
 **Relación con modos de privacidad**
@@ -330,9 +330,9 @@ role_permissions:
 | Elemento §18 (CONTEXTO)                                               | Estado al cierre Día 2                                        |
 | --------------------------------------------------------------------- | ------------------------------------------------------------- |
 | `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`                               | Raíz; revisar con el equipo.                                  |
-| `docs/roles/`*, `config/roles.example.yaml`, `community-schema.json`  | Entregables Día 2 (ver `repo-structure.md`).                    |
+| `docs/roles/`*, `config/roles.example.yaml`, `community-schema.json`  | Entregables Día 2 (ver [`project/repo-structure.md`](../project/repo-structure.md)).                    |
 | `docs/pop-up-2026/day-1.md`, `day-2.md`                               | Minutas.                                                      |
-| `docs/architecture.md`, `apps/web/`, `apps/api/`, `packages/*` código | **Día 3+** — fuera del repo hasta su día (`repo-structure.md`). |
+| `docs/architecture/system-architecture.md`, `apps/web/`, `apps/api/`, `packages/*` código | **Día 3+** — fuera del repo hasta su día ([`project/repo-structure.md`](../project/repo-structure.md)). |
 
 
 **Commits:** mensajes en inglés, imperativo; ramas por día según convención del CONTEXTO.

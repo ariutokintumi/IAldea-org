@@ -1,22 +1,112 @@
+version: '3.8'
+
 services:
+  # 1. El Kernel (Base de Datos Vectorial)
   db:
-    image: ankane/pgvector:v0.5.1
+    image: ankane/pgvector:latest
     container_name: ialdea-db
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: ialdea_db
-      POSTGRES_USER: admin
+      POSTGRES_DB: ${DB_NAME:-ialdea_db}
+      POSTGRES_USER: ${DB_USER:-admin}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-ialdea2026}
     volumes:
-      - ./infra/db/data:/var/lib/postgresql/data
-      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d ialdea_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - ./data/postgres:/var/lib/postgresql/data
+      # Primera vez / volumen vacío: Postgres ejecuta el SQL y crea memberships, documents, vector, etc.
+      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/10-ialdea.sql:ro
+    networks:
+      - ialdea-net
+
+  # 2. El Búnker (Conmutador - Black Box)
+  conmutador:
+    build: ./apps/conmutador-service
+    container_name: ialdea-conmutador
+    ports:
+      - "3005:3005"
+    env_file: .env
+    depends_on:
+      - db
+    networks:
+      - ialdea-net
+
+  # 2b. Puente: subagentes + Postgres (Node) para LangGraph
+  orchestrator-bridge:
+    build:
+      context: .
+      dockerfile: apps/orchestrator-bridge/Dockerfile
+    container_name: ialdea-orchestrator-bridge
+    ports:
+      - "3011:3011"
+    env_file: .env
+    environment:
+      DB_HOST: db
+      CONMUTADOR_URL: http://conmutador:3005
+    depends_on:
+      - db
+      - conmutador
+    networks:
+      - ialdea-net
+
+  # 2c. Orquestador LangGraph + FastAPI (Python)
+  langgraph-orchestrator:
+    build:
+      context: .
+      dockerfile: apps/langgraph-orchestrator/Dockerfile
+    container_name: ialdea-langgraph
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      REPO_ROOT: /repo
+      ORCHESTRATOR_BRIDGE_URL: http://orchestrator-bridge:3011
+    volumes:
+      - .:/repo:ro
+    depends_on:
+      - orchestrator-bridge
+    networks:
+      - ialdea-net
+
+  # 3. Gateway de Telegram
+  telegram-bot:
+    build:
+      context: .
+      dockerfile: apps/telegram-gateway/Dockerfile
+    container_name: ialdea-telegram
+    env_file: .env
+    environment:
+      DB_HOST: db
+      LANGGRAPH_ORCHESTRATOR_URL: ${LANGGRAPH_ORCHESTRATOR_URL:-http://langgraph-orchestrator:8000}
+      CONMUTADOR_URL: http://conmutador:3005
+    depends_on:
+      - conmutador
+      - db
+      - langgraph-orchestrator
+    networks:
+      - ialdea-net
+
+  # 4. Gateway de WhatsApp Web (Comunitario)
+  whatsapp-web:
+    build:
+      context: .
+      dockerfile: apps/whatsapp-web-gateway/Dockerfile
+    container_name: ialdea-whatsapp
+    env_file: .env
+    environment:
+      LANGGRAPH_ORCHESTRATOR_URL: ${LANGGRAPH_ORCHESTRATOR_URL:-http://langgraph-orchestrator:8000}
+      ORCHESTRATOR_BRIDGE_URL: http://orchestrator-bridge:3011
+      DB_HOST: db
+      CONMUTADOR_URL: http://conmutador:3005
+    volumes:
+      - ./apps/whatsapp-web-gateway/.wwebjs_auth:/app/apps/whatsapp-web-gateway/.wwebjs_auth
+    depends_on:
+      - conmutador
+      - db
+      - orchestrator-bridge
+      - langgraph-orchestrator
+    networks:
+      - ialdea-net
 
 networks:
-  default:
-    name: ialdea-network
+  ialdea-net:
+    driver: bridge

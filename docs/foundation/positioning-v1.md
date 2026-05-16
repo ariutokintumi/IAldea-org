@@ -8,7 +8,7 @@ Construir herramientas para que comunidades pequeñas **organicen información**
 
 ## Audiencia
 
-“Comunidades pequeñas” en sentido amplio (periurbanas, cooperativas, barrios, etc.). Evitar framing cargado; ver [`CONTEXTO-POPUP-VILLAGE.md`](../CONTEXTO-POPUP-VILLAGE.md) §4.
+“Comunidades pequeñas” en sentido amplio (periurbanas, cooperativas, barrios, etc.). Evitar framing cargado; ver [`CONTEXTO-POPUP-VILLAGE.md`](../../CONTEXTO-POPUP-VILLAGE.md) §4.
 
 ## Qué no somos (una línea para prensa)
 

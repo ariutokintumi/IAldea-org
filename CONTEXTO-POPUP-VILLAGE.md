@@ -177,7 +177,7 @@ El proyecto completo tiene cuatro fases. El Pop-Up es sólo la primera.
 
 * MVP open-source funcional.
 * Modelo de civic safety documentado.
-* Demo dataset (comunidad ficticia de 300 habitantes).
+* Demo dataset (comunidad ficticia de menos de 500 habitantes).
 * Manifesto, roadmap, criterios de pilotos.
 * Materiales para sponsors.
 
@@ -478,10 +478,10 @@ Cada día tiene esta estructura:
 
 **Outputs esperados (validar que existen al inicio del Día 2):**
 
-* `docs/principles.md`
-* `soul/SOUL.example.md` (primer borrador)
-* `docs/civic-safety.md` (lista de casos prohibidos y safety taxonomy)
-* `docs/positioning-v1.md` (posicionamiento público)
+* `docs/foundation/principles.md`
+* `docs/governance/IaAldea_SOUL.md` (borrador evolucionado; canónico operativo)
+* `docs/foundation/civic-safety.md` (lista de casos prohibidos y safety taxonomy)
+* `docs/foundation/positioning-v1.md` (posicionamiento público)
 * `docs/pop-up-2026/day-1.md` (minuta del día)
 
 **Acción del Día 2 si algo falta:** el scribe del Día 1 (o Germán/Sury) lo cierra antes del standup del Día 2.
@@ -526,7 +526,7 @@ Cada día tiene esta estructura:
 * `docs/roles/role-model.md`: modelo de roles con responsabilidades.
 * `config/roles.example.yaml`: matriz de permisos en formato YAML enforceable.
 * `docs/roles/permission-matrix.csv`: misma info en CSV para lectura humana.
-* `examples/fictional-community/community-schema.json`: esquema de ejemplo de cómo se configura una comunidad de 300 habitantes ficticia.
+* `examples/fictional-community/community-schema.json`: esquema de ejemplo de cómo se configura una comunidad ficticia de menos de 500 habitantes (p. ej. ~450 en demos).
 * `docs/roles/user-stories.md`: 10 historias de usuario concretas tipo "Como secretaria, quiero buscar el acuerdo de la asamblea de marzo para no convocar de nuevo".
 * `docs/pop-up-2026/day-2.md`: minuta.
 
@@ -555,7 +555,7 @@ Cada día tiene esta estructura:
 
 **Outputs:**
 
-* `docs/architecture.md` con diagrama de las 4 capas (Kernel, Graph, Agents, Safety).
+* `docs/architecture/system-architecture.md` con diagrama de las 4 capas (Kernel, Graph, Agents, Safety).
 * `packages/memory-kernel/README.md`: data model, entidades, atributos.
 * `packages/graph/README.md`: nodos y aristas (Person, Document, Decision, Place, Event, Agreement, Source, Risk, etc.).
 * `docs/source-hierarchy.md`: jerarquía de fuentes (acta firmada > nota de campo > comentario en chat) para resolver contradicciones.
@@ -1377,25 +1377,33 @@ Cuando un mensaje (Telegram, email, post) está hecho para que alguien lo copie 
 
 ## 18. Estructura del repositorio
 
-El repo IAldea-org en GitHub. Hoy contiene `README.md`, `LICENSE` y este documento. El resto se llena durante el Pop-Up.
+El repo IAldea-org en GitHub. **Este archivo vive en la raíz del repositorio** (`CONTEXTO-POPUP-VILLAGE.md`). La documentación operativa adicional vive bajo `docs/`. En la raíz también están `README.md`, `LICENSE`, políticas de contribución y el manifiesto operativo del código (`docker-compose.yml`, `Makefile`). El resto se llena durante el Pop-Up.
 
 ```
 IAldea-org/
 ├── README.md                         actual (ya está)
 ├── LICENSE                           MIT (ya está)
-├── CONTEXTO-POPUP-VILLAGE.md         este archivo
+├── CONTEXTO-POPUP-VILLAGE.md         este archivo (raíz)
 ├── CONTRIBUTING.md                   Día 2
 ├── CODE_OF_CONDUCT.md                Día 2
 ├── SECURITY.md                       Día 6
 ├── MANIFESTO.md                      Día 7
 ├── ROADMAP.md                        Día 7
 ├── docs/
-│   ├── vision.md                     Día 1
-│   ├── principles.md                 Día 1
-│   ├── civic-safety.md               Día 1
-│   ├── privacy.md                    Día 1
-│   ├── positioning-v1.md             Día 1
-│   ├── architecture.md               Día 3
+│   ├── project/
+│   │   ├── repo-structure.md
+│   │   └── guia-diaria.md
+│   ├── foundation/
+│   │   ├── vision.md, principles.md, civic-safety.md, privacy.md, positioning-v1.md   Día 1
+│   ├── governance/
+│   │   ├── IaAldea_SOUL.md              SOUL operativo (orquestadores)
+│   │   └── SOUL-outline.md
+│   ├── memory/
+│   │   ├── Episodic.md, Public-sources.md, Source-hierarchy.md
+│   ├── architecture/
+│   │   ├── README.md
+│   │   └── system-architecture.md       Día 3 (+ notas Día 4+)
+│   ├── sprint-artifacts/Artifacts/   entregables por día
 │   ├── decision-template.md          Día 5
 │   ├── non-critical-scope.md         Día 5
 │   ├── blocked-requests-examples.md  Día 6
@@ -1404,7 +1412,6 @@ IAldea-org/
 │   ├── implementation-playbook.md    Día 7
 │   ├── pilot-guide.md                Día 7
 │   ├── sponsor-report-template.md    Día 7
-│   ├── source-hierarchy.md           Día 3
 │   ├── roles/
 │   │   ├── role-model.md             Día 2
 │   │   ├── permission-matrix.csv     Día 2

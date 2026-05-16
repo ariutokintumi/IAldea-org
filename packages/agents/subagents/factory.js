@@ -1,26 +1,34 @@
-const BaseSubagent = require('./base_subagent');
+const AgenteEconomia = require('./registry/economia');
+const AgenteLegal = require('./registry/legal');
+const AgenteAgua = require('./registry/agua');
+const AgenteProduccion = require('./registry/produccion');
+const AgenteInfraestructura = require('./registry/infraestructura');
+const AgenteAsambleas = require('./registry/asambleas');
+const AgenteSeguridad = require('./registry/seguridad');
+const AgenteTransporte = require('./registry/transporte');
+const AgenteSalud = require('./registry/salud');
+const AgenteEducacion = require('./registry/educacion');
 
 const subagents = {
-  economia: new BaseSubagent('Economia', 2),
-  produccion: new BaseSubagent('Produccion', 1),
-  agua: new BaseSubagent('Agua', 1),
-  infraestructura: new BaseSubagent('Infraestructura', 1),
-  asambleas: new BaseSubagent('Asambleas', 1),
-  legal: new BaseSubagent('Legal', 2),
-  seguridad: new BaseSubagent('Security', 3),
-  transporte: new BaseSubagent('Transporte', 1),
-  salud: new BaseSubagent('Salud', 1),
-  educacion: new BaseSubagent('Educacion', 1)
+  economia: new AgenteEconomia(), // L4
+  legal: new AgenteLegal(),     // L3
+  agua: new AgenteAgua(),       // L1
+
+  // Expertos Genéricos
+  produccion: new AgenteProduccion(),
+  infraestructura: new AgenteInfraestructura(),
+  asambleas: new AgenteAsambleas(),
+  seguridad: new AgenteSeguridad(), // L3 Comité/Admin
+  transporte: new AgenteTransporte(),
+  salud: new AgenteSalud(),
+  educacion: new AgenteEducacion()
 };
 
-/**
- * Obtiene el subagente adecuado según el tema detectado
- */
-function getSubagent(topic) {
-  return subagents[topic.toLowerCase()] || null;
+function getSubagent(domain) {
+  return subagents[domain.toLowerCase()];
 }
 
 module.exports = {
-  subagents,
-  getSubagent
+  getSubagent,
+  subagents
 };

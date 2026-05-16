@@ -90,9 +90,16 @@ async function handleWhatsAppMessage(phone, text) {
       return;
     }
 
-    // 2. Procesar con el Orquestador
-    const orchestrator = new Orchestrator(role, level);
-    const responseText = await orchestrator.processMessage(text);
+    // 2. Orquestación (LangGraph si LANGGRAPH_ORCHESTRATOR_URL; si no, router Node)
+    const { invokeLangGraph } = require('../../packages/agents/langgraph_invoker');
+    let responseText = await invokeLangGraph(text, role, level).catch((e) => {
+      console.error('LangGraph:', e.message);
+      return null;
+    });
+    if (responseText == null) {
+      const orchestrator = new Orchestrator(role, level);
+      responseText = await orchestrator.processMessage(text);
+    }
 
     // 3. Enviar respuesta de vuelta a WhatsApp
     await sendWhatsAppResponse(phone, responseText);

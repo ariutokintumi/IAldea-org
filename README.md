@@ -1,282 +1,426 @@
 # IAldea
 
-> *Open infrastructure to help small communities explore better everyday decisions, organize information, and preserve memory.*
+IAldea is collective intelligence infrastructure for protecting, organizing, and querying the memory of autonomous communities. The architecture isolates cryptographic secrets from the language model and enforces access by role and governance tier so sensitive material is only exposed when policy allows.
 
-A digital public good for communities of fewer than 500 inhabitants. Open source, self-hostable, model-agnostic. Built in the open at the [ETH Cinco de Mayo Pop-Up City](https://ialdea.org), Puerto Escondido, Oaxaca, May 11 to 18, 2026.
-
-[![License: MIT](https://img.shields.io/badge/license-MIT-1B1A17.svg)](LICENSE)
-[![Phase 01](https://img.shields.io/badge/phase-01_pre--build-E89B3C)](https://ialdea.org)
-[![Build Sprint](https://img.shields.io/badge/build_sprint-May_11_to_18%2C_2026-B8482E)](https://luma.com/zbiimfx9)
-[![Website](https://img.shields.io/badge/site-ialdea.org-1E4D5C)](https://ialdea.org)
+IAldea does not replace assemblies, legitimate authorities, or professional advice; it is tooling for civic memory under community-defined rules.
 
 ---
 
-## Status
+## Canonical architecture
 
-This repository is **pre-build**. The build sprint starts at the Pop-Up City in Puerto Escondido on **May 11, 2026**, and the first MVP lands by **May 18, 2026**. After that, hard-testing and debugging through May 28, public showcase at the ETH Cinco de Mayo main event in Puebla May 29 to 31, then three pilot deployments in Mexican communities June 1 to July 31.
-
-If you are arriving for the build sprint, jump to [Getting involved](#getting-involved). If you are not, watch this repo and follow [ialdea.org](https://ialdea.org); the first commits land May 11.
-
-**This fork (Pop-Up week):** tracked files follow **[`repo-structure.md`](repo-structure.md)** — **Días 1–2** según [`CONTEXTO-POPUP-VILLAGE.md`](CONTEXTO-POPUP-VILLAGE.md) §10 (visión, SOUL, roles, matriz, YAML, `community-schema.json`, minutas). Calendario del equipo: [`guia-diaria.md`](guia-diaria.md). Arquitectura detallada, web chat y agentes: **Día 3+**.
+The **authoritative** description of the four-layer stack (Trust / Kernel / Graph / Agents / Safety), the data model, graph entities, source hierarchy, ingestion, eVVM, and Día 4+ implementation notes is in **[`docs/architecture/system-architecture.md`](docs/architecture/system-architecture.md)**. Start there for system diagrams and ER-style views. Folder index: [`docs/architecture/README.md`](docs/architecture/README.md).
 
 ---
 
-## What IAldea is
+## Vision and boundaries
 
-IAldea is a civic memory and intelligence platform for small communities. It helps people and local authorities:
+| Principle | Meaning |
+|-----------|---------|
+| Sovereignty | Data and policy belong to the community; deployment can stay self-hosted. |
+| Separation of duties | The model orchestrates language; the **Conmutador** arbitrates decryption and access; gateways do not hold master keys. |
+| Verifiability | Answers should align with a **source hierarchy**; contradictions trigger canonical warnings and human review. |
+| Modularity | Gateways, orchestration (Node router vs LangGraph), retrieval, and crypto are separate services and packages. |
 
-- Organize community memory: documents, minutes, agreements, history.
-- Access public information with citations and traceability.
-- Compare non-critical everyday decisions with context.
-- Listen to citizen feedback responsibly and aggregate it.
-- Preserve continuity across changes of authority.
-
-It is **not** an AI that governs. It does not vote, decide, accuse, file complaints, commit budget, diagnose, or replace assemblies, experts, or community processes. The full will-do / will-not-do boundaries live in the [manifesto](https://ialdea.org/manifesto) and in `SOUL.md`.
-
-> *We are not building an AI that governs communities. We are building open infrastructure to help communities decide better, understand better, and remember better, with humans always in the loop.*
-
-The platform supports free models, paid models via API keys, local models, or remote models. It can be hosted by any community, government, NGO, university, or private organization on its own infrastructure under the MIT license.
+Governance of tone, refusals, and identity is defined in `docs/governance/IaAldea_SOUL.md`. Safety refusals used by orchestrators live under `tests/safety/refusals.md`.
 
 ---
 
-## Civic safety is the product
+## The Conmutador (cryptographic arbiter)
 
-This is the rule that governs every architectural and product decision in this repository.
+The **Conmutador** is an isolated service (intended as a hard boundary, “black box”) between AI components and encrypted community data.
 
-The list of things IAldea **will not do** is more important than the list of things it does. Every feature must be defensible against this list. Every PR review starts here.
+| Responsibility | Description |
+|----------------|-------------|
+| Key custody | It is the component entrusted with encryption keys appropriate to the deployment. The LLM and generic app code do not receive those secrets. |
+| Access arbitration | It validates requests (including access tier) before releasing decrypted material to authorized subagent flows. |
+| Blast-radius reduction | Compromise of a gateway or prompt path is not equivalent to bulk exfiltration of ciphertext keys. |
 
-### Will do
+**Access tiers (keychain model)** are used to classify how strictly material is guarded:
 
-- Organize information and summarize positions.
-- Compare 2 to 3 non-critical scenarios with explicit pros, cons, and risks.
-- Detect patterns across feedback in aggregated form.
-- Remember prior agreements across changes of authority.
-- Help understand public procedures.
-- Retrieve official public sources with citations and timestamps.
-- Surface aggregated, anonymized concerns to authorities.
-- Flag explicitly when a topic needs review by a human expert.
-- Refuse out of scope asks loudly and politely.
+| Tier | Typical content |
+|------|-----------------|
+| L1 | Community-facing, public or low-sensitivity material. |
+| L2 | Strategic or operational material (e.g. secretariat, treasury, committee). |
+| L3 | High-sensitivity administrative or safety-related material. |
 
-### Will not do
-
-- No legal, medical, emergency, structural, or operational advice.
-- No accusations or rumor validation, ever.
-- No voting recommendations, ever.
-- No public budget commitments or assignment of legal responsibility.
-- No filing of complaints or creation of official procedures.
-- No surveillance and no extraction of community data.
-- No replacement of assemblies, authorities, experts, or community processes.
-- No propaganda, no automated municipal administration, no electoral interference.
-
-The full taxonomy lives in the [manifesto](https://ialdea.org/manifesto). The machine-enforceable version lives in each community's `policy_config.yaml`.
+Exact key naming and environment variables for your deployment are listed in `.env.example`.
 
 ---
 
-## Architecture
+## The Node router (classic orchestrator)
 
-A four-layer stack, configurable community by community, with privacy and traceability baked in.
+`packages/agents/router.js` implements the **legacy Node orchestrator**: role-specific configuration, retrieval via **subagents**, assembly of context, and a single Anthropic call with SOUL and safety text loaded from disk.
 
+| When it runs | Gateways and tools point to Node-only flows, or `LANGGRAPH_ORCHESTRATOR_URL` is unset / empty so they do not call the Python service. |
+| Role configs | Modular files under `packages/agents/orchestrators/configs/` (e.g. ciudadano, secretaria, tesoreria). |
+| Subagents | Domain experts (`packages/agents/subagents`) query memory through the Conmutador / kernel stack as implemented in code. |
+
+This path keeps ingestion and subagent logic in one ecosystem (Node) and is the default when LangGraph is not wired in.
+
+---
+
+## LangGraph orchestrator (optional)
+
+When `LANGGRAPH_ORCHESTRATOR_URL` is set (e.g. `http://127.0.0.1:8000` locally), gateways can call **FastAPI + LangGraph** (`apps/langgraph-orchestrator`):
+
+1. **Precheck** against YAML refusal patterns.
+2. **Gather** context via the **orchestrator bridge** (`POST /bundle` on `apps/orchestrator-bridge`), reusing the same Node subagents and Postgres-backed memory instead of duplicating ingestion.
+3. **LLM** step with Anthropic using SOUL, refusals, role protocol, and bundled context.
+
+If the bridge fails, the graph can still respond under degraded context (no documentary memory) while respecting SOUL and safety instructions; diagnostics can be enabled with `IALDEA_EXPOSE_GATHER_ERRORS=1` (see `.env.example`).
+
+---
+
+## Multi-agent model
+
+IAldea is not a single generic chatbot. Two layers matter:
+
+**Experience layer (by stakeholder role)**  
+Orchestrator behavior is tuned for roles such as secretariat, treasury, coordination, citizen, validator, committee, aligning prompts and policy emphasis.
+
+**Domain layer (subagents)**  
+Specialized experts cover areas including water, economy, health, education, assemblies, legal, safety, transport, production, and infrastructure. The router or bridge invokes them as needed.
+
+---
+
+## Access channels (gateways)
+
+| Channel | Path | Notes |
+|---------|------|-------|
+| WhatsApp Web | `apps/whatsapp-web-gateway` | Rapid local pilots; session data under app directory. |
+| Telegram | `apps/telegram-gateway` | Bot token-driven. |
+| WhatsApp Business API | `apps/whatsapp-gateway` | Meta-approved scalability. |
+
+All channels are intended to share the same security core (Conmutador, same orchestration contract) rather than bespoke stacks per channel.
+
+---
+
+## Memberships table and user curation
+
+Roles and access tiers are **not** inferred by the LLM. They come from the PostgreSQL table **`memberships`** (the “Auth Gatekeeper” in `infra/db/init.sql`). Gateways resolve the current user with `packages/security/identity.js`: they hash the channel identifier (e.g. WhatsApp id), look up `channel_ref_hash`, and pass `role_slug` and `access_level` into the orchestrator.
+
+### Columns (schema)
+
+| Column | Purpose |
+|--------|---------|
+| `id` | UUID primary key. |
+| `contributor_handle` | Stable human-facing handle; **unique**; used as `contributor_handle` on document versions when that person ingests content. |
+| `channel_ref_hash` | **Unique** blind reference derived from the channel id (e.g. WhatsApp/Telegram); used for lookup on every message. |
+| `role_slug` | Governance role: `ciudadano`, `secretaria`, `tesoreria`, `coordinacion`, `validador`, `comite`, `admin`, etc. Must match a key in `ROLE_CONFIGS` in `packages/agents/router.js` or the orchestrator falls back to the **ciudadano** profile. |
+| `access_level` | Numeric tier for memory and Conmutador policy: **0** (none / blocked for messaging paths that enforce it), **1** public-tier citizen, **2** confidential-tier, **3** private-tier. Document `sensitivity` filters in subagents align with these tiers. |
+| `community_id` | Deployment or community instance id. |
+| `active` | Soft enable flag (defaults to true). |
+| `enrolled_at` / `last_seen_at` | Enrollment and optional activity timestamps. |
+
+### First contact (auto-enrollment)
+
+If no row exists for `channel_ref_hash`, identity code **inserts** a new membership with `role_slug = 'ciudadano'` and `access_level = 1` (see `packages/security/identity.js`). That is how “first WhatsApp/Telegram contact” becomes a citizen in the database without an LLM.
+
+### Curating users (operators)
+
+Promote, demote, or revoke access by editing **`memberships`** with SQL or your own admin UI connected to the same database. Inspect existing rows first (`SELECT contributor_handle, channel_ref_hash, role_slug, access_level FROM memberships;`).
+
+```sql
+-- Example: promote a member to secretariat with L2 access (replace handle with real value)
+UPDATE memberships
+SET role_slug = 'secretaria', access_level = 2
+WHERE contributor_handle = '<contributor_handle>';
+
+-- Example: block messaging tier (e.g. WhatsApp Web gateway skips users with access_level = 0)
+UPDATE memberships
+SET access_level = 0
+WHERE channel_ref_hash = '<sha256_hex_from_identity>';
+
+-- Example: soft-disable without deleting history
+UPDATE memberships
+SET active = false
+WHERE contributor_handle = '<contributor_handle>';
 ```
-┌──────────────────────────────────────────────┐
-│  04 / SAFETY     Auditor + SOUL.md           │
-│                  Catches accusations,        │
-│                  hallucinations, and out     │
-│                  of scope advice before      │
-│                  it reaches a citizen.       │
-├──────────────────────────────────────────────┤
-│  03 / AGENTS     Citizen + Authority chat    │
-│                  Role aware. Cited.          │
-│                  Refuses out of scope asks.  │
-├──────────────────────────────────────────────┤
-│  02 / GRAPH      Knowledge graph + vectors   │
-│                  People, roles, problems,    │
-│                  sources, retrieved by       │
-│                  meaning rather than just    │
-│                  keywords.                   │
-├──────────────────────────────────────────────┤
-│  01 / KERNEL     Memory Kernel               │
-│                  Documents, minutes,         │
-│                  agreements, history,        │
-│                  versioned and queryable.    │
-└──────────────────────────────────────────────┘
+
+Always coordinate `role_slug` with the orchestrator configs under `packages/agents/orchestrators/configs/`. For schema migrations and fresh installs, see `infra/db/init.sql` and `make db-init` in this README.
+
+---
+
+## Source hierarchy (trust levels)
+
+| Trust band | Interpretation |
+|------------|----------------|
+| 1–2 | Strongly grounded: official documents, approved minutes. |
+| 3 | Referential: working drafts or preparatory material. |
+| 4–5 | Signals: citizen feedback or model inference, explicitly labeled (e.g. `[INFERENCIA]`). |
+
+Conflicts across sources should surface canonical inconsistency messaging and invite human resolution.
+
+---
+
+## Technology stack
+
+| Layer | Technology |
+|-------|------------|
+| Reasoning model | Anthropic Claude (see `ANTHROPIC_MODEL` / app defaults). |
+| Embeddings / retrieval helpers | OpenAI embeddings where configured (`OPENAI_API_KEY`). |
+| Memory kernel | PostgreSQL with pgvector. |
+| Encryption transit | AES-256-GCM framing around Conmutador-mediated access (see `apps/conmutador-service`, `packages/security`). |
+| Classic orchestration | Node.js, `packages/agents/router.js`. |
+| Graph orchestration | Python, LangGraph, FastAPI, `langchain-anthropic`. |
+| Container orchestration | Docker Compose, optional `Makefile` wrappers. |
+
+---
+
+## Modularity and repository layout
+
+Applications are thin deployable entrypoints; shared logic lives under `packages/`.
+
+```text
+IAldea-org-26/
+├── apps/
+│   ├── conmutador-service/      # Conmutador HTTP service
+│   ├── orchestrator-bridge/     # Node bridge: POST /bundle (subagents + DB)
+│   ├── langgraph-orchestrator/ # FastAPI + LangGraph graph
+│   ├── whatsapp-web-gateway/
+│   ├── telegram-gateway/
+│   ├── whatsapp-gateway/
+│   ├── whatsapp-gateway-free/
+│   └── web/
+├── packages/
+│   ├── agents/                  # Router, subagents, orchestrator configs
+│   ├── kernel/                  # DB and data-access patterns
+│   ├── ingesta/                 # Embedding / ingestion utilities
+│   ├── security/                # Crypto helpers
+│   └── trust/                   # Trust / provenance helpers
+├── tests/                       # Including safety corpora (e.g. refusals)
+├── CONTEXTO-POPUP-VILLAGE.md    # Pop-up sprint bible (raíz)
+├── docs/                        # Documentation root index: docs/README.md
+│   ├── project/                 # repo-structure.md, guia-diaria.md
+│   ├── foundation/              # vision, principles, civic-safety, privacy, positioning
+│   ├── governance/
+│   │   └── IaAldea_SOUL.md     # Identity protocol (loaded at runtime)
+│   ├── memory/                  # Episodic, sources, source hierarchy drafts
+│   ├── architecture/            # system-architecture.md (canonical), README index
+│   └── …                        # roles, planning, pop-up-2026, etc.
+├── config/
+├── infra/
+├── docker-compose.yml
+├── Makefile                     # compose shortcuts (up, down, logs)
+└── .env.example
 ```
 
-### 01 / Kernel — Community Memory Kernel
+---
 
-The persistent base. Stores community documents, minutes, regulations, assembly notes, budgets, problems, agreements, recurring concerns, public sources, and authorized conversations. Versioned, queryable, exportable. The community owns the kernel.
+## Architecture (high level)
 
-### 02 / Graph — Knowledge Graph + Vectors
+```mermaid
+flowchart LR
+  subgraph channels [Gateways]
+    WA[WhatsApp Web]
+    TG[Telegram]
+  end
 
-Models entities (Person, Role, Committee, Authority, Community, Location, Problem, Need, Agreement, Document, Public Source, Procedure, Budget Item, Event, Project, Risk, Resource) and the relationships between them. Vector retrieval surfaces fragments by meaning, not just keyword match.
+  subgraph orch [Orchestration choice]
+    LG[LangGraph FastAPI]
+    RT[Node router]
+  end
 
-### 03 / Agents — Citizen + Authority + Committee
+  subgraph bridge [Memory bridge]
+    OB[orchestrator-bridge POST /bundle]
+  end
 
-Two role-aware conversational agents share the same memory but operate under different policies:
+  subgraph core [Policy and data]
+    CM[Conmutador]
+    DB[(Postgres pgvector)]
+    SA[Subagents]
+  end
 
-- **Citizen agent**: answers questions, helps find public information, explains agreements and procedures, can collect feedback in one of three privacy modes (with explicit consent).
-- **Authority / committee agent**: helps prepare assemblies, summarizes aggregated concerns, compares non-critical scenarios, surfaces public programs and prior agreements, drafts preliminary documents.
+  WA --> LG
+  TG --> LG
+  WA --> RT
+  TG --> RT
+  LG --> OB
+  OB --> SA
+  RT --> SA
+  SA --> CM
+  SA --> DB
+```
 
-Both agents always cite sources, distinguish facts from inferences, and refuse out of scope asks.
+**With LangGraph enabled**, a simplified request sequence:
 
-### 04 / Safety — Auditor + SOUL.md
+```mermaid
+sequenceDiagram
+  participant G as Gateway
+  participant L as LangGraph /invoke
+  participant B as orchestrator-bridge /bundle
+  participant S as Subagents
+  participant C as Conmutador
+  participant D as Postgres
 
-Every agent response passes through a verifier before delivery. The auditor checks for:
-
-- Out of scope advice (legal, medical, emergency, electoral, operational).
-- Accusations or rumor validation.
-- Privacy leaks and unauthorized identification of individuals.
-- Hallucinated facts and unsupported claims.
-- Missing citations and dangerous ambiguity.
-
-The auditor reads the community's `SOUL.md` and `policy_config.yaml` to know what is in scope.
+  G->>L: message role access_level
+  L->>L: refusal precheck
+  L->>B: bundle request
+  B->>S: delegate domain retrieval
+  S->>C: decrypt / policy where applicable
+  S->>D: vector / structured queries
+  B-->>L: context protocol title risk
+  L->>L: Anthropic completion with SOUL + safety
+  L-->>G: response
+```
 
 ---
 
 ## Configuration
 
-Two files configure IAldea per community. Both are version-controlled by the community and reviewable by anyone.
+Copy `.env.example` to `.env` and set database credentials, `CONMUTADOR_KEY` (or deployment-specific key variables), `ANTHROPIC_API_KEY`, and `OPENAI_API_KEY` as required by your bridge and ingestion paths.
 
-### SOUL.md
-
-Vision, tone, limits, ethics, forbidden cases, source hierarchy, escalation rules, privacy posture, local cultural considerations. Human-readable. Authored by the community in collaboration with civic operators.
-
-### policy_config.yaml
-
-Machine-enforceable rules. Allowed and blocked topics. Role permissions and data access. Aggregation thresholds. Privacy modes. Source trust levels. Citation requirements. Model settings. Audit logging.
-
-Examples of both will land at `soul/SOUL.example.md` and `config/policy_config.example.yaml` during the build sprint.
-
----
-
-## Privacy modes
-
-Three first-class modes, configurable in `policy_config.yaml`. Default for new communities is `private_no_memory`.
-
-1. **Public**: contributions intentionally part of community memory. Stored, indexed, citable.
-2. **Confidential community**: aggregated patterns only. Individuals are never identified. Aggregation threshold (default: minimum 3 unique contributors) enforced before any aggregate is released.
-3. **Private, no memory**: query and answer, no retention. Useful for sensitive procedural questions where no record should exist.
-
-The system never names individuals in aggregates. The system never validates accusations. The system never publishes complaints.
+| Variable | Role |
+|----------|------|
+| `LANGGRAPH_ORCHESTRATOR_URL` | If set, gateways target the Python orchestrator; if empty, Node router path. |
+| `ORCHESTRATOR_BRIDGE_URL` | Base URL for `POST /bundle` (LangGraph gather step). |
+| `CONMUTADOR_URL` | URL subagents and bridge use to reach the Conmutador. |
+| `DB_*` | PostgreSQL connectivity. |
+| `COMMUNITY_DISPLAY_NAME` | Community name substituted into `IaAldea_SOUL.md` greetings (bridge and LangGraph). |
+| `IALDEA_EXPOSE_GATHER_ERRORS` | When `1`, `/invoke` may include `gather_error` for debugging. |
 
 ---
 
-## The four-phase program
+## Local development
 
-| Phase | Name | Dates | Output |
-|---|---|---|---|
-| 01 | Pop-Up City: Seed-Phase | May 11 to 18, 2026 | Open-source MVP, civic-safety model, demo dataset |
-| 02 | Hard-Testing & Debugging | May 19 to 28, 2026 | Stabilized MVP, integration polish, red-team report |
-| 03 | Presentation & Spotlight | May 29 to 31, 2026 | Public stage at ETH Cinco de Mayo, Puebla, MX |
-| 04 | 3 Real Communities Pilot | June 1 to July 31, 2026 | Real deployments, Impact Report |
+### One-time setup (per machine)
 
-Detailed week schedule for the Pop-Up City: <https://ialdea.org#popup>.
+1. **Environment:** copy `.env.example` to `.env` and set keys, database passwords, and `COMMUNITY_DISPLAY_NAME`.
+2. **Node** (from repository root; first clone or after dependency changes):
 
----
-
-## Repository structure — cierre **Día 2**
-
-El árbol permitido está en **[`repo-structure.md`](repo-structure.md)**. Resumen:
-
-```
-ialdea-org/
-├── CONTEXTO-POPUP-VILLAGE.md, guia-diaria.md, repo-structure.md
-├── README.md, LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md
-├── docs/
-│   ├── vision.md, principles.md, civic-safety.md, privacy.md, positioning-v1.md
-│   ├── README.md
-│   ├── pop-up-2026/day-1.md, day-2.md
-│   ├── planning/                dia_02 + README
-│   └── roles/                   CSV, role-model, user-stories
-├── examples/fictional-community/community-schema.json
-├── soul/
-└── config/                      policy_config.example + roles.example
+```bash
+(cd packages/kernel && npm install)
+(cd packages/agents && npm install)
+(cd apps/conmutador-service && npm install)
+(cd apps/orchestrator-bridge && npm install)
+(cd apps/whatsapp-web-gateway && npm install)
 ```
 
-**Día 3+** (arquitectura, Kernel, `apps/web`, agentes, ingesta): ver §10 del CONTEXTO; ampliar `repo-structure.md` al abrir cada día.
+3. **Python (LangGraph):** in `apps/langgraph-orchestrator`:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+```
+
+4. **Database volume:** the first time you need Postgres with the IAldea schema, start the DB container and optionally apply `init.sql` if the data directory already existed without it:
+
+```bash
+docker compose up -d db
+make db-init   # only if memberships / vector tables are missing inside an old volume
+```
+
+Day-to-day you only start processes unless dependencies or schema change.
+
+### Service ports (host-based runs)
+
+| Port | Service | Notes |
+|------|---------|--------|
+| 5432 | PostgreSQL (`ialdea-db`) | Published by Compose; use `DB_HOST=localhost` from processes on the host. |
+| 3005 | Conmutador | `CONMUTADOR_URL=http://127.0.0.1:3005` in `.env`. |
+| 3011 | Orchestrator bridge | `ORCHESTRATOR_BRIDGE_URL=http://127.0.0.1:3011` for LangGraph gather. |
+| 8000 | LangGraph FastAPI | `LANGGRAPH_ORCHESTRATOR_URL=http://127.0.0.1:8000` for gateways using the graph. |
+| — | WhatsApp Web gateway | No HTTP port; connects outbound and shows a QR in the terminal. |
+
+### Five-terminal full stack (recommended for local debugging)
+
+In **each** terminal, change to the **repository root** (`cd` into `IAldea-org-26`) before running the commands below. Using five terminals keeps logs separate so you can restart one service without stopping the others.
+
+**Terminal 1 — PostgreSQL**
+
+Keep Postgres in the foreground so you see startup errors, or use `-d` and free this terminal for something else.
+
+```bash
+docker compose up db
+# Alternative (background): docker compose up -d db
+```
+
+**Terminal 2 — Conmutador**
+
+```bash
+cd apps/conmutador-service && node index.js
+```
+
+**Terminal 3 — Orchestrator bridge (subagents + Postgres)**
+
+```bash
+cd apps/orchestrator-bridge && node index.js
+```
+
+**Terminal 4 — LangGraph orchestrator**
+
+```bash
+cd apps/langgraph-orchestrator
+export REPO_ROOT="$(cd ../.. && pwd)"
+export ORCHESTRATOR_BRIDGE_URL="${ORCHESTRATOR_BRIDGE_URL:-http://127.0.0.1:3011}"
+.venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+**Terminal 5 — WhatsApp Web gateway**
+
+```bash
+cd apps/whatsapp-web-gateway && node index.js
+```
+
+Scan the QR printed in this terminal to link WhatsApp Web. Ensure `.env` points gateways at the graph and bridge on the host, for example:
+
+- `DB_HOST=localhost`
+- `CONMUTADOR_URL=http://127.0.0.1:3005`
+- `ORCHESTRATOR_BRIDGE_URL=http://127.0.0.1:3011`
+- `LANGGRAPH_ORCHESTRATOR_URL=http://127.0.0.1:8000`
+
+**Optional:** if `LANGGRAPH_ORCHESTRATOR_URL` is empty or LangGraph is down, the WhatsApp gateway **falls back** to the Node `Orchestrator` in `packages/agents/router.js`. You can omit terminal 4 in that mode, but you lose LangGraph precheck and the bundled gather contract. Keep terminal 3 if you still use `POST /bundle` from scripts or from LangGraph elsewhere.
+
+### Smoke checks (host ports)
+
+```bash
+curl -s http://127.0.0.1:3011/health
+curl -s http://127.0.0.1:8000/health
+curl -s -X POST http://127.0.0.1:3011/bundle \
+  -H "Content-Type: application/json" \
+  -d '{"message":"prueba de memoria","role":"ciudadano","accessLevel":1}'
+curl -s -X POST http://127.0.0.1:8000/invoke \
+  -H "Content-Type: application/json" \
+  -d '{"message":"hola","role":"ciudadano","access_level":1}'
+```
+
+The Conmutador only exposes `POST /encrypt` and `POST /decrypt` (no HTTP health route); if terminal 2 shows the bunker banner, it is up.
+
+### Docker Compose (single command, all services in containers)
+
+From repository root:
+
+```bash
+docker compose up -d --build
+# or
+make up
+```
+
+Useful Makefile targets:
+
+| Target | Purpose |
+|--------|---------|
+| `make up` | Build and start the full stack in the background. |
+| `make down` | Stop and remove containers. |
+| `make ps` | Show container status. |
+| `make logs-whatsapp` | Follow WhatsApp Web container logs. |
+| `make logs-langgraph` | Follow LangGraph container logs. |
+| `make db-init` | Pipe `infra/db/init.sql` into the running `db` container (repair empty or legacy schema). |
+
+Inside Compose, services use hostnames `db`, `conmutador`, `orchestrator-bridge`, and `langgraph-orchestrator`; `.env` values that say `127.0.0.1` apply to **host** runs only.
 
 ---
 
-## Getting involved
+## Response governance
 
-### For builders attending the Pop-Up City
-
-You are arriving in Puerto Escondido on or before May 11, 2026. Free accommodation is included for the full week.
-
-Bring a laptop with:
-
-- Git
-- A current Node 20+, Python 3.11+, or Rust toolchain (the exact stack is locked on Day 1)
-- An OpenAI / Anthropic / local model API key (or be ready to spin up a local model)
-- A willingness to ship publicly
-
-Day 1 is **Vision, limits, and ethics**. We draft `SOUL.md` together and lock the forbidden cases before any feature work begins. Civic safety is the product. Every line of code should be defensible against the will-not list.
-
-If you have not registered yet: <https://luma.com/zbiimfx9>.
-
-### For testers and citizens
-
-Code experience is not required. Three roles are open during the Pop-Up City week:
-
-- **Tester**: try the MVP in real time, give honest feedback.
-- **Civic operator**: bring your community context, help calibrate the safety boundaries.
-- **Translator / documentation reviewer**: make the docs land in Spanish and English, ideally with indigenous-language drafts where applicable.
-
-Apply via the same Luma link: <https://luma.com/zbiimfx9>.
-
-### For remote contributors
-
-Pull requests open after May 18, 2026, when the MVP is mergeable. Before then the repo is in flux. Watch this repo and follow [ialdea.org](https://ialdea.org) for the live progress feed.
-
-### For sponsors
-
-The build sprint costs USD $25,000 to run. Three tiers, two highlight slots remaining. Full prospectus: <https://ialdea.org/support>. Contact: <hello@ethcdm.com> or <https://t.me/llamame>.
+Public-facing replies follow `docs/governance/IaAldea_SOUL.md`: concise (on the order of 150 words), formal civic tone, source labeling (e.g. `[HECHO]` / `[INFERENCIA]`, `[FTE: ...]`) as configured, and alignment with the refusal corpus.
 
 ---
 
-## Pilots
+## License and positioning
 
-Three pilot communities are selected in early June 2026 for deployments running through July. Selection criteria:
-
-- Fewer than 500 inhabitants.
-- Minimum connectivity for documenting and querying.
-- A trusted local counterpart (committee, secretary, civic operator).
-- A clear non-critical use case.
-- Low political conflict, low legal risk.
-- Documented and revocable community consent.
-
-Pilots are not assumed to be in Oaxaca. They are selected after the Pop-Up City based on readiness, safety, consent, connectivity, and partner alignment. Each pilot ships an Impact Report at the end of July 2026.
+This project is released under the **MIT License** (see `LICENSE`). For public positioning and pop-up messaging aligned with the original vision, see `docs/foundation/positioning-v1.md` and `CONTEXTO-POPUP-VILLAGE.md` (repository root).
 
 ---
 
-## License
-
-MIT. See [LICENSE](LICENSE).
-
-This is the most permissive open-source license that aligns with the project's commitment to be a public good. Any community, government, NGO, or private organization may fork, deploy, modify, and redistribute IAldea without restriction.
-
-The IAldea name and the *I*Aldea wordmark are reserved by ETH Cinco de Mayo and used only for the canonical implementation. Forks should rename.
-
----
-
-## Acknowledgments
-
-IAldea is initiated by [ETH Cinco de Mayo](https://ethcdm.com), a LATAM Web3 builder community based in Puebla, Mexico. The project would not exist without the builders, testers, civic operators, advisors, and partner communities who showed up.
-
-Sponsors who fund the build sprint, the pilots, and the long tail are recognized at <https://ialdea.org/support> and inside this repository as integrations land.
-
----
-
-## Links
-
-- **Website**: <https://ialdea.org>
-- **Manifesto**: <https://ialdea.org/manifesto>
-- **Team**: <https://ialdea.org/team>
-- **Support**: <https://ialdea.org/support>
-- **Apply / register for the Pop-Up City**: <https://luma.com/zbiimfx9>
-- **Sponsor deck**: <https://ialdea.org/downloads/IAldea-Sponsor-Deck-2026.pdf>
-- **ETH Cinco de Mayo**: <https://ethcdm.com>
-- **Contact**: <hello@ethcdm.com> · <https://t.me/llamame>
-
----
-
-*Pre-build. Written from the deck and the project context pack on May 5, 2026. This README will be rewritten at the end of each phase as the project moves from intent to implementation.*
+IAldea: community sovereignty through structured civic memory.
