@@ -21,6 +21,14 @@ COPY docs/governance/IaAldea_SOUL.md ./docs/governance/IaAldea_SOUL.md
 
 COPY apps/whatsapp-web-gateway ./apps/whatsapp-web-gateway
 
+# Dependencias de packages/ (router → kernel pg, agents, ingesta/embedder openai)
+WORKDIR /app/packages/kernel
+RUN npm install
+WORKDIR /app/packages/agents
+RUN npm install
+WORKDIR /app/packages/ingesta
+RUN npm install
+
 WORKDIR /app/apps/whatsapp-web-gateway
 RUN npm install
 

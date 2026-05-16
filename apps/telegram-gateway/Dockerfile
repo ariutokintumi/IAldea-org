@@ -6,6 +6,14 @@ COPY tests/safety ./tests/safety
 COPY docs/governance/IaAldea_SOUL.md ./docs/governance/IaAldea_SOUL.md
 
 COPY apps/telegram-gateway ./apps/telegram-gateway
+
+WORKDIR /app/packages/kernel
+RUN npm install
+WORKDIR /app/packages/agents
+RUN npm install
+WORKDIR /app/packages/ingesta
+RUN npm install
+
 WORKDIR /app/apps/telegram-gateway
 RUN npm install
 

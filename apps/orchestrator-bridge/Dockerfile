@@ -8,6 +8,13 @@ COPY docs/governance/IaAldea_SOUL.md ./docs/governance/IaAldea_SOUL.md
 
 COPY apps/orchestrator-bridge ./apps/orchestrator-bridge
 
+WORKDIR /app/packages/kernel
+RUN npm install
+WORKDIR /app/packages/agents
+RUN npm install
+WORKDIR /app/packages/ingesta
+RUN npm install
+
 WORKDIR /app/apps/orchestrator-bridge
 RUN npm install
 
